@@ -140,9 +140,13 @@ if (changedFiles.length > 0) {
 console.log(`\n${BOLD}[4/4] 文档同步检查${RESET}`);
 const prdPath = path.join(process.cwd(), "docs", "01-PRD.md");
 const statusPath = path.join(process.cwd(), "docs", "03-STATUS.md");
+let docChanged = false;
 if (changedFiles.length > 0) {
   const hasCodeChanges = changedFiles.some(
     (f) => f.startsWith("src/") || f.startsWith("slices/")
+  );
+  docChanged = changedFiles.some(
+    (f) => f.startsWith("docs/01-PRD.md") || f.startsWith("docs/02-ARCHITECTURE.md")
   );
   if (hasCodeChanges) {
     if (!changedFiles.includes("docs/03-STATUS.md")) {
@@ -155,6 +159,14 @@ if (changedFiles.length > 0) {
   }
 } else {
   pass("无变更");
+}
+
+// 5. 文档同步建议
+console.log(`\n${BOLD}[5] 文档同步建议${RESET}`);
+if (docChanged) {
+  console.log(`  ${YELLOW}💡 docs/ 有变更，建议运行: /vault-sync --sync-docs${RESET}`);
+} else {
+  pass("docs/ 无变更，无需同步");
 }
 
 // 总结
