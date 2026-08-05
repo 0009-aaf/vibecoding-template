@@ -17,6 +17,7 @@
 ## 全局命令
 - `/vibe-plan` — 导需求 → 生成 PRD → 设计架构
 - `/vibe-spec` — 拆切片
+- `/vibe-implement` — 按切片实现代码
 - `/vibe-audit` — 提交前审计
 - `/vault-sync` — 同步到 Obsidian
 
