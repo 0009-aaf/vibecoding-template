@@ -7,11 +7,18 @@
 - 技术栈：
 - 数据库：
 - 部署方式：
+- vault_path：<!-- Obsidian vault 路径，如 D:/path/to/vault -->
 
 ## 核心文档
 - `docs/01-PRD.md` — 需求与验收标准
 - `docs/02-ARCHITECTURE.md` — 架构方案
 - `docs/03-STATUS.md` — 项目状态（每次更新）
+
+## 全局命令
+- `/vibe-plan` — 导需求 → 生成 PRD → 设计架构
+- `/vibe-spec` — 拆切片
+- `/vibe-audit` — 提交前审计
+- `/vault-sync` — 同步到 Obsidian
 
 ## 编码规范
 - 入口判空：API 响应、用户输入、文件读取、环境变量，覆盖 null/undefined/[]/"" 四种空值
@@ -28,5 +35,5 @@
 
 ## 工作流
 - 每次迭代一个切片（`slices/<编号>/spec.md`）
-- 每完成一个切片：跑测试 → 过 lint → git commit
+- 每完成一个切片：跑测试 → 过 lint → 运行 `node .opencode/quality-gate.js` → git commit
 - 更新 `docs/03-STATUS.md` 上下文摘要
