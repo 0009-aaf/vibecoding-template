@@ -19,11 +19,13 @@ $ARGUMENTS
 - 遵守 Protected Region 限制（不修改标记文件）
 - 只修改 spec 中列出的涉及文件
 
-### 阶段3: 测试
+### 阶段3: 测试 + 质量闸门
 - 运行单元测试
 - 运行集成测试
 - 运行 lint 检查
 - 所有测试必须通过
+- 运行 `node .opencode/quality-gate.js`
+- 质量闸门阻断则修复后重新运行
 
 ### 阶段4: 更新状态
 - 更新 `docs/03-STATUS.md` 上下文摘要
