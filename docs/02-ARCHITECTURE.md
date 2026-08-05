@@ -17,7 +17,9 @@
 ├── commands/
 │   ├── vibe-plan.md             # 导需求→PRD→架构
 │   ├── vibe-spec.md             # 拆切片
-│   └── vibe-audit.md            # 提交前审计
+│   ├── vibe-implement.md        # 实现切片
+│   ├── vibe-audit.md            # 提交前审计
+│   └── vault-sync.md            # 同步 Obsidian
 └── templates/
     ├── PRD-template.md
     ├── ARCH-template.md
@@ -29,13 +31,12 @@ vibecoding-template/             # 模板项目
 │   ├── .gitignore
 │   ├── README.md
 │   ├── docs/
+│   │   ├── 03-STATUS.md
 │   │   ├── PROJECT.md
 │   │   └── TASKS.md
 │   └── .opencode/
 │       └── quality-gate.js      # 项目级质量闸门（唯一需要复制的文件）
 ├── .opencode/
-│   ├── commands/
-│   │   └── implement.md         # 项目级实现命令
 │   └── quality-gate.js          # 本项目的质量闸门
 ├── docs/
 │   ├── 01-PRD.md
