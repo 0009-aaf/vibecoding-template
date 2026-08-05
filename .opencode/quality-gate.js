@@ -36,7 +36,8 @@ function fail(msg) {
 function run(cmd) {
   try {
     return execSync(cmd, { encoding: "utf8", stdio: "pipe" }).trim();
-  } catch {
+  } catch (e) {
+    console.error(`  [quality-gate] 命令执行失败: ${cmd} — ${e.message}`);
     return "";
   }
 }
@@ -77,19 +78,24 @@ console.log(`\n${BOLD}[2/4] Protected Region 检查${RESET}`);
 const archPath = path.join(process.cwd(), "docs", "02-ARCHITECTURE.md");
 if (fs.existsSync(archPath)) {
   const arch = fs.readFileSync(archPath, "utf8");
-  const protectedMatches = arch.match(/Protected Region[^]*?```/);
-  if (protectedMatches) {
+  // 匹配所有 Protected Region 块（支持多个代码块）
+  const protectedBlocks = arch.match(/Protected Region[\s\S]*?(?=\n##|\n$)/g);
+  if (protectedBlocks) {
     const protectedFiles = [];
-    const lines = protectedMatches[0].split("\n");
-    for (const line of lines) {
-      const m = line.match(/^\s*[-*]\s*`([^`]+)`/);
-      if (m) protectedFiles.push(m[1]);
+    for (const block of protectedBlocks) {
+      const lines = block.split("\n");
+      for (const line of lines) {
+        const m = line.match(/^\s*[-*]\s*`([^`]+)`/);
+        if (m) protectedFiles.push(m[1]);
+      }
     }
     if (protectedFiles.length > 0) {
-      const changedFiles = run("git diff --cached --name-only").split("\n");
+      const changedFiles = run("git diff --cached --name-only").split("\n").filter(Boolean);
       let touched = false;
       for (const pf of protectedFiles) {
-        if (changedFiles.some((f) => f.includes(pf.replace(/\*/g, "")))) {
+        const pattern = pf.replace(/\*/g, "\\w+").replace(/\./g, "\\.");
+        const regex = new RegExp(pattern);
+        if (changedFiles.some((f) => regex.test(f))) {
           fail(`Protected Region 文件被修改: ${pf}`);
           touched = true;
         }
@@ -113,11 +119,11 @@ if (changedFiles.length > 0) {
   const unexpected = changedFiles.filter(
     (f) =>
       !f.startsWith(".opencode/") &&
-      !f.startsWith(".vibecoding/") &&
       !f.startsWith(".gitignore") &&
       !f.startsWith("docs/") &&
       !f.startsWith("slices/") &&
-      !f.startsWith("starter-template/") &&
+      !f.startsWith("src/") &&
+      !f.startsWith("tests/") &&
       !f.startsWith("AGENTS.md") &&
       !f.startsWith("README.md")
   );
