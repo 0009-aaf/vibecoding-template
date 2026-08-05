@@ -7,7 +7,7 @@
 - 技术栈：
 - 数据库：
 - 部署方式：
-- vault_path：<!-- Obsidian vault 路径，如 D:/path/to/vault -->
+- Obsidian vault：`~/.config/opencode/opencode.json` 中配置（`references.vault.path`）
 
 ## 核心文档
 - `docs/01-PRD.md` — 需求与验收标准
