@@ -47,7 +47,7 @@ console.log(`\n${BOLD}=== Vibecoding Quality Gate ===${RESET}\n`);
 // 1. 密钥扫描
 console.log(`${BOLD}[1/4] 密钥扫描${RESET}`);
 const secretPatterns = [
-  /sk-[a-zA-Z0-9]{20,}/,
+  /sk-[a-zA-Z0-9_-]{20,}/,
   /api[_-]?key['":\s]+\w{16,}/i,
   /password['":\s]+\w{6,}/i,
   /secret['":\s]+\w{8,}/i,
