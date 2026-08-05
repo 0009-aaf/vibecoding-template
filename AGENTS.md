@@ -16,10 +16,10 @@
 
 ## 禁止事项
 - 不得修改未点名的文件
-- 不得覆盖 Protected Region 标记的代码（`.vibecoding/quality-gate.js`、`.vibecoding/templates/`、`starter-template/AGENTS.md`）
+- 不得覆盖 Protected Region 标记的代码（`.opencode/quality-gate.js`、`starter-template/AGENTS.md`）
 - 不得在代码中硬编码密钥
 
 ## 工作流
 - 每次迭代一个切片（`slices/<编号>/spec.md`）
-- 每完成一个切片：跑测试 → 过 lint → 运行 `node .vibecoding/quality-gate.js` → git commit
+- 每完成一个切片：跑测试 → 过 lint → 运行 `node .opencode/quality-gate.js` → git commit
 - 更新 `docs/03-STATUS.md` 上下文摘要

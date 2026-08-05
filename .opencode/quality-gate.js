@@ -2,7 +2,7 @@
  * Vibecoding Quality Gate
  * 提交前质量检查：密钥扫描、Protected Region 检查、变更范围检查、文档同步检查
  *
- * 用法: node .vibecoding/quality-gate.js
+ * 用法: node .opencode/quality-gate.js
  * 环境变量: SKIP_VIBE_GATE=1 可跳过
  */
 
