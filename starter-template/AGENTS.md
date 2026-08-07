@@ -1,4 +1,4 @@
-# AGENTS.md — AI 行为约定
+﻿# AGENTS.md — AI 行为约定
 
 > 复制到新项目根目录，作为 AI 的全局上下文。
 
@@ -19,6 +19,7 @@
 - `/vibe-spec` — 拆切片
 - `/vibe-implement` — 按切片实现 + 浏览器功能验证
 - `/vibe-audit` — 提交前审计
+- `/vibe-status` - 查看项目全貌（切片进度/活跃锁/建议下一步）
 - `/vault-sync` — 同步到 Obsidian
 
 ## 截图目录
