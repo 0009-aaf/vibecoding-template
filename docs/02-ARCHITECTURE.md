@@ -56,8 +56,19 @@ N/A — 纯本地模板项目，无服务端
 - `.opencode/quality-gate.js` — 质量闸门逻辑
 - `starter-template/AGENTS.md` — AI 行为规范模板
 
-## 6. 变更记录
+## 6. 浏览器验证（E2E）
+- `~/.config/opencode/skills/e2e-verifier/` — 浏览器实际操控 + 功能断言 + 截图 + doubao 视觉核对
+- 截图存储：
+  - `references/design/reference/` — 定视觉时参考站截图
+  - `references/design/verification/<slice>/` — 切片浏览器验证截图
+- 触发点：
+  - `/vibe-plan` 阶段4：浏览器访问参考站定视觉
+  - `/vibe-implement` 阶段3.5：切片开发后浏览器功能验证
+  - `/vibe-audit` 检查项4：UI/功能验证检查
+
+## 7. 变更记录
 | 日期 | 变更内容 | 原因 |
 |------|----------|------|
 | 2026-08-05 | 初始创建 | 架构落地 |
 | 2026-08-05 | 重构：Skill/命令移入全局，项目只留 quality-gate | 全局优先 |
+| 2026-08-07 | 嵌入浏览器 E2E 验证（e2e-verifier skill + 三命令优化） | 补齐功能/UI验证 |

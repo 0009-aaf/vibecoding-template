@@ -124,6 +124,7 @@ if (changedFiles.length > 0) {
       !f.startsWith("slices/") &&
       !f.startsWith("src/") &&
       !f.startsWith("tests/") &&
+      !f.startsWith("references/") &&
       !f.startsWith("AGENTS.md") &&
       !f.startsWith("README.md")
   );
