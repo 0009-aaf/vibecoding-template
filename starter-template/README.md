@@ -5,7 +5,7 @@
 ## 前置条件
 
 确保全局 opencode 配置已就位：
-- `~/.config/opencode/skills/` — 3 个 Skill（prd-generator / architecture-designer / slice-spec-writer）
+- `~/.config/opencode/skills/` — 4 个 Skill（prd-generator / architecture-designer / slice-spec-writer / e2e-verifier）
 - `~/.config/opencode/commands/` — 5 个命令（vibe-plan / vibe-spec / vibe-audit / vibe-implement / vault-sync）
 
 如缺少，复制 `vibecoding-template` 项目中的对应目录到全局配置。
@@ -22,9 +22,9 @@
 
 | 命令 | 用途 |
 |------|------|
-| `/vibe-plan` | 导需求 → 生成 PRD → 设计架构 |
+| `/vibe-plan` | 导需求 → 生成 PRD → 设计架构 + 参考站截图 |
 | `/vibe-spec` | 拆切片 |
-| `/vibe-implement` | 按切片实现代码 |
+| `/vibe-implement` | 按切片实现 + 浏览器功能验证 |
 | `/vibe-audit` | 提交前审计 |
 | `/vault-sync` | 同步决策到 Obsidian |
 
@@ -39,6 +39,8 @@ project/
 ├── slices/            # 切片开发
 ├── src/               # 最终代码
 ├── tests/             # 测试
+├── references/
+│   └── design/        # 参考站截图 + 浏览器验证截图
 └── .opencode/
     └── quality-gate.js
 ```
