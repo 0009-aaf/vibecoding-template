@@ -19,11 +19,19 @@
 - 优先级：P0
 
 ### 三个全局 Skill（~/.config/opencode/skills/）
-- 功能描述：prd-generator、architecture-designer、slice-spec-writer 三个 Skill，全局可用
+- 功能描述：prd-generator、architecture-designer、slice-spec-writer、e2e-verifier 四个 Skill，全局可用
 - 验收标准：
   - 成功路径：任何项目可加载全局 Skill
   - 失败路径：Skill 加载后无法执行指定步骤
   - 边界条件：触发词在 description 中明确定义
+- 优先级：P0
+
+### 浏览器 E2E 验证（e2e-verifier）
+- 功能描述：浏览器实际操控 + 功能断言 + 截图 + doubao 视觉核对，验证切片功能与 UI
+- 验收标准：
+  - 成功路径：按验收标准走成功/失败/边界路径，输出 PASS/FAIL + 截图证据
+  - 失败路径：验证未通过 → 报告未通过项供修复
+  - 边界条件：应用启动命令自动探测
 - 优先级：P0
 
 ### 全局命令（~/.config/opencode/commands/）
