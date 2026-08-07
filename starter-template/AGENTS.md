@@ -15,11 +15,15 @@
 - `docs/03-STATUS.md` — 项目状态（每次更新）
 
 ## 全局命令
-- `/vibe-plan` — 导需求 → 生成 PRD → 设计架构
+- `/vibe-plan` — 导需求 → 生成 PRD → 设计架构 + 浏览器参考站截图
 - `/vibe-spec` — 拆切片
-- `/vibe-implement` — 按切片实现代码
+- `/vibe-implement` — 按切片实现 + 浏览器功能验证
 - `/vibe-audit` — 提交前审计
 - `/vault-sync` — 同步到 Obsidian
+
+## 截图目录
+- `references/design/reference/` — 定视觉时参考站截图
+- `references/design/verification/<slice>/` — 切片浏览器验证截图
 
 ## 编码规范
 - 入口判空：API 响应、用户输入、文件读取、环境变量，覆盖 null/undefined/[]/"" 四种空值
@@ -36,5 +40,5 @@
 
 ## 工作流
 - 每次迭代一个切片（`slices/<编号>/spec.md`）
-- 每完成一个切片：跑测试 → 过 lint → 运行 `node .opencode/quality-gate.js` → git commit
+- 每完成一个切片：跑测试 → 过 lint → 运行 `node .opencode/quality-gate.js` → 浏览器验证 → git commit
 - 更新 `docs/03-STATUS.md` 上下文摘要
