@@ -57,18 +57,27 @@ N/A — 纯本地模板项目，无服务端
 - `starter-template/AGENTS.md` — AI 行为规范模板
 
 ## 6. 浏览器验证（E2E）
-- `~/.config/opencode/skills/e2e-verifier/` — 浏览器实际操控 + 功能断言 + 截图 + doubao 视觉核对
+- `~/.config/opencode/skills/e2e-verifier/` - 浏览器实际操控 + 功能断言 + 截图 + doubao 视觉核对
+- 端口冲突处理：探测已运行服务复用，无服务时动态端口启动
 - 截图存储：
-  - `references/design/reference/` — 定视觉时参考站截图
-  - `references/design/verification/<slice>/` — 切片浏览器验证截图
+  - `references/design/reference/` - 定视觉时参考站截图
+  - `references/design/verification/<slice>/` - 切片浏览器验证截图
 - 触发点：
   - `/vibe-plan` 阶段4：浏览器访问参考站定视觉
   - `/vibe-implement` 阶段3.5：切片开发后浏览器功能验证
   - `/vibe-audit` 检查项4：UI/功能验证检查
 
-## 7. 变更记录
+## 7. 并行开发安全
+- **切片依赖检查**：`/vibe-implement` 启动前检查前置依赖是否已完成
+- **切片锁**：`slices/README.md` 的 `session-id` 列防止重复选取
+- **共享文件**：spec.md 声明共享文件（router/config），追加式修改避免合并冲突
+- **回滚流程**：切片失败时删分支 + 释放锁 + 状态回退
+- **状态查看**：`/vibe-status` 一键查看切片进度/活跃锁/建议下一步
+
+## 8. 变更记录
 | 日期 | 变更内容 | 原因 |
 |------|----------|------|
 | 2026-08-05 | 初始创建 | 架构落地 |
 | 2026-08-05 | 重构：Skill/命令移入全局，项目只留 quality-gate | 全局优先 |
 | 2026-08-07 | 嵌入浏览器 E2E 验证（e2e-verifier skill + 三命令优化） | 补齐功能/UI验证 |
+| 2026-08-07 | 补齐并行安全：依赖检查 + 共享文件 + 回滚 + vibe-status + 端口管理 | 实战踩坑预防 |
