@@ -10,10 +10,11 @@
 ## 2. 目录分层
 ```
 ~/.config/opencode/              # 全局（一次配置，所有项目可用）
-├── skills/                      # 3 个 Skill
+├── skills/                      # 4 个 Skill
 │   ├── prd-generator/SKILL.md
 │   ├── architecture-designer/SKILL.md
-│   └── slice-spec-writer/SKILL.md
+│   ├── slice-spec-writer/SKILL.md
+│   └── e2e-verifier/SKILL.md    # 浏览器 E2E 验证
 ├── commands/
 │   ├── vibe-plan.md             # 导需求→PRD→架构
 │   ├── vibe-spec.md             # 拆切片

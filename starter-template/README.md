@@ -6,7 +6,7 @@
 
 确保全局 opencode 配置已就位：
 - `~/.config/opencode/skills/` — 4 个 Skill（prd-generator / architecture-designer / slice-spec-writer / e2e-verifier）
-- `~/.config/opencode/commands/` — 5 个命令（vibe-plan / vibe-spec / vibe-audit / vibe-implement / vault-sync）
+- `~/.config/opencode/commands/` - 6 个命令（vibe-plan / vibe-spec / vibe-implement / vibe-audit / vibe-status / vault-sync）
 
 如缺少，复制 `vibecoding-template` 项目中的对应目录到全局配置。
 
