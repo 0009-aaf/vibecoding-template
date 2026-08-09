@@ -42,10 +42,16 @@ function run(cmd) {
   }
 }
 
+// SKIP_VIBE_GATE=1 跳过质量门禁
+if (process.env.SKIP_VIBE_GATE === "1") {
+  console.log(`${YELLOW}${BOLD}⚠️  SKIP_VIBE_GATE=1，跳过质量门禁${RESET}\n`);
+  process.exit(0);
+}
+
 console.log(`\n${BOLD}=== Vibecoding Quality Gate ===${RESET}\n`);
 
 // 1. 密钥扫描
-console.log(`${BOLD}[1/4] 密钥扫描${RESET}`);
+console.log(`${BOLD}[1/6] 密钥扫描${RESET}`);
 const secretPatterns = [
   /sk-[a-zA-Z0-9_-]{20,}/,
   /api[_-]?key['":\s]+\w{16,}/i,
@@ -74,7 +80,7 @@ if (diff) {
 }
 
 // 2. Protected Region 检查
-console.log(`\n${BOLD}[2/4] Protected Region 检查${RESET}`);
+console.log(`\n${BOLD}[2/6] Protected Region 检查${RESET}`);
 const archPath = path.join(process.cwd(), "docs", "02-ARCHITECTURE.md");
 if (fs.existsSync(archPath)) {
   const arch = fs.readFileSync(archPath, "utf8");
@@ -112,7 +118,7 @@ if (fs.existsSync(archPath)) {
 }
 
 // 3. 变更范围检查
-console.log(`\n${BOLD}[3/4] 变更范围检查${RESET}`);
+console.log(`\n${BOLD}[3/6] 变更范围检查${RESET}`);
 const changedFiles = run("git diff --cached --name-only").split("\n").filter(Boolean);
 if (changedFiles.length > 0) {
   // 检查是否只修改了预期文件（排除 .opencode/ .vibecoding/ .gitignore 等）
@@ -138,7 +144,7 @@ if (changedFiles.length > 0) {
 }
 
 // 4. 文档同步检查
-console.log(`\n${BOLD}[4/4] 文档同步检查${RESET}`);
+console.log(`\n${BOLD}[4/6] 文档同步检查${RESET}`);
 const prdPath = path.join(process.cwd(), "docs", "01-PRD.md");
 const statusPath = path.join(process.cwd(), "docs", "03-STATUS.md");
 let docChanged = false;
@@ -181,12 +187,27 @@ for (const file of stagedFeatureFiles) {
   const filePath = path.join(process.cwd(), file);
   if (!fs.existsSync(filePath)) continue;
   const content = fs.readFileSync(filePath, "utf8");
-  const importRegex = /from\s+['"][^'"]*features\/([^/]+)\//g;
+  // 匹配所有 import 语句
+  const importRegex = /from\s+['"]([^'"]+)['"]/g;
   let match;
   while ((match = importRegex.exec(content)) !== null) {
-    if (match[1] !== myFeature) {
-      fail(`${file} 跨 feature import -> features/${match[1]}/ (M10)`);
+    const importPath = match[1];
+    // 情况1: 显式 features/ 路径（如 "@/features/bill/..."）
+    const explicitMatch = importPath.match(/features\/([^/]+)\//);
+    if (explicitMatch && explicitMatch[1] !== myFeature) {
+      fail(`${file} 跨 feature import -> features/${explicitMatch[1]}/ (M10)`);
       crossFeature = true;
+      continue;
+    }
+    // 情况2: 相对路径解析后跨 feature（如 "../../bill/domain/service"）
+    if (importPath.startsWith(".")) {
+      const fileDir = path.dirname(file);
+      const resolved = path.normalize(path.join(fileDir, importPath)).replace(/\\/g, "/");
+      const featureMatch = resolved.match(/^src\/features\/([^/]+)\//);
+      if (featureMatch && featureMatch[1] !== myFeature) {
+        fail(`${file} 跨 feature import -> features/${featureMatch[1]}/ (M10)`);
+        crossFeature = true;
+      }
     }
   }
 }
