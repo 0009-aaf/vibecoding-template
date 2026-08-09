@@ -41,5 +41,6 @@
 
 ## 工作流
 - 每次迭代一个切片（`slices/<编号>/spec.md`）
-- 每完成一个切片：跑测试 → 过 lint → 运行 `node .opencode/quality-gate.js` → 浏览器验证 → git commit
+- 多会话并行时，每个切片用 `git worktree` 创建独立工作目录，互不干扰
+- 每完成一个切片：跑测试 -> 过 lint -> 运行 `node .opencode/quality-gate.js` -> 浏览器验证 -> 合并到 main -> 清理 worktree
 - 更新 `docs/03-STATUS.md` 上下文摘要
