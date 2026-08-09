@@ -170,6 +170,34 @@ if (docChanged) {
   pass("docs/ 无变更，无需同步");
 }
 
+// 6. 跨 feature import 检查
+console.log(`\n${BOLD}[6] 跨 feature import 检查${RESET}`);
+const stagedFeatureFiles = changedFiles.filter(
+  (f) => f.startsWith("src/features/") && (f.endsWith(".ts") || f.endsWith(".tsx") || f.endsWith(".js") || f.endsWith(".jsx"))
+);
+let crossFeature = false;
+for (const file of stagedFeatureFiles) {
+  const myFeature = file.split("/")[2];
+  const filePath = path.join(process.cwd(), file);
+  if (!fs.existsSync(filePath)) continue;
+  const content = fs.readFileSync(filePath, "utf8");
+  const importRegex = /from\s+['"][^'"]*features\/([^/]+)\//g;
+  let match;
+  while ((match = importRegex.exec(content)) !== null) {
+    if (match[1] !== myFeature) {
+      fail(`${file} 跨 feature import -> features/${match[1]}/ (M10)`);
+      crossFeature = true;
+    }
+  }
+}
+if (!crossFeature) {
+  if (stagedFeatureFiles.length > 0) {
+    pass("无跨 feature import");
+  } else {
+    pass("无 feature 文件变更");
+  }
+}
+
 // 总结
 console.log(`\n${BOLD}=== 审计总结 ===${RESET}`);
 const fails = results.filter((r) => r.status === "fail");
