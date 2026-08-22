@@ -22,6 +22,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# 机器特定路径（集中定义，便于新机器移植时修改）
+$HarnessDir = 'C:\Users\fms\.claude\harness'
+
 # 入口判空
 if (-not $GlobalDir) {
     Write-Error 'GlobalDir 为空，无法确定全局配置目录'
@@ -69,7 +72,7 @@ Write-Host "完成: $copied/4 个目录已同步"
 
 # 可选自检
 if (-not $SkipCheck) {
-    $checks = "C:\Users\fms\.claude\harness\tasks\vibe-command-structure\checks.py"
+    $checks = Join-Path $HarnessDir 'tasks\vibe-command-structure\checks.py'
     if (Test-Path -LiteralPath $checks) {
         Write-Host ''
         Write-Host '--- 运行命令结构回归自检（含仓库级一致性：镜像 vs 全局）---'
