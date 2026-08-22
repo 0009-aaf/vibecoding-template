@@ -18,8 +18,8 @@
   - 边界条件：文档模板与 Skill 输出格式一致
 - 优先级：P0
 
-### 三个全局 Skill（~/.config/opencode/skills/）
-- 功能描述：prd-generator、architecture-designer、slice-spec-writer、e2e-verifier 四个 Skill，全局可用
+### 五个全局 Skill（~/.config/opencode/skills/）
+- 功能描述：prd-generator、architecture-designer、architecture-selection、slice-spec-writer、e2e-verifier 五个 Skill，全局可用
 - 验收标准：
   - 成功路径：任何项目可加载全局 Skill
   - 失败路径：Skill 加载后无法执行指定步骤
@@ -35,7 +35,7 @@
 - 优先级：P0
 
 ### 全局命令（~/.config/opencode/commands/）
-- 功能描述：vibe-plan、vibe-spec、vibe-audit、vibe-implement、vault-sync 五个命令
+- 功能描述：vibe-plan、vibe-spec、vibe-audit、vibe-implement、vibe-status、vibe-clean、vault-sync 七个命令
 - 验收标准：
   - 成功路径：命令可被 opencode 识别并执行
   - 失败路径：命令格式与 opencode 不兼容
