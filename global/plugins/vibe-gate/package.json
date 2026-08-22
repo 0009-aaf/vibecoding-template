@@ -1,0 +1,9 @@
+{
+  "name": "opencode-vibe-gate",
+  "version": "0.1.0",
+  "description": "Vibe workflow gate: run quality-gate before git commit (project-aware, SKIP_VIBE_GATE escape)",
+  "type": "module",
+  "main": "index.mjs",
+  "private": true,
+  "license": "MIT"
+}
