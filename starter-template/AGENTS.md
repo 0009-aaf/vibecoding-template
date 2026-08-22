@@ -13,7 +13,9 @@
 - `docs/01-PRD.md` — 需求与验收标准（含 §3.1 NFR）
 - `docs/02-ARCHITECTURE.md` — 架构方案（含 §9 六主题选型）
 - `docs/03-STATUS.md` — 项目状态（每次更新）
+- `docs/04-CONTRACTS.md` — 接口契约（/vibe-spec 生成，切片实现依据）
 - `docs/05-DECISIONS.md` — ADR 决策记录（选型必记）
+- `docs/DoD.md` — 项目级完成底线（/vibe-plan 生成，五段固定清单，切片完成须 AC ∩ DoD 双达标）
 
 ## 架构选型（新项目必读）
 - `/vibe-plan` 阶段3 会加载 `architecture-selection` skill，对 NFR 适用的维度弹选项（⭐推荐 + 优劣）
@@ -27,7 +29,8 @@
 - `/vibe-implement` — 按切片实现 + 浏览器功能验证
 - `/vibe-audit` — 提交前审计
 - `/vibe-status` - 查看项目全貌（切片进度/活跃锁/建议下一步）
-- `/vault-sync` — 同步到 Obsidian
+- `/vibe-clean` — 崩溃恢复：清理 worktree/分支/锁/blackboard 残留
+- `/vault-sync` — 同步决策到 Obsidian
 
 ## 截图目录
 - `references/design/reference/` — 定视觉时参考站截图
