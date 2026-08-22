@@ -10,9 +10,16 @@
 - Obsidian vault：`~/.config/opencode/opencode.json` 中配置（`references.vault.path`）
 
 ## 核心文档
-- `docs/01-PRD.md` — 需求与验收标准
-- `docs/02-ARCHITECTURE.md` — 架构方案
+- `docs/01-PRD.md` — 需求与验收标准（含 §3.1 NFR）
+- `docs/02-ARCHITECTURE.md` — 架构方案（含 §9 六主题选型）
 - `docs/03-STATUS.md` — 项目状态（每次更新）
+- `docs/05-DECISIONS.md` — ADR 决策记录（选型必记）
+
+## 架构选型（新项目必读）
+- `/vibe-plan` 阶段3 会加载 `architecture-selection` skill，对 NFR 适用的维度弹选项（⭐推荐 + 优劣）
+- 每个选型必须来自成熟目录，禁止模型默认值现场发明
+- 每维必须"有决策 或 显式`不适用(理由)`"，禁止静默跳过
+- 每个非平凡选型写一条 ADR 到 `docs/05-DECISIONS.md`
 
 ## 全局命令
 - `/vibe-plan` — 导需求 → 生成 PRD → 设计架构 + 浏览器参考站截图
