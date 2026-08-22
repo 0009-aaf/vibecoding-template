@@ -38,7 +38,9 @@ project/
 │   ├── 01-PRD.md      # 需求 + 验收 + NFR
 │   ├── 02-ARCHITECTURE.md  # 架构 + 六主题选型
 │   ├── 03-STATUS.md   # 项目状态
-│   └── 05-DECISIONS.md # ADR 决策记录
+│   ├── 04-CONTRACTS.md # 接口契约（/vibe-spec 生成）
+│   ├── 05-DECISIONS.md # ADR 决策记录
+│   └── DoD.md         # 完成底线（/vibe-plan 生成，五段固定清单）
 ├── slices/            # 切片开发
 ├── src/               # 最终代码
 ├── tests/             # 测试
