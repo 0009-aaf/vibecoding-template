@@ -5,10 +5,10 @@
 ## 前置条件
 
 确保全局 opencode 配置已就位：
-- `~/.config/opencode/skills/` — 5 个 Skill（prd-generator / architecture-designer / slice-spec-writer / e2e-verifier / architecture-selection）
-- `~/.config/opencode/commands/` - 6 个命令（vibe-plan / vibe-spec / vibe-implement / vibe-audit / vibe-status / vault-sync）
+- `~/.config/opencode/skills/` — 5 个 Skill（prd-generator / architecture-designer / architecture-selection / slice-spec-writer / e2e-verifier）
+- `~/.config/opencode/commands/` - 7 个命令（vibe-plan / vibe-spec / vibe-implement / vibe-audit / vibe-status / vibe-clean / vault-sync）
 
-如缺少，复制 `vibecoding-template` 项目中的对应目录到全局配置。
+如缺少，从 `vibecoding-template` 仓库运行 `scripts/sync-global.ps1`（把仓库 `global/` 目录同步到全局配置）。
 
 ## 快速开始
 
@@ -27,6 +27,7 @@
 | `/vibe-implement` | 按切片实现 + 浏览器功能验证 |
 | `/vibe-audit` | 提交前审计 |
 | `/vibe-status` | 查看项目全貌（切片进度/活跃锁/建议下一步） |
+| `/vibe-clean` | 崩溃恢复：清理 worktree/分支/锁残留 |
 | `/vault-sync` | 同步决策到 Obsidian |
 
 ## 项目结构

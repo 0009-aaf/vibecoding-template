@@ -1,0 +1,9 @@
+{
+  "name": "opencode-vault-sync",
+  "version": "0.1.0",
+  "description": "Auto-write session summary to Obsidian vault daily note on session end",
+  "type": "module",
+  "main": "index.mjs",
+  "private": true,
+  "license": "MIT"
+}
