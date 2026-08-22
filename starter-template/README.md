@@ -5,7 +5,7 @@
 ## 前置条件
 
 确保全局 opencode 配置已就位：
-- `~/.config/opencode/skills/` — 4 个 Skill（prd-generator / architecture-designer / slice-spec-writer / e2e-verifier）
+- `~/.config/opencode/skills/` — 5 个 Skill（prd-generator / architecture-designer / slice-spec-writer / e2e-verifier / architecture-selection）
 - `~/.config/opencode/commands/` - 6 个命令（vibe-plan / vibe-spec / vibe-implement / vibe-audit / vibe-status / vault-sync）
 
 如缺少，复制 `vibecoding-template` 项目中的对应目录到全局配置。
@@ -33,18 +33,25 @@
 
 ```
 project/
-├── docs/              # 三份核心文档
-│   ├── 01-PRD.md
-│   ├── 02-ARCHITECTURE.md
-│   └── 03-STATUS.md
+├── docs/              # 核心文档
+│   ├── 01-PRD.md      # 需求 + 验收 + NFR
+│   ├── 02-ARCHITECTURE.md  # 架构 + 六主题选型
+│   ├── 03-STATUS.md   # 项目状态
+│   └── 05-DECISIONS.md # ADR 决策记录
 ├── slices/            # 切片开发
 ├── src/               # 最终代码
 ├── tests/             # 测试
 ├── references/
 │   └── design/        # 参考站截图 + 浏览器验证截图
 └── .opencode/
-    └── quality-gate.js
+    └── quality-gate.js # 含 G05 架构完备性门禁
 ```
+
+## 架构选型说明
+
+- `/vibe-plan` 阶段3 加载 `architecture-selection` skill，对 NFR 适用的维度弹选项（⭐推荐 + 优劣）
+- 每个选型必须来自成熟目录（不现场发明）；每维"有决策 或 显式不适用"
+- 每个非平凡选型写 ADR 到 `docs/05-DECISIONS.md`；G05 门禁校验 NFR/选型/ADR 齐备
 
 ## 开发流程
 
