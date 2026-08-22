@@ -8,14 +8,10 @@
  *   M01 密钥扫描（阻断）
  *   M02 Protected Region 修改（阻断）
  *   M03 跨 feature import（阻断）
- *   M04 显式路径跨 feature import（阻断）
- *   M05 同 feature import（通过）
  *   M06 空仓库（通过）
  *   M07 SKIP_VIBE_GATE 跳过（通过）
  *   M08 无 git 仓库降级（通过）
  *   M10 跨 feature import（阻断，同 M03）
- *   M14 通过 index.ts 访问（通过）
- *   M15 shared 单 feature 使用（警告）
  *   M16 库清单外库检测 / 自造轮子（阻断）
  *   M17 测试覆盖率（项目配置了 coverage 脚本时执行，非零退出阻断；未配置则跳过）
  *   M18 有 UI 切片缺 E2E（阻断）
@@ -23,7 +19,7 @@
  *   M20 测试文件不在规定目录（警告）
  *   G05 架构完备性（vibe 项目：NFR+六主题选型+ADR，阻断）
  *
- * 注：M09 整数溢出风险（警告）历史声明未实现，已从检查项中移除，避免假安全感。
+ * 注：M04/M05/M09/M14/M15 历史声明未实现，已从检查项中移除，避免假安全感。
  */
 
 const { execSync } = require('child_process');
@@ -56,9 +52,11 @@ const TEST_DIRS = {
 
 // Protected Region 文件列表（来自 docs/02-ARCHITECTURE.md §5）
 // vibe-plan 生成时替换为实际文件列表
+// 默认保护：质量闸门自身 + 行为规范模板。
+// starter-template/AGENTS.md 仅模板项目存在；新项目复制后该路径不存在 -> M02 永不触发，无害。
 const PROTECTED_REGIONS = [
-  // 'src/features/*/service.ts',
-  // 'src/middleware/auth.ts',
+  '.opencode/quality-gate.js',
+  'starter-template/AGENTS.md',
 ];
 
 // === 检查逻辑 ===
@@ -102,7 +100,7 @@ function checkSecrets(files) {
   const secretPatterns = [
     /sk-[a-zA-Z0-9_-]{20,}/,           // API key (sk-xxx, 允许 - 和 _)
     /-----BEGIN [A-Z ]*PRIVATE KEY-----/, // PEM private key
-    /(?:api[_-]?key|password|secret|token)\s*[:=]\s*["'][^"']{12,}["']/i, // key=value（12+字符降低误报）
+    /(?:api[_-]?key|password|secret|access[_-]?token|token)\s*"?\s*[:=]\s*["'][^"']{12,}["']/i, // key=value（12+字符降低误报；"? 兼容 JSON 键 `"access_token": "..."`）
   ];
   // 排除测试文件和 mock 文件
   const testFilePattern = /\.(test|spec)\.(js|ts|tsx|jsx)$|\/(mock|fixture|__mocks__)\//i;
@@ -142,7 +140,7 @@ function checkProtectedRegion(stagedFiles) {
   return issues;
 }
 
-// M03/M04/M05/M10/M14: 跨 feature import 检查
+// M03/M10: 跨 feature import 检查
 function checkCrossFeatureImport(files) {
   const issues = [];
   for (const file of files) {
@@ -192,7 +190,8 @@ function checkLibCompliance(files) {
         }
       }
     } catch (e) {
-      // package.json 解析失败，跳过
+      // package.json 解析失败：库清单检查失去依据，阻断并显式报告
+      issues.push({ type: 'pkg-parse-error', file: 'package.json', reason: (e && e.message) || String(e) });
     }
   }
 
@@ -383,7 +382,7 @@ function main() {
   // M07: SKIP_VIBE_GATE
   if (process.env.SKIP_VIBE_GATE === '1') {
     console.log('⏭️  SKIP_VIBE_GATE=1，跳过质量门禁');
-    console.log('通过: 6\n警告: 0\n阻断: 0');
+    console.log('通过: 0\n警告: 0\n阻断: 0');
     process.exit(0);
   }
 
@@ -399,7 +398,7 @@ function main() {
   // M08: 无 git 仓库降级
   if (!isGitRepo()) {
     console.log('⚠️  非 git 仓库，跳过 git 相关检查');
-    console.log('通过: 6\n警告: 0\n阻断: 0');
+    console.log('通过: 0\n警告: 0\n阻断: 0');
     process.exit(0);
   }
 
@@ -412,7 +411,7 @@ function main() {
   // M06: 空仓库
   if (files.length === 0) {
     console.log('✅ 空仓库，所有检查通过');
-    console.log('通过: 6\n警告: 0\n阻断: 0');
+    console.log('通过: 0\n警告: 0\n阻断: 0');
     process.exit(0);
   }
 
@@ -510,9 +509,7 @@ function main() {
     checks.pass++;
   }
 
-  // M14/M15: 通过检查（不阻断，只报告）
-  checks.pass++; // index.ts 访问检查占位
-  checks.pass++; // shared 使用检查占位
+  // M14/M15: 未实现，已从检查项移除（避免假安全感 —— 同 M09 先例）
 
   // G05: 架构完备性（vibe 项目强制，非 vibe 项目跳过）
   const archCheck = checkArchitectureCompleteness();

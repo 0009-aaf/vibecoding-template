@@ -1,9 +1,9 @@
 # Vibe 工作流 — 总览与导航
 
-> 本文件是 vibe 工作流的**入口地图**：6 个命令的职责与调用时机、依赖链、机制触发点、与周边组件的关系。
+> 本文件是 vibe 工作流的**入口地图**：7 个命令的职责与调用时机、依赖链、机制触发点、与周边组件的关系。
 > 不知道用哪个命令 / 忘了某机制在哪触发 → 先看这里。
 
-## 6 个命令总览
+## 7 个命令总览
 
 | 命令 | 一句话职责 | 调用时机（When to Use） | 前置要求 |
 |---|---|---|---|
@@ -13,6 +13,9 @@
 | `/vibe-audit` | 提交前审计：密钥/契约/范围/文档/测试/UI/诊断痕迹 + **DoD 双闸门** | **合并前**，或 rebase 后 | 至少一个切片处于待验收 |
 | `/vibe-status` | 一键看全貌：切片进度、活跃锁、稠密轨（渐进披露）、残留 | **随时**，尤其中断恢复前 | 无 |
 | `/vibe-clean [--force\|--scan-only\|--fix-status]` | 崩溃恢复：清 worktree/分支/锁/blackboard 残留 | status 提示有残留时 | 无 |
+| `/vault-sync [--sync-docs]` | 同步 Obsidian：决策 → 30_Decisions/，文档 → 20_Projects/，日报 | 有架构/PRD/技术选型决策时（非每次切片） | `opencode.json` 配 `references.vault.path` |
+
+> 口径：**7 个命令 = 6 个 `vibe-*` 前缀命令 + `vault-sync`**（后者的 vault 同步职责独立于切片流水线，故前缀不同）。
 
 ## 依赖链（必须按序）
 
@@ -55,7 +58,7 @@
 ## 周边组件关系
 
 ```
-┌─ commands/vibe-*.md        6 个命令（本总览所在层）
+┌─ commands/vibe-*.md        6 个 vibe-* 命令 + vault-sync（共 7 个，本总览所在层）
 ├─ skills/                   方法 skill（prd-generator / architecture-designer / slice-spec-writer）
 ├─ templates/                PRD / ARCH / DoD / quality-gate 模板（/vibe-plan 复制生成）
 ├─ plugins/vibe-gate/        commit 前强制 quality-gate 的 hook plugin

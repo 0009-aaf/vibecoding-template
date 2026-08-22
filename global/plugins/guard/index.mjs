@@ -8,8 +8,10 @@
  * Windows 的 rmdir /s、del /f /s /q、Remove-Item -Recurse -Force 等。
  *
  * 逃生门：环境变量 OPENCODE_DISABLE_GUARD=1 时跳过（与 vibe-gate 的 SKIP_VIBE_GATE 一致）。
+ *
+ * 误报/漏报矩阵回归：node global/plugins/guard/guard-matrix.mjs（DoD 防御机制必测）。
  */
-const DENY_PATTERNS = [
+export const DENY_PATTERNS = [
   // 递归删除（仅递归/批量才危险；单文件删允许）
   { re: /\brm\s+-[a-zA-Z]*r[a-zA-Z]*f\b/i, msg: "禁止递归强制删除 rm -rf" },
   { re: /\brm\s+-[a-zA-Z]*f[a-zA-Z]*r\b/i, msg: "禁止递归强制删除 rm -fr" },
@@ -20,8 +22,10 @@ const DENY_PATTERNS = [
   // git 强推（--force-with-lease 是安全的，不拦）
   { re: /\bgit\s+push\b[^;\n]*--force(?!-)/i, msg: "禁止 git push --force" },
   { re: /\bgit\s+push\b[^;\n]*\s-f(?:\s|$)/i, msg: "禁止 git push -f" },
-  // 关机/重启
-  { re: /\b(?:shutdown|reboot|halt|poweroff)\b/i, msg: "禁止关机/重启类命令" },
+  // 关机/重启 —— 仅拦"命令首 token 或分隔符后"的裸命令词，避免误伤
+  // 字符串内容（Write-Host "server will halt soon"）或子串（npm run shutdown-handler-test）。
+  // 实测矩阵见同目录 guard-matrix.mjs（误报/漏报回归，DoD 防御必测）。
+  { re: /(?:^|[;&|]\s*)(?:shutdown|reboot|halt|poweroff)(?:\.exe)?(?=\s|$)/i, msg: "禁止关机/重启类命令" },
   // 磁盘/格式化（要求盘符后跟 / 参数或命令结尾，避免误伤字符串）
   { re: /\bmkfs\b/i, msg: "禁止 mkfs 文件系统创建" },
   { re: /\bdd\b[^;\n]*of=\/dev\//i, msg: "禁止 dd 直写设备" },
@@ -31,7 +35,7 @@ const DENY_PATTERNS = [
   { re: /:\(\)\s*\{\s*:\s*\|:\s*&\s*\}\s*;:/i, msg: "禁止 fork bomb" },
 ];
 
-function isDangerous(command) {
+export function isDangerous(command) {
   if (!command || typeof command !== "string") return null;
   for (const p of DENY_PATTERNS) {
     if (p.re.test(command)) return p.msg;

@@ -10,7 +10,26 @@ import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
 
-const VAULT_PATH = "D:/learning/计算机/Obsidian Vault";
+// Vault 路径：优先读 opencode 配置 references.vault.path（与 /vault-sync 命令文档一致），
+// 全部候选失败时回退到历史默认路径。文档见 global/commands/vault-sync.md。
+function resolveVaultPath() {
+  const candidates = [
+    process.env.OPENCODE_CONFIG,
+    join(homedir(), ".config", "opencode", "opencode.json"),
+  ].filter(Boolean);
+  for (const cfgPath of candidates) {
+    try {
+      const cfg = JSON.parse(readFileSync(cfgPath, "utf8"));
+      const vp = cfg && cfg.references && cfg.references.vault && cfg.references.vault.path;
+      if (typeof vp === "string" && vp.trim()) return vp.trim();
+    } catch (err) {
+      // 候选配置不可读/无 vault 字段 -> 尝试下一候选（错误路径显式处理，不静默吞）
+      console.error(`[vault-sync] 读取 opencode 配置失败（尝试下一候选）: ${cfgPath}`, err && err.message);
+    }
+  }
+  return "D:/learning/计算机/Obsidian Vault"; // 回退：历史默认路径（机器特定）
+}
+const VAULT_PATH = resolveVaultPath();
 const DAILY_DIR = join(VAULT_PATH, "10_Daily");
 const LOG_PATH = join(homedir(), ".opencode", "vault-sync.log");
 
@@ -29,7 +48,10 @@ function scheduleDebugFlush() {
     try {
       mkdirSync(join(homedir(), ".opencode"), { recursive: true });
       appendFileSync(LOG_PATH, chunk, "utf8");
-    } catch {}
+    } catch (err) {
+      // 日志落盘失败：用 stderr 显式报告，避免用 debugLog（会再次触发 flush 造成递归）
+      console.error(`[vault-sync] 日志写入失败: ${LOG_PATH}`, err && err.message);
+    }
     _debugFlushing = false;
     if (_debugBuffer.length > 0) scheduleDebugFlush();
   });
@@ -101,7 +123,9 @@ export default async (ctx) => {
   try {
     mkdirSync(join(homedir(), ".opencode"), { recursive: true });
     debugLog(`INIT vault=${VAULT_PATH} daily=${DAILY_DIR}`);
-  } catch {}
+  } catch (err) {
+    console.error(`[vault-sync] 初始化失败: ${err && err.message}`);
+  }
   return {
     event: async ({ event }) => {
       if (!event || typeof event.type !== "string") return;
