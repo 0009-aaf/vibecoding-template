@@ -10,23 +10,40 @@
 ## 2. 目录分层
 ```
 ~/.config/opencode/              # 全局（一次配置，所有项目可用）
-├── skills/                      # 4 个 Skill
+├── skills/                      # 5 个 Skill
 │   ├── prd-generator/SKILL.md
 │   ├── architecture-designer/SKILL.md
+│   ├── architecture-selection/SKILL.md  # 成熟架构目录（10 维选型）
 │   ├── slice-spec-writer/SKILL.md
 │   └── e2e-verifier/SKILL.md    # 浏览器 E2E 验证
-├── commands/
+├── commands/                    # 7 个 vibe 命令 + 5 个 Agent Team 命令
 │   ├── vibe-plan.md             # 导需求→PRD→架构
 │   ├── vibe-spec.md             # 拆切片
 │   ├── vibe-implement.md        # 实现切片
 │   ├── vibe-audit.md            # 提交前审计
-│   └── vault-sync.md            # 同步 Obsidian
-└── templates/
-    ├── PRD-template.md
-    ├── ARCH-template.md
-    └── decision-log.md
+│   ├── vibe-status.md           # 项目全貌/残留
+│   ├── vibe-clean.md            # 崩溃恢复清理
+│   ├── vault-sync.md            # 同步 Obsidian
+│   └── ...（focus-* / execution-plan / plan-design）
+├── templates/                   # 5 个模板
+│   ├── PRD-template.md
+│   ├── ARCH-template.md
+│   ├── decision-log.md
+│   ├── DoD-template.md          # 项目级 Definition of Done
+│   └── quality-gate-template.js # quality-gate 生成源
+├── plugins/                     # commit 前强制 quality-gate 等
+│   └── vibe-gate/
+└── （harness 位于 ~/.claude/harness/，git 追踪）
+    └── blackboard.py 等脚本
 
 vibecoding-template/             # 模板项目
+├── global/                      # 全局实体的真源镜像（同步到 ~/.config/opencode）
+│   ├── skills/
+│   ├── commands/
+│   ├── templates/
+│   └── plugins/
+├── scripts/
+│   └── sync-global.ps1          # 一键同步 global/ → 全局配置
 ├── starter-template/            # 可复制到新项目的脚手架
 │   ├── AGENTS.md
 │   ├── .gitignore
@@ -109,3 +126,4 @@ N/A — 纯本地模板项目，无服务端
 | 2026-08-09 | 分支策略改用 git worktree，解决多会话并行工作区冲突 | 实战踩坑修复 |
 | 2026-08-09 | 合并前 rebase main + CLI 降级验证（浏览器不可用时 HTTP 测试） | 实战踩坑修复 |
 | 2026-08-18 | 加入成熟架构选择机制（architecture-selection skill + NFR + 六主题选型 + ADR + G05 门禁） | 从"现场发明"改为"目录选择" |
+| 2026-08-22 | 文档实体清单统一（5 skill/7 命令/5 模板）+ 新增 global/ 真源镜像与 sync-global.ps1 | 修复文档漂移与自举断裂 |
