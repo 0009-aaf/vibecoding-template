@@ -72,10 +72,10 @@ if (-not $SkipCheck) {
     $checks = "C:\Users\fms\.claude\harness\tasks\vibe-command-structure\checks.py"
     if (Test-Path -LiteralPath $checks) {
         Write-Host ''
-        Write-Host '--- 运行命令结构回归自检 ---'
-        & python $checks
+        Write-Host '--- 运行命令结构回归自检（含仓库级一致性：镜像 vs 全局）---'
+        & python $checks (Join-Path $GlobalDir 'commands') (Join-Path $GlobalDir 'templates') $repoRoot
         if ($LASTEXITCODE -ne 0) {
-            Write-Error '自检未通过：全局命令结构与回归基线不一致，请检查 global/commands 内容'
+            Write-Error '自检未通过：全局命令结构或仓库级一致性（quality-gate 双份/文档清单/镜像漂移）失败，请检查 global/ 内容'
             exit 1
         }
         Write-Host '自检通过'
