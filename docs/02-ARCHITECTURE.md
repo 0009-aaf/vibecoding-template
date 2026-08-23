@@ -13,12 +13,15 @@
 ## 2. 目录分层
 ```
 ~/.config/opencode/              # 全局（一次配置，所有项目可用）
-├── skills/                      # 16 个 Skill（5 方法 + coding-standards 族 11）
+├── skills/                      # 19 个 Skill（5 方法 + 3 设计 + coding-standards 族 11）
 │   ├── prd-generator/SKILL.md
 │   ├── architecture-designer/SKILL.md
 │   ├── architecture-selection/SKILL.md  # 成熟架构目录（10 维选型）
 │   ├── slice-spec-writer/SKILL.md
 │   ├── e2e-verifier/SKILL.md    # 浏览器 E2E 验证
+│   ├── frontend-design/SKILL.md # 美学审校，防 AI 模板化
+│   ├── ui-ux-pro-max/SKILL.md   # UI/UX 设计系统生成（search.py --design-system）
+│   ├── web-artifacts-builder/SKILL.md # HTML 预览构建器（单文件 HTML 静态预览）
 │   ├── coding-standards/SKILL.md        # 总纲：通用规则 + 语言路由表
 │   └── coding-standards-{ts,react,vue,node,python,c,api,wx,shell,html}/
 ├── commands/                    # 7 个 vibe 命令 + 5 个 Agent Team 命令
@@ -44,7 +47,7 @@
 
 vibecoding-template/             # 模板项目
 ├── global/                      # 全局实体的真源镜像（单向同步到 ~/.config/opencode）
-│   ├── skills/                  # 16 Skill 真源
+│   ├── skills/                  # 19 Skill 真源
 │   ├── commands/                # 13 命令文件真源（12 命令 + vibe-README 导航）
 │   ├── templates/               # 10 模板真源
 │   └── plugins/                 # 5 插件真源
@@ -177,3 +180,4 @@ N/A — 纯本地模板项目，无服务端
 | 2026-08-22 | 文档实体清单统一（5 skill/7 命令/5 模板）+ 新增 global/ 真源镜像与 sync-global.ps1 | 修复文档漂移与自举断裂 |
 | 2026-08-23 | 术语统一十维度（§9 表 10 行）+ G05 升级为 §9 段内十维检查 + 孤儿模板清理（PRD/decision-log 删除）+ 路径可移植化 + 与 ZCode 插件版口径对齐 | 全量审查修复（N-01~N-07/D-02/C-04） |
 | 2026-08-23 | §2 目录树刷新为实际结构（16 Skill/10 模板/13 命令文件）；§6/§7/§8 重排对齐 ARCH-template（库清单/命名约定含术语表/测试策略，原浏览器验证/并行安全/降级收编为 §8 子节） | 全量审查 A1/A2：章节引用悬空（constitution C6/X3/vibe-implement §6/§8）+ 实体计数三方不一致 |
+| 2026-08-24 | §2 目录树 Skill 计数 16→19，补 frontend-design / ui-ux-pro-max / web-artifacts-builder 三行 | 审查 F-05：UI 设计 skill 入库后计数漂移 |

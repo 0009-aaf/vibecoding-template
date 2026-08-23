@@ -76,7 +76,8 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - **先加载设计 skill（视觉重项目必做，纯后端项目跳过）**：
     1. 加载 `ui-ux-pro-max` → `python ~/.config/opencode/skills/ui-ux-pro-max/scripts/search.py "<产品类型> <行业> <关键词>" --design-system -p "<项目名> --output-dir <项目根>` 生成完整设计系统（pattern/style/colors/typography/effects/anti-patterns）
     2. 加载 `frontend-design` → 对照设计系统审校美学方向（防 AI 模板化：避开 cream+serif+terracotta / 黑底+acid accent / broadsheet 三类默认样）
-    3. **视觉重（PRD §2 有明确页面视觉要求）→ 加载 `web-artifacts-builder`** → 用 `D:\Git\bin\bash.exe` 跑 `scripts/init-artifact.sh <tmp目录>` 产出 React 骨架，手写关键页（首页/核心功能页）→ `scripts/bundle-artifact.sh` 打包成**单文件 HTML 静态预览**输出到 `references/design/preview.html`（用户可浏览器直接打开看方向）
+    3. **视觉重（PRD §2 有明确页面视觉要求）→ 加载 `web-artifacts-builder`** → 用 Git bash 跑 `scripts/init-artifact.sh <tmp目录>` 产出 React 骨架，手写关键页（首页/核心功能页）→ `scripts/bundle-artifact.sh` 打包成**单文件 HTML 静态预览**输出到 `references/design/preview.html`（用户可浏览器直接打开看方向）
+       - **bash 探测（机器相关）**：先 `Get-Command bash` 确认真实 Git bash 路径（如 `D:\Git\bin\bash.exe`），**禁用** `C:\Windows\system32\bash.exe`（WSL stub，WSL 未装时直接报错）——见 coding-standards-shell SH13
        - 图标一律内联 SVG（`lucide-react` / 手写 `stroke="currentColor"`），禁用位图/emoji
        - 预览仅定方向，不追求完整：用户确认后细节在 `/vibe-implement` 阶段实现
   - §1 设计令牌（颜色/字体/间距/圆角/阴影/断点，表格化——UI 切片实现的唯一视觉锚点；**来自 ui-ux-pro-max 输出的色板/字体系统**）

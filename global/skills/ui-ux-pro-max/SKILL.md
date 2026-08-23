@@ -7,6 +7,21 @@ description: "UI/UX design intelligence for web, mobile, and desktop. This skill
 
 Searchable local UI/UX guidance: 79 searchable styles (50 active), 192 product palettes and exact reasoning profiles, 74 font pairings, 119 UX guidelines, 105 curated icons, 17 GSAP presets, 25 chart types, and 22 technology stacks.
 
+## Development & Testing
+
+Stdlib-only (zero external dependencies). Regression suite:
+
+```
+python -m pytest scripts/tests/
+```
+
+Note: `test_catalog_refresh.py` / `test_relevance_evaluator.py` require upstream
+maintenance scripts (`refresh-google-fonts.py` / `refresh-icon-catalog.py` /
+`evaluate-relevance.py`) that are not shipped in the template mirror — they are
+auto-skipped here. Catalog snapshots (`catalog-summary.json`) record LF-normalized
+SHA-256 hashes; `validate_data.py` normalizes line endings before hashing, so the
+suite stays green under Windows autocrlf checkouts.
+
 ## When to Apply
 
 Use this Skill when the task involves **UI structure, visual design decisions, interaction patterns, or user experience quality control**: designing new pages, creating/refactoring UI components, choosing color/typography/spacing/layout systems, reviewing UI for UX/accessibility/consistency, implementing navigation/animation/responsive behavior, or improving perceived quality and usability.

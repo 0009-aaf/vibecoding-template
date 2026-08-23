@@ -1,0 +1,5 @@
+# 行尾规范化（Windows autocrlf 环境下保证哈希稳定）
+# ui-ux-pro-max 数据目录：catalog-summary.json 的 snapshots 哈希按 LF 内容计算，强制 eol=lf 防 CRLF 漂移
+global/skills/ui-ux-pro-max/data/** text eol=lf
+# web-artifacts-builder 构建脚本：Git bash 下 CRLF 有解析风险，强制 LF
+global/skills/web-artifacts-builder/scripts/*.sh text eol=lf

@@ -68,7 +68,8 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 ┌─ commands/vibe-*.md        6 个 vibe-* 命令 + vault-sync（共 7 个，本总览所在层）
 │                            另有 5 个 Agent Team 命令（focus-* / plan-design / execution-plan）
 ├─ skills/                   方法 skill（prd-generator / architecture-designer / slice-spec-writer /
-│                            architecture-selection / e2e-verifier / coding-standards 族 ×11）
+│                            architecture-selection / e2e-verifier）+ 设计 skill（frontend-design /
+│                            ui-ux-pro-max / web-artifacts-builder）+ coding-standards 族 ×11（共 19）
 ├─ templates/                DOC-STANDARD / ARCH / DoD / SECURITY / DESIGN / CONTRACTS /
 │                            RUNBOOK / CODING-STANDARDS / CONSTITUTION / quality-gate 模板
 │                            （/vibe-plan 复制生成；ARCH 与 skill 双源由 sync-hash 校验）
@@ -82,6 +83,7 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 
 ```powershell
 # 命令结构回归（改了命令文件后跑）
+# 注：以下为本机示例路径；实测路径以 `python ~/.claude/harness/tasks/vibe-command-structure/checks.py` 等效为准（PowerShell 需写全路径或用 $HOME 展开）
 python "C:\Users\fms\.claude\harness\tasks\vibe-command-structure\checks.py"
 
 # 查看 eval 基线（含 vibe-command-structure）

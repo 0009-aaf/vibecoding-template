@@ -20,6 +20,11 @@
 - vibe-plan 阶段5 新增生成 00-DOC-STANDARD 与 constitution（均增量保护）
 
 ### Fixed
+- **审查修复（2026-08-24 工作流多维度审查）**：
+  - **ui-ux-pro-max 测试套件入库不完整**：2 个依赖上游私有脚本的测试（`test_catalog_refresh.py` / `test_relevance_evaluator.py`）加 SkipTest 防护（模板镜像缺失 refresh/evaluate 脚本时自动跳过，不再收集崩溃）；`catalog-summary.json` 快照哈希失配根因 = Windows autocrlf 漂移 → `validate_data.py` 哈希前 LF 归一化 + 新增 `.gitattributes` 强制 `global/skills/ui-ux-pro-max/data/**` 与 `web-artifacts-builder/scripts/*.sh` eol=lf；SKILL.md 补测试运行说明。回归：130 passed + 2 skipped + 7923 subtests 全绿
+  - **ARCH Skill 计数漂移**：02-ARCHITECTURE §2 目录树 16→19，补 frontend-design / ui-ux-pro-max / web-artifacts-builder 三行（vibe-README skills 清单同步补设计类 3 个）
+  - **README badge 锚点悬空**：`#skills-一览16-个` → `#skills-一览19-个`
+  - **vibe-plan 硬编码 Git bash 路径语义化**：`D:\Git\bin\bash.exe` 改为 Get-Command 探测提示（禁 WSL stub，见 coding-standards-shell SH13）
 - 存量文档合规整改：01-PRD/02-ARCHITECTURE 补引言 blockquote、03-STATUS 补引言、06-RUNBOOK/08-CODING-STANDARDS 补变更记录、RUNBOOK/CODING-STANDARDS 模板补变更记录占位（S6 上线即发现）
 - **安全（P1）**：quality-gate M02/M17 命令注入修复——staged 文件名与 npm 脚本键名全部改 `execFileSync` 参数数组（不经 shell），三副本同步；M01 密钥扫描补 `.env*` 前缀文件（`.env.local` 等此前漏扫）；`secretPatterns` 提升为模块级导出（`require.main` 守卫，import 不执行主流程）
 - **安全（P1）**：clawd-bridge 权限转发 token 先发后验证 → verify-before-send——含 `bridge_token` 的 `/permission` 请求仅在端口已通过 Clawd 身份验证后发送（冷启动先发无 token 探针），state 广播维持先发后验证（无敏感内容）

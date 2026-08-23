@@ -3,7 +3,7 @@
 > **Vibe Coding 工作流模板仓库** — 给 AI Agent（opencode 等）配上"图纸、地基、规矩、门禁"：可复制的项目脚手架 + 19 个全局 Skill + 13 条命令 + 提交前机器校验，让"边聊边写"有章法、可验证、不漂移。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Skills](https://img.shields.io/badge/skills-19-blue)](#skills-一览16-个)
+[![Skills](https://img.shields.io/badge/skills-19-blue)](#skills-一览19-个)
 [![Commands](https://img.shields.io/badge/commands-13-green)](#工作流命令)
 [![Gates](https://img.shields.io/badge/gates-S1--S7%20%2B%20quality--gate-red)](#质量防线)
 

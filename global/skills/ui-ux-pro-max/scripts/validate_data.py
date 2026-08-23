@@ -663,7 +663,8 @@ def _check_catalog_summary(summary, licenses, phosphor, problems):
             problems.append(f"[catalog:summary] stale count for {key}")
     snapshots = summary.get("snapshots") if isinstance(summary.get("snapshots"), dict) else {}
     for name in ("google-fonts.csv", "google-font-licenses.json", "icons.csv", "phosphor-icons-upstream.json"):
-        digest = hashlib.sha256((DATA_DIR / name).read_bytes()).hexdigest()
+        # 快照哈希按 LF 内容记录；Windows autocrlf 检出为 CRLF 时需归一化后再算，否则假失配
+        digest = hashlib.sha256((DATA_DIR / name).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
         if snapshots.get(name) != {"sha256": digest}:
             problems.append(f"[catalog:summary] stale snapshot for {name}")
     policy = summary.get("promotionPolicy")

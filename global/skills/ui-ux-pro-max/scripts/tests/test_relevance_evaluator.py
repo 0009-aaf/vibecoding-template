@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
-"""Unit tests for metric math and relevance fixture validation."""
+"""Unit tests for metric math and relevance fixture validation.
+
+NOTE (vibecoding-template): requires upstream evaluate-relevance.py, which is
+not shipped in this template mirror. Skipped instead of failing collection.
+"""
 
 import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = next(parent for parent in Path(__file__).resolve().parents
-            if (parent / "scripts/evaluate-relevance.py").exists())
+try:
+    ROOT = next(parent for parent in Path(__file__).resolve().parents
+                if (parent / "scripts/evaluate-relevance.py").exists())
+except StopIteration:
+    raise unittest.SkipTest(
+        "upstream evaluate-relevance.py not present in this repo mirror; "
+        "runs in the upstream repository"
+    )
 MODULE_PATH = ROOT / "scripts/evaluate-relevance.py"
 SPEC = importlib.util.spec_from_file_location("evaluate_relevance", MODULE_PATH)
 evaluator = importlib.util.module_from_spec(SPEC)
