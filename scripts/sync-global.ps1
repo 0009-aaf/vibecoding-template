@@ -61,8 +61,10 @@ foreach ($sub in $subDirs) {
     if (-not (Test-Path -LiteralPath $dstSub)) {
         New-Item -ItemType Directory -Force -Path $dstSub | Out-Null
     }
-    # 整目录复制，排除 node_modules（依赖产物不进镜像）
-    Copy-Item -Path (Join-Path $srcSub '*') -Destination $dstSub -Recurse -Force -Exclude 'node_modules'
+    # 整目录复制（PS 的 -Exclude 对 -Recurse 子目录不生效，改为复制后递归清理 node_modules）
+    Copy-Item -Path (Join-Path $srcSub '*') -Destination $dstSub -Recurse -Force
+    Get-ChildItem -LiteralPath $dstSub -Directory -Recurse -Filter 'node_modules' -ErrorAction SilentlyContinue |
+        Remove-Item -Recurse -Force
     $count = (Get-ChildItem -Path $dstSub -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
     Write-Host "  [OK] $sub/  files=$count"
     $copied++

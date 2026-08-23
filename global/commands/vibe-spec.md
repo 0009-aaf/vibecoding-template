@@ -5,8 +5,8 @@ description: 切片命令：读取 PRD + 架构文档 → 拆分切片 → 输�
 ## /vibe-spec — 切片规格
 
 ### 会话隔离
-生成 SID = `spec-{今日日期}-{4位随机}`。注册：`python C:/Users/fms/.claude/harness/blackboard.py register <SID> "vibe-spec (<需求摘要>)"`
-> 会话异常中断时，需手动从 blackboard 清除本 SID：`python C:/Users/fms/.claude/harness/blackboard.py remove <SID>`
+生成 SID = `spec-{今日日期}-{4位随机}`。注册：`python ~/.claude/harness/blackboard.py register <SID> "vibe-spec (<需求摘要>)"`
+> 会话异常中断时，需手动从 blackboard 清除本 SID：`python ~/.claude/harness/blackboard.py remove <SID>`
 
 ### 前置条件
 - `docs/01-PRD.md` 必须存在
@@ -58,4 +58,4 @@ description: 切片命令：读取 PRD + 架构文档 → 拆分切片 → 输�
 - 更新 `docs/03-STATUS.md` 切片清单
 - 向用户展示切片列表、依赖关系和接口契约摘要
 - 确认后提示用户：可运行 `/vibe-implement <编号>` 开始实现
-- 从 blackboard 移除本会话：`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`
+- 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py archive <SID>`

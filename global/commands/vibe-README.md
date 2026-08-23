@@ -110,7 +110,7 @@ vibe 支持**用户手动多窗口**并行：每个终端窗口跑一个 `/vibe-
 靠 worktree + OS 文件锁 + `slices/README.md` session-id 保证不冲突。注意：
 
 1. **每个切片一个独立 worktree**，不要在同一目录开两个窗口跑同一切片。
-2. **主 blackboard 写操作只经脚本**（`python C:/Users/fms/.claude/harness/blackboard.py`），
+2. **主 blackboard 写操作只经脚本**（`python ~/.claude/harness/blackboard.py`），
    禁止手改 `_Team/blackboard.md`——多窗口并发写会丢更新（见 blackboard-protocol.md）。
 3. **opencode 多实例 session 共享风险**：同一项目目录开两个 `opencode` 实例会共享
    SQLite 会话状态（官方 issue #31307/#28249），编辑/快照会互相覆盖。规避方式：

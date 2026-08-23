@@ -38,3 +38,10 @@ npm-debug.log*
 
 # AI tooling
 .opencode/plugins/data/
+
+# Python cache
+.ruff_cache/
+__pycache__/
+
+# Runtime PID files (vibe e2e server tracking)
+*.pid

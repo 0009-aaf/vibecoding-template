@@ -1,6 +1,6 @@
 ---
 name: architecture-designer
-description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录分层、数据模型、服务端边界、Protected Region 标记。使用场景：Phase 2（打地基）阶段。触发词："出架构"、"设计架构"、"技术选型"、"定技术栈"
+description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录分层、数据模型、服务端边界、Protected Region 标记。使用场景：/vibe-plan 的架构设计阶段（打地基）。触发词："出架构"、"设计架构"、"技术选型"、"定技术栈"
 ---
 
 # 架构设计器
@@ -109,7 +109,7 @@ CI 要求：
 - 合并 main 前必须跑 E2E
 - 覆盖率低于目标 -> 阻断
 
-### Step 9: 六主题选型（调用 architecture-selection skill）
+### Step 9: 十维度选型（调用 architecture-selection skill）
 - 加载 `architecture-selection` skill，对 NFR 适用的维度用 question 工具弹选项（含 ⭐推荐 + 优劣）
 - 十维度：D1 架构风格 / D2 前端客户端 / D3 后端 / D4 数据库 / D5 缓存内存 / D6 高并发 / D7 事务锁 / D8 CICD / D9 灾备 / D10 部署
 - 每维输出到 docs/02-ARCHITECTURE.md §9 选型表，一行一维：
@@ -230,17 +230,19 @@ TDD：API 强制先写测试 / UI 同步写
 E2E：有 UI 必须 / 纯 API 不要求
 契约测试：共享 zod schema 内嵌集成测试
 
-## 9. 六主题选型（来自 architecture-selection 目录）
+## 9. 十维度选型（D1–D10，来自 architecture-selection 目录）
 | 维度 | 选型 | 理由 | ADR# |
 |------|------|------|------|
-| 架构风格 | Modular Monolith | 小型应用,单体足够 | ADR-001 |
-| 数据库 | PostgreSQL | 需事务+持久化 | ADR-001 |
-| 缓存/内存 | Redis cache-aside | 读多写少 | ADR-002 |
-| 高并发 | 不适用(本地工具,无并发) | - | - |
-| 事务和锁 | READ COMMITTED+乐观锁 | 默认隔离够用 | ADR-003 |
-| CICD | GitHub Actions | 托管零运维 | ADR-004 |
-| 灾备 | 3-2-1备份+恢复演练 | 有数据必备份 | ADR-005 |
-| 部署 | Docker Compose | 单机多服务 | ADR-006 |
+| D1 架构风格 | Modular Monolith | 小型应用,单体足够 | ADR-001 |
+| D2 前端客户端 | Next.js (React) | 需 SEO/SSR | ADR-002 |
+| D3 后端 | Node.js (Fastify) | 全栈 JS 同语言 | ADR-003 |
+| D4 数据库 | PostgreSQL | 需事务+持久化 | ADR-004 |
+| D5 缓存/内存 | Redis cache-aside | 读多写少 | ADR-005 |
+| D6 高并发 | 不适用(本地工具,无并发) | - | - |
+| D7 事务和锁 | READ COMMITTED+乐观锁 | 默认隔离够用 | ADR-006 |
+| D8 CICD | GitHub Actions | 托管零运维 | ADR-007 |
+| D9 灾备 | 3-2-1备份+恢复演练 | 有数据必备份 | ADR-008 |
+| D10 部署 | Docker Compose | 单机多服务 | ADR-009 |
 
 > 每维必须"有决策 或 显式不适用"。详见 docs/05-DECISIONS.md。
 

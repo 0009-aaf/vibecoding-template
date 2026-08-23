@@ -36,7 +36,7 @@
 project/
 ├── docs/              # 核心文档
 │   ├── 01-PRD.md      # 需求 + 验收 + NFR
-│   ├── 02-ARCHITECTURE.md  # 架构 + 六主题选型
+│   ├── 02-ARCHITECTURE.md  # 架构 + 十维度选型
 │   ├── 03-STATUS.md   # 项目状态
 │   ├── 04-CONTRACTS.md # 接口契约（/vibe-spec 生成）
 │   ├── 05-DECISIONS.md # ADR 决策记录
@@ -58,9 +58,9 @@ project/
 
 ## 开发流程
 
-1. Phase 1: 定图纸 — 写 PRD，定视觉
-2. Phase 2: 打地基 — 定架构，锁技术栈
-3. Phase 3: 立规矩 — 三份文档，开发规范
+1. 定图纸 — 写 PRD，定视觉
+2. 打地基 — 定架构，锁技术栈
+3. 立规矩 — 三份文档，开发规范
 4. 开发：按切片迭代
 
 ## 参考
