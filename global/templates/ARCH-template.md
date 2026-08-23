@@ -1,6 +1,7 @@
 # 架构方案: [项目名称]
 
-> 快速参考模板。**真源在 `architecture-designer` skill 的输出模板**——两处不一致时以 skill 为准，改动须双向同步。
+<!-- sync-hash: 3 -->
+> 快速参考模板。**真源在 `architecture-designer` skill 的输出模板**——两处不一致时以 skill 为准，改动须双向同步（并同步 bump 两侧 sync-hash，scripts/check-sync.mjs 检查 5 校验相等）。
 
 ## 1. 技术栈
 | 层级 | 选型 | 理由 |

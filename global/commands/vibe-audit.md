@@ -1,5 +1,5 @@
 ---
-description: 审计命令：commit 前检查密钥扫描、契约一致性、变更范围、文档同步、测试覆盖。优先调用项目 .opencode/quality-gate.js，不存在则做基础检查。
+description: 审计命令：commit 前检查密钥扫描、契约一致性、变更范围、文档同步、测试覆盖、安全基线对照、技术债对账、漂移检测。优先调用项目 .opencode/quality-gate.js，不存在则做基础检查。
 ---
 
 ## /vibe-audit - 提交前审计
@@ -29,6 +29,27 @@ description: 审计命令：commit 前检查密钥扫描、契约一致性、变
   - **Ship-readiness**：安全影响已评审；存在回滚路径；人类已批准
 - 任一未勾选 -> **阻断**，报告缺哪项（阻断结论独立计入，不受 quality-gate 结果覆盖）
 
+### 安全基线对照（独立于 quality-gate，无论是否存在 quality-gate.js 都执行）
+- 读取 `docs/07-SECURITY.md`（安全基线，由 /vibe-plan 阶段3 生成）
+- 不存在 -> 跳过，报告标注"⚠️ 缺 docs/07-SECURITY.md（G05.5 门禁项），建议运行 /vibe-plan"（不阻断，quality-gate 的 G05.5 会拦）
+- 存在 -> 对本次变更逐项对照：
+  - 变更触及认证/授权/密钥/输入校验/CORS/依赖清单 -> 核对是否符合基线表
+  - 引入新库 -> 是否在 ARCH §6 库清单内（对应 M16）
+  - 基线冲突 -> **阻断**，报告冲突项与基线条目
+  - 基线需要演进（如新增限流）-> 提示更新 07-SECURITY.md 并记 ADR
+
+### 技术债对账（独立于 quality-gate）
+- 扫描本次变更代码中的 `TODO` / `TBD` / `FIXME` / `XXX` 注释
+- 读取 `docs/TECH-DEBT.md`（由 /vibe-implement 阶段4 维护）
+- 代码中有标记但债务清单未登记 -> **警告**，列出未登记项（提示补登记，不阻断）
+- `docs/TECH-DEBT.md` 不存在且代码中无标记 -> 通过
+- 清单中有"建议处理时机"已到期未处理的项 -> 警告提醒
+
+### 漂移检测（若仓库配置了 scripts/check-sync.mjs）
+- 仓库根存在 `scripts/check-sync.mjs` -> 运行 `node scripts/check-sync.mjs`
+- 退出码非零（检测到多副本/引用漂移）-> **阻断**，报告漂移明细（修复同步后再提交）
+- 不存在 -> 跳过（该脚本为可选配置，vibecoding-template 类多副本仓库使用）
+
 ### 基础检查（无 quality-gate.js 时）
 
 #### 1. 密钥扫描（阻断）
@@ -51,6 +72,11 @@ description: 审计命令：commit 前检查密钥扫描、契约一致性、变
 
 #### 4. 文档同步检查（警告）
 - 检查 `docs/01-PRD.md` 和 `docs/02-ARCHITECTURE.md` 是否需要更新
+- 落地核对（不靠感觉，逐项比对）：
+  - `AGENTS.md` 项目信息表（技术栈/数据库/部署） vs `docs/02-ARCHITECTURE.md` §1 选型
+  - `docs/03-STATUS.md` 各切片状态 vs `slices/README.md` 状态列
+  - 命令表中的命令数 vs 实际命令文件数（多副本仓库跑 `node scripts/check-sync.mjs`，见漂移检测）
+  - 新增依赖是否已写入 ARCH §6 库清单
 - 需求变更但文档未同步 -> 警告
 
 #### 5. 测试覆盖检查（警告，新增）
@@ -84,6 +110,9 @@ DoD 行独立判定（不受 quality-gate 覆盖）；quality-gate.js 不存在 
 ### 测试覆盖: ✅ 通过 / ⚠️ 警告
 ### UI/功能验证: ✅ 通过 / ⚠️ 建议
 ### 诊断痕迹: ✅ 通过 / ⚠️ 警告
+### 安全基线对照: ✅ 通过 / ❌ 阻断 / ⏭️ 跳过（缺 07-SECURITY.md）
+### 技术债对账: ✅ 通过 / ⚠️ 警告
+### 漂移检测: ✅ 通过 / ❌ 阻断 / ⏭️ 跳过（未配置）
 ### Definition of Done: ✅ 通过 / ❌ 阻断
 
 ### 结论: ✅ 可提交（AC ∩ DoD 双闸门通过） / ❌ 需修复

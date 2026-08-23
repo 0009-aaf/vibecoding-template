@@ -5,6 +5,9 @@ description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录�
 
 # 架构设计器
 
+<!-- sync-hash: 3 -->
+> 输出模板与 `global/templates/ARCH-template.md` 双源镜像：任一侧改动须双向同步并 bump 两侧 sync-hash（scripts/check-sync.mjs 检查 5 校验相等）。本文件为真源。
+
 ## 核心目标
 从 PRD 出发，输出简洁、可执行的架构方案到 `docs/02-ARCHITECTURE.md`
 
