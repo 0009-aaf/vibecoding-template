@@ -7,10 +7,10 @@
 
 | 命令 | 一句话职责 | 调用时机（When to Use） | 前置要求 |
 |---|---|---|---|
-| `/vibe-plan <需求>` | 项目启动：导需求 → PRD → 架构 → 契约 → DoD → quality-gate | **新项目 / 大功能**，还没有 docs/ 时 | 无（问答式收集需求） |
+| `/vibe-plan <需求>` | 项目启动：导需求 → PRD → 架构 → 安全基线 → 契约 → DoD → quality-gate | **新项目 / 大功能**，还没有 docs/ 时 | 无（问答式收集需求） |
 | `/vibe-spec` | 拆切片：PRD+架构 → 垂直切片 + 依赖图 + 每切片 spec | plan 完成后，要开始实现前 | `docs/01-PRD.md` + `docs/02-ARCHITECTURE.md` |
-| `/vibe-implement <编号> [--fast\|--full\|--loop]` | 实现一个切片：测试 → 实现 → 闸门 → 验收 → 合并 | **切片就绪后**（依赖已完成） | spec.md + CONTRACTS.md + quality-gate.js |
-| `/vibe-audit` | 提交前审计：密钥/契约/范围/文档/测试/UI/诊断痕迹 + **DoD 双闸门** | **合并前**，或 rebase 后 | 至少一个切片处于待验收 |
+| `/vibe-implement <编号> [--fast\|--full\|--loop]` | 实现一个切片：测试 → 实现 → 闸门 → CHANGELOG/技术债登记 → 验收 → 合并 | **切片就绪后**（依赖已完成） | spec.md + CONTRACTS.md + quality-gate.js |
+| `/vibe-audit` | 提交前审计：密钥/契约/范围/文档/测试/UI/诊断痕迹/安全基线/技术债对账/漂移 + **DoD 双闸门** | **合并前**，或 rebase 后 | 至少一个切片处于待验收 |
 | `/vibe-status` | 一键看全貌：切片进度、活跃锁、稠密轨（渐进披露）、残留 | **随时**，尤其中断恢复前 | 无 |
 | `/vibe-clean [--force\|--scan-only\|--fix-status]` | 崩溃恢复：清 worktree/分支/锁/blackboard 残留 | status 提示有残留时 | 无 |
 | `/vault-sync [--sync-docs]` | 同步 Obsidian：决策 → 30_Decisions/，文档 → 20_Projects/，日报 | 有架构/PRD/技术选型决策时（非每次切片） | `opencode.json` 配 `references.vault.path` |
@@ -59,9 +59,13 @@
 
 ```
 ┌─ commands/vibe-*.md        6 个 vibe-* 命令 + vault-sync（共 7 个，本总览所在层）
-├─ skills/                   方法 skill（prd-generator / architecture-designer / slice-spec-writer）
-├─ templates/                PRD / ARCH / DoD / quality-gate 模板（/vibe-plan 复制生成）
-├─ plugins/vibe-gate/        commit 前强制 quality-gate 的 hook plugin
+│                            另有 5 个 Agent Team 命令（focus-* / plan-design / execution-plan）
+├─ skills/                   方法 skill（prd-generator / architecture-designer / slice-spec-writer /
+│                            architecture-selection / e2e-verifier / coding-standards 族 ×11）
+├─ templates/                PRD / ARCH / DoD / SECURITY / RUNBOOK / CODING-STANDARDS /
+│                            quality-gate 模板（/vibe-plan 复制生成）
+├─ plugins/vibe-gate/        commit 前强制 quality-gate 的 hook plugin（+ check-sync 漂移检测）
+├─ scripts/check-sync.mjs    多副本/引用漂移检测（commit 前 + /vibe-audit）
 └─ ~/.claude/harness/tasks/vibe-command-structure/
                              命令本身的结构回归（checks.py 确定性校验）
 ```
@@ -99,10 +103,26 @@ vibe 不是唯一的工作流，避免命令混用：
 | 修 bug（轻量：developer→reviewer→tester） | `/fix-bug` | 跳过 architect，最快 |
 | 代码审查（多 reviewer 投票） | `/code-review` / `/adversarial-review` | 审查独立于开发 |
 | 技术调研 | `/tech-research` | researcher→architect 两段式 |
+| 只出方案不动代码（READ-ONLY 调研 + 风险矩阵） | `/plan-design`（本仓库） | 无 PRD/架构文档时的轻量方案设计，输出到 Obsidian |
+| 把既有方案排批次并行派发 | `/execution-plan`（本仓库） | 冲突分析 + 批次执行，配合 agent-team |
+| 纯专注会话（防上下文污染） | `/focus-start` / `/focus-done`（本仓库） | 单任务焦点 + 记忆卸载 |
+
+**两套规划体系的边界**（vibe-plan vs plan-design/execution-plan）：
+
+| 场景 | 选择 | 理由 |
+|---|---|---|
+| 新项目 / 要落 docs/ 文档链（PRD→ARCH→CONTRACTS） | `/vibe-plan` | 产出被 G05/G06 门禁消费，进切片流水线 |
+| 已有项目出一次性技术方案 / 不想生成全套文档 | `/plan-design` | 轻量、READ-ONLY、输出 Obsidian 供人读 |
+| 方案已定、要排执行批次 | `/execution-plan` | 只管派发不管规划 |
+| 拿不准 | 先 `/vibe-plan` | 文档链 + 门禁的长线收益大于一次性方案 |
 
 边界规则：**vibe 是项目开发流水线，project-design 是设计前置，goal 是单任务执行**。
 同一个需求不要既跑 vibe-plan 又跑 project-design；切片内的小改动走 `/vibe-implement --fast`，
 不另起 goal。
+
+> 注：`/project-design`、`/goal`、`/fix-bug`、`/code-review`、`/adversarial-review`、`/tech-research`
+> 属于外部 agent-team 命令集（`~/.claude/harness/` 部署），**不在本仓库 global/commands/ 内**——
+> check-sync 的外部命令白名单与此处保持一致。
 
 ## 多窗口并行操作规范（CLI 多会话）
 

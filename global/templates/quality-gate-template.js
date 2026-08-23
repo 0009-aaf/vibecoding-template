@@ -17,7 +17,8 @@
  *   M18 有 UI 切片缺 E2E（阻断）
  *   M19 spec 测试用例未实现（阻断）
  *   M20 测试文件不在规定目录（警告）
- *   G05 架构完备性（vibe 项目：NFR+十维度选型+ADR，阻断）
+ *   G05 架构完备性（vibe 项目：NFR+十维度选型+安全基线+ADR，阻断）
+ *   G06 文档完备性（vibe 项目：CODING-STANDARDS/RUNBOOK 存在性，阻断）
  *
  * 注：M04/M05/M09/M14/M15 历史声明未实现，已从检查项中移除，避免假安全感。
  */
@@ -384,11 +385,17 @@ function checkArchitectureCompleteness() {
     issues.push({ type: 'missing-adr', msg: '缺少 ADR 决策记录（docs/05-DECISIONS.md，须含 ADR-NNN 条目）' });
   }
 
+  // G05.5: 安全基线（plan 阶段与架构同生命周期生成；小项目允许逐项"不适用(理由)"，但文件必须存在）
+  const security = getFileContent('docs/07-SECURITY.md');
+  if (!security) {
+    issues.push({ type: 'missing-security', msg: '缺少安全基线（docs/07-SECURITY.md，由 /vibe-plan 阶段3 生成）' });
+  }
+
   return { skipped: false, issues };
 }
 
 // G06: 文档完备性检查（vibe 工作流项目）
-// 校验项目级规范文档已生成且非空（docs/06-CODING-STANDARDS.md、docs/06-RUNBOOK.md）。
+// 校验项目级规范文档已生成且非空（docs/08-CODING-STANDARDS.md、docs/06-RUNBOOK.md）。
 // 反臃肿/防误伤原则：
 //   - 非 vibe 项目（无 PRD/ARCH）→ 跳过
 //   - 只检查"文件存在且非空占位"，不校验内容质量（G05 已管架构内容）
@@ -401,14 +408,14 @@ function checkDocumentationCompleteness() {
   if (!arch && !prd) return { skipped: true, issues: [] };
 
   const issues = [];
-  const standards = getFileContent('docs/06-CODING-STANDARDS.md');
+  const standards = getFileContent('docs/08-CODING-STANDARDS.md');
   const runbook = getFileContent('docs/06-RUNBOOK.md');
 
   // G06.1: CODING-STANDARDS 存在且含实际命名规则（非空模板占位）
   if (!standards) {
-    issues.push({ type: 'missing-standards', msg: 'docs/06-CODING-STANDARDS.md 不存在（vibe 项目须产出项目级代码规范）' });
+    issues.push({ type: 'missing-standards', msg: 'docs/08-CODING-STANDARDS.md 不存在（vibe 项目须产出项目级代码规范）' });
   } else if (!/N\d/.test(standards) && !/命名/.test(standards)) {
-    issues.push({ type: 'standards-empty', msg: 'docs/06-CODING-STANDARDS.md 缺少命名规范内容（疑似空占位）' });
+    issues.push({ type: 'standards-empty', msg: 'docs/08-CODING-STANDARDS.md 缺少命名规范内容（疑似空占位）' });
   }
 
   // G06.2: RUNBOOK 存在（允许占位——plan 阶段生成）
@@ -560,7 +567,7 @@ function main() {
     checks.block++;
     blockers.push({
       code: 'G05',
-      name: '架构完备性（NFR/十维度选型/ADR 缺失）',
+      name: '架构完备性（NFR/十维度选型/安全基线/ADR 缺失）',
       issues: archCheck.issues,
     });
   } else {
