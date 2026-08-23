@@ -12,6 +12,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 
 ### 守卫
 若 $ARGUMENTS 为空 → 先用 question 工具询问项目目标，再继续
+全程约束：项目根 `constitution.md` 为最高约束，任何产出违背其条款即否决重做
 
 ### 阶段1: 头脑风暴
 - 逐条提问收集原始需求（每次一个问题）
@@ -55,7 +56,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - 小项目允许逐项标注"不适用(理由)"，但文件必须存在（G05.5 门禁校验存在性，不校验内容质量）
 - 输出到 `docs/02-ARCHITECTURE.md`
 
-### 阶段4: 定视觉（浏览器访问参考站 + CLI 降级）
+### 阶段4: 定视觉 → 生成 `docs/09-DESIGN.md`（浏览器访问参考站 + CLI 降级）
 - **环境检测**：
   - 尝试 `playwright_navigate`（导航到 `about:blank`）
   - 成功 -> 浏览器模式，走完整流程
@@ -63,7 +64,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
     - 用 `webfetch` 获取参考网站页面内容
     - 用 `doubao_analyze_image` 无法截图 -> 跳过视觉分析
     - 从 HTML 结构提取：布局结构、导航层级、CSS 类命名模式
-    - 标注"CLI 降级：视觉分析不完整，需人工补充"
+    - 标注"CLI 降级：视觉分析不完整，需人工补充"（写入 09-DESIGN §7）
     - 不阻断流程，继续后续阶段
 - 浏览器可用时的完整流程：
   - 用 playwright 访问 2-3 个参考网站（PRD §2 中列出的）
@@ -71,15 +72,28 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - 每站关键页截图 -> `references/design/reference/`
   - 用 vision 分析工具分析截图（优先 `doubao_analyze_image`，不可用时跳过，不阻塞）
   - 提取：布局 / 导航结构 / 配色 / 气质
-  - 写入 PRD §2（附参考截图路径）
+- **生成 `docs/09-DESIGN.md`（界面设计规格）**：复制 `~/.config/opencode/templates/DESIGN-template.md`，按提取结果填充：
+  - §1 设计令牌（颜色/字体/间距/圆角/阴影/断点，表格化——UI 切片实现的唯一视觉锚点）
+  - §2 页面清单（每页布局区块/路由/所属 feature）
+  - §3 组件清单与复用（组件库来自 ARCH §9 D2 选型）
+  - §4 交互五态规范（loading/empty/error/disabled/skeleton）
+  - §5 响应式策略 + §6 无障碍基线（允许逐项"不适用(理由)"）
+  - §7 参考与截图索引
+  - 纯后端项目（PRD 无页面模块）：保留文件，整体标注"不适用(理由=无 UI 切片)"
+  - PRD §2 收敛为一句话风格方向 + 指向 `docs/09-DESIGN.md`（视觉细节不再散落 PRD）
+  - G05.6 门禁校验：有 UI 切片的项目必须存在 09-DESIGN.md（判定口径与 M18 一致）
 
-### 阶段5: 交接文档（README 填充 + Runbook 生成）
+### 阶段5: 交接文档（README 填充 + 规范与运行文档生成）
 - **填充 `README.md`**（原为占位，必须替换）：
   - 项目名：取自 PRD §0 标题
   - 一句话定位：取自 PRD §0"要解决的问题"
   - 技术栈徽章/一行：从 02-ARCHITECTURE.md 选型摘要（Modular Monolith / Next.js / ...）
   - 快速开始：3 条命令（安装/启动/测试），细节指向 `docs/06-RUNBOOK.md`
   - 保留 vibe 命令表与项目结构说明（starter-template 已有）
+- **生成 `docs/00-DOC-STANDARD.md`**：复制 `~/.config/opencode/templates/DOC-STANDARD-template.md` 填入项目名（文档链自身的元规范；本命令生成任何 docs/ 文档须遵守）
+- **生成 `constitution.md`（项目根，项目宪法）**：复制 `~/.config/opencode/templates/CONSTITUTION-template.md`
+  - **增量保护**：已存在 -> 不覆盖（宪法变更须 ADR，C13），仅提示用户
+  - 按项目情况裁剪示例列（条款本体不改；删除不适用的条款须记 ADR 说明）
 - **生成 `docs/06-RUNBOOK.md`**：复制 `~/.config/opencode/templates/RUNBOOK-template.md`
   - 按选型填充：环境要求（版本）、环境变量清单、启动/测试命令、部署方式、回滚、备份恢复
   - 从 02-ARCHITECTURE.md §9 选型值与 §8 测试策略取实际内容
@@ -92,17 +106,20 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 - **PRD 确认含 §0 项目背景**（Why/用户/成功标志/排除项/约束）；缺则补齐
 
 ### 产出
+- `docs/00-DOC-STANDARD.md`（文档元规范——阶段5）
+- `constitution.md`（项目根，13 条不可协商条款——阶段5，增量保护）
 - `docs/01-PRD.md`（含 §0 项目背景 + §3.1 NFR）
 - `docs/02-ARCHITECTURE.md`（含库清单、命名约定、测试策略、§9 十维度选型）
-- `docs/04-CONTRACTS.md`（契约框架：库清单 + 命名约定 + 共享类型占位）
+- `docs/04-CONTRACTS.md`（契约框架：库清单 + 命名约定 + 错误码注册表占位 + 共享类型占位）
 - `docs/05-DECISIONS.md`（ADR 决策记录，随选型追加）
 - `docs/DoD.md`（项目级 Definition of Done，五段固定清单）
 - `docs/06-RUNBOOK.md`（运行/环境/部署/回滚/备份——阶段5）
 - `docs/07-SECURITY.md`（安全基线：鉴权/密钥/输入校验/CORS/依赖漏洞——阶段3，与架构同生命周期）
 - `docs/08-CODING-STANDARDS.md`（项目级代码规范：命名/文件组织/技术栈专项/Commit——阶段5）
+- `docs/09-DESIGN.md`（界面设计：令牌/页面/组件/五态/响应式/无障碍——阶段4）
 - `README.md`（已填充：定位 + 快速开始 + vibe 命令表）
 - `.env.example`（环境变量占位样例）
-- `.opencode/quality-gate.js`（根据架构配置生成，含 G05 架构完备性[含 G05.5 安全基线] + G06 文档完备性检查）
+- `.opencode/quality-gate.js`（根据架构配置生成，含 G05 架构完备性[含 G05.5 安全基线/G05.6 界面设计] + G06 文档完备性检查）
 
 ### 收尾
 - 确保 `docs/03-STATUS.md` 存在，不存在则创建
