@@ -27,7 +27,8 @@
 | 文件 | 分工 |
 |---|---|
 | `constitution.md`（本文件） | 不可协商底线，违背即否决 |
-| `docs/DoD.md` | per-project 完成清单（宪法管"不能做"，DoD 管"没做完"） |
+| `docs/DoD.md` | per-project 完成清单（宪法管"不能做"，DoD 管"没做完"）；无切片交付的仓库允许缺席（见 `docs/00-DOC-STANDARD.md` §1，底线由本文件承载） |
+| `docs/04-CONTRACTS.md` | 跨端契约边界（C12 的依据）；无跨端契约的项目允许缺席（见 `docs/00-DOC-STANDARD.md` §1） |
 | `docs/08-CODING-STANDARDS.md` | 可协商的项目级风格（冲突时宪法 > DoD > 本文件） |
 | `AGENTS.md` | AI 行为入口约定，引用本文件 |
 

@@ -15,6 +15,7 @@
  *   S4 global/ 与 ~/.config/opencode 副本哈希对比（警告级：部署是手动动作，不阻断）
  *   S5 ARCH-template 与 architecture-designer 双源 sync-hash 标记相等
  *   S6 文档结构校验（docs/00-DOC-STANDARD：编号白名单/H1/引言/变更记录）
+ *   S7 skill 路由完整性 + skill 名引用存在性（S7a 总纲路由双向比对；S7b `X` skill / skill("X") 必须有目录）
  *
  * 退出码：0 = 通过（可含警告），1 = 存在漂移（阻断）。
  * 逃生阀：SKIP_CHECK_SYNC=1 跳过全部检查（须在 commit message 说明原因）。
@@ -22,6 +23,7 @@
 
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -192,7 +194,8 @@ function checkCommandReferences() {
 // === S4: global/ 与 ~/.config/opencode 哈希对比（警告级） ===
 
 function checkDeployedSync() {
-  const deployedRoot = path.join(process.env.USERPROFILE || '', '.config', 'opencode');
+  // os.homedir() 跨平台（Windows USERPROFILE / POSIX HOME）；环境变量缺失时退化为相对路径会误判
+  const deployedRoot = path.join(os.homedir(), '.config', 'opencode');
   const warnings = [];
   if (!fs.existsSync(deployedRoot)) {
     return { warnings, note: `未部署（${rel(deployedRoot)} 不存在），跳过` };
@@ -313,6 +316,70 @@ function checkSyncHash() {
   return { issues };
 }
 
+// === S7: skill 路由完整性 + skill 名引用存在性 ===
+
+// 部署在本仓库外的 skill（与 EXTERNAL_COMMANDS 同理；当前为空，出现第一个外部 skill 时扩表）
+const EXTERNAL_SKILLS = new Set([]);
+
+// S7a: coding-standards 总纲的路由声明（§六表格反引号名 + description 花括号枚举）
+//      与 global/skills/ 实际目录双向比对——声明无目录=悬空；目录未声明=孤儿（不会被自动加载）
+// S7b: 全仓 markdown 中被引用的 skill 名（`X` skill 紧邻模式 / skill("X") 调用）必须真实存在。
+//      与 S3（命令引用）同构：引用存在性不靠自觉。
+function checkSkillReferences() {
+  const issues = [];
+  const skillsDir = path.join(repoRoot, 'global', 'skills');
+  const existing = new Set(
+    fs.existsSync(skillsDir)
+      ? fs.readdirSync(skillsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)
+      : []
+  );
+
+  // --- S7a: 路由完整性（双向） ---
+  const overviewPath = path.join(skillsDir, 'coding-standards', 'SKILL.md');
+  const overview = readText(overviewPath) || '';
+  const declared = new Set();
+  for (const m of overview.matchAll(/`(coding-standards-[a-z0-9-]+)`/g)) declared.add(m[1]);
+  for (const m of overview.matchAll(/coding-standards-\{([a-z0-9,-]+)\}/g)) {
+    for (const item of m[1].split(',')) declared.add(`coding-standards-${item.trim()}`);
+  }
+  const actual = new Set([...existing].filter((d) => d.startsWith('coding-standards-')));
+  for (const d of declared) {
+    if (!actual.has(d)) issues.push(`S7a 路由悬空：总纲声明 \`${d}\` 但 global/skills/ 无此目录`);
+  }
+  for (const a of actual) {
+    if (!declared.has(a)) issues.push(`S7a 路由孤儿：\`global/skills/${a}/\` 存在但总纲 §六路由表未登记（不会被自动加载）`);
+  }
+
+  // --- S7b: 引用存在性 ---
+  const scanFiles = [
+    ...walkFiles(path.join(repoRoot, 'global'), ['.md']),
+    ...walkFiles(path.join(repoRoot, 'docs'), ['.md']),
+    ...walkFiles(path.join(repoRoot, 'starter-template'), ['.md']),
+    path.join(repoRoot, 'README.md'),
+    path.join(repoRoot, 'AGENTS.md'),
+    path.join(repoRoot, 'constitution.md'),
+  ].filter((f) => fs.existsSync(f));
+  // 两种强信号（防误报：参数化写法 coding-standards-<lang> 天然不匹配 [a-z0-9-]+"'" 的边界）
+  const refPatterns = [
+    /`([a-z][a-z0-9-]{2,})`(?=[^`\n]{0,12}\bskill\b)/gi, // `X` ... skill（反引号名后 12 字符内出现 skill）
+    /\bskill\(\s*["']([a-z0-9-]{3,})["']/gi, // skill("X") 调用
+  ];
+  for (const file of scanFiles) {
+    const lines = (readText(file) || '').split(/\r?\n/);
+    lines.forEach((line, i) => {
+      for (const p of refPatterns) {
+        p.lastIndex = 0;
+        for (const m of line.matchAll(p)) {
+          const name = m[1];
+          if (existing.has(name) || EXTERNAL_SKILLS.has(name)) continue;
+          issues.push(`${rel(file)}:${i + 1} 引用 skill \`${name}\` 但 global/skills/ 无此目录（也不在 EXTERNAL_SKILLS 白名单）`);
+        }
+      }
+    });
+  }
+  return { issues, skills: existing.size, scanned: scanFiles.length };
+}
+
 // === 主流程 ===
 
 function main() {
@@ -334,6 +401,8 @@ function main() {
   if (s5.issues.length > 0) blockers.push({ code: 'S5', name: '双源 sync-hash 漂移', issues: s5.issues });
   const s6 = checkDocStructure();
   if (s6.issues.length > 0) blockers.push({ code: 'S6', name: '文档结构不符合 00-DOC-STANDARD', issues: s6.issues });
+  const s7 = checkSkillReferences();
+  if (s7.issues.length > 0) blockers.push({ code: 'S7', name: 'skill 路由/引用漂移', issues: s7.issues });
   const s4 = checkDeployedSync();
   if (s4.warnings.length > 0) warnings.push({ code: 'S4', name: '全局部署滞后（运行 sync-global.ps1）', issues: s4.warnings });
 
@@ -347,6 +416,7 @@ function main() {
   console.log(`[S4] 全局部署同步: ${s4.warnings.length ? '⚠️  ' + s4.warnings.length + ' 项滞后' : '✅'}${s4.note ? '（' + s4.note + '）' : ''}`);
   console.log(`[S5] 双源 sync-hash: ${s5.issues.length ? '❌' : '✅'}`);
   console.log(`[S6] 文档结构规范: ${s6.issues.length ? '❌' : '✅'}（docs ${s6.docs} 份 + 模板侧）`);
+  console.log(`[S7] skill 路由/引用: ${s7.issues.length ? '❌' : '✅'}（${s7.skills} 个 skill，引用扫描 ${s7.scanned} 文件）`);
 
   if (blockers.length > 0) {
     console.log('\n❌ 阻断项：');

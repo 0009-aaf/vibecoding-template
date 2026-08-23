@@ -264,7 +264,13 @@ function getStablePid() {
 // so both benefit from port caching + self-healing discovery. Tries cached port
 // first; on failure walks runtime.json + fallback range. Caches the winning
 // port. Never throws.
-function postToClawd(urlPath, body, logTag) {
+//
+// requireVerified (permission forwards): the payload carries the bridge token,
+// which is the only thing authorizing /reply decisions — so it must never
+// reach a port that has not proven its Clawd identity. The /state broadcast is
+// tokenless and may be sent verify-after; sensitive payloads verify-BEFORE-send
+// (cached verified port, or a tokenless probe on cold start).
+function postToClawd(urlPath, body, logTag, requireVerified = false) {
   // Enrich every outbound body with process-tree fields. Cached after first
   // call so this is just a few object assignments per POST.
   if (_stablePid) {
@@ -281,6 +287,12 @@ function postToClawd(urlPath, body, logTag) {
 
   (async () => {
     for (const port of candidates) {
+      if (requireVerified && port !== _cachedPort) {
+        const verified = await probePortIdentity(port);
+        debugLog(`POST[${reqId}] ${logTag} port=${port} probe verified=${verified}`);
+        if (!verified) continue;
+        _cachedPort = port;
+      }
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), POST_TIMEOUT_MS);
       const t0 = Date.now();
@@ -317,6 +329,27 @@ function postToClawd(urlPath, body, logTag) {
   });
 }
 
+// Tokenless identity probe: a port answers with the Clawd header BEFORE any
+// sensitive payload (bridge token) is sent there. Prevents a rogue local
+// process squatting the port range from harvesting the token on first contact.
+async function probePortIdentity(port) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), POST_TIMEOUT_MS);
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}${STATE_PATH}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agent_id: AGENT_ID, probe: true }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    return res.headers.get("x-clawd-server") === "clawd-on-desk";
+  } catch {
+    clearTimeout(timer);
+    return false;
+  }
+}
+
 function postStateToClawd(body) {
   postToClawd(STATE_PATH, body, `STATE state=${body.state}`);
 }
@@ -324,8 +357,9 @@ function postStateToClawd(body) {
 // Fire-and-forget permission forward. Clawd decides allow/deny/always in its
 // bubble UI and — critically — replies to opencode's own REST API directly
 // (POST ${server_url}permission/:request_id/reply). The plugin never waits.
+// Payload carries the bridge token -> requireVerified enforces verify-before-send.
 function postPermissionToClawd(body) {
-  postToClawd("/permission", body, `PERM tool=${body.tool_name} req=${body.request_id}`);
+  postToClawd("/permission", body, `PERM tool=${body.tool_name} req=${body.request_id}`, true);
 }
 
 // Clawd uses PascalCase event names matching Claude Code's hook vocabulary so

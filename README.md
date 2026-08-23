@@ -44,7 +44,7 @@ vibecoding-template/
 │   └── plugins/          # vibe-gate（commit 前门禁 + 漂移检测）等插件
 ├── scripts/
 │   ├── sync-global.ps1   # 自动同步 global/ → ~/.config/opencode
-│   └── check-sync.mjs    # 漂移检测器（S1-S6：多副本/引用/双源/文档结构，commit 前强制）
+│   └── check-sync.mjs    # 漂移检测器（S1-S7：多副本/引用/双源/文档结构/skill 路由，commit 前强制）
 └── docs/                 # 本仓库自身的全套文档（Dogfood）
 ```
 
@@ -54,7 +54,7 @@ vibecoding-template/
 # 1. 复制脚手架
 cp -r starter-template/ /path/to/my-project
 # 2. 改 AGENTS.md：项目名 + 一段话定位
-# 3. （首次）同步全局：global/sync-global.ps1  → 确保 5 Skill + 7 命令就位
+# 3. （首次）同步全局：scripts/sync-global.ps1  → 确保 16 Skill + 7 命令就位
 # 4. 进入项目跑第一个命令
 opencode /vibe-plan
 ```

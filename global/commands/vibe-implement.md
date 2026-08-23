@@ -183,8 +183,8 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
 - **Protected Region 不碰**
 - **模块边界检查**（实现过程中持续检查，不是事后）：
   - 不跨 feature import（feature A 不 import feature B 内部）-> M10
-  - 只通过 feature 的 index.ts 访问其他 feature -> M14
-  - shared 只被多个 feature 用，不为单个 feature 创建 -> M15
+  - 只用 `docs/02-ARCHITECTURE.md` §6 库清单内批准的库，不自造轮子 -> M16
+  - （M14/M15 历史占位已移除：quality-gate 未实现该检查项，避免假安全感）
 - 全部文件实现完成 -> 进入阶段3
 
 #### 反合理化表（阶段2b：写实现）
