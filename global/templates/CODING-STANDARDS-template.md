@@ -43,7 +43,7 @@
 
 - 格式：`<type>(<scope>): <subject>`，type ∈ `feat / fix / docs / refactor / test / chore`
 - scope：feature 名（如 `feat(auth): 增加登录`）
-- Body：每个非琐碎变更文件一行 `<文件>: <功能> + <本次变更>`（CM11——提交历史不读 diff 也能按文件功能阅读）
+- Body：每个非琐碎变更文件一行 `<文件>: <该文件的功能>`（CM11——只描述文件职责，不描述本次改动）
 - 禁止裸 commit message（空/泛义），禁止 `wip` 提交到 main
 
 ## 6. 引用
