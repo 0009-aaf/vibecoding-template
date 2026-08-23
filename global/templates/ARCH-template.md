@@ -1,6 +1,6 @@
 # 架构方案: [项目名称]
 
-<!-- sync-hash: 3 -->
+<!-- sync-hash: 4 -->
 > 快速参考模板。**真源在 `architecture-designer` skill 的输出模板**——两处不一致时以 skill 为准，改动须双向同步（并同步 bump 两侧 sync-hash，scripts/check-sync.mjs 检查 5 校验相等）。
 
 ## 1. 技术栈
@@ -35,6 +35,10 @@ project/
 erDiagram
     Entity1 ||--o{ Entity2 : relates
 ```
+
+**迁移规范**（涉及数据库时必答）：
+- 命名 `<时间戳>_<动作>_<对象>`；每个迁移必须可回滚
+- destructive 迁移（删列/删表/改类型丢数据）：先记 ADR + 备份先行
 
 ## 4. 服务端边界
 - 必须在服务端：
@@ -80,6 +84,7 @@ erDiagram
 | D10 部署 | | | |
 
 > 每维必须"有决策 或 显式不适用(理由)"。详见 docs/05-DECISIONS.md。
+> D5 选中缓存时：失效策略必答（cache-aside / write-through / TTL + 主动失效），写入"理由"列。
 
 ## 10. 变更记录
 | 日期 | 变更内容 | 原因 |
