@@ -158,6 +158,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
     - API 路由 -> coding-standards-api
     - `.wxml` -> coding-standards-wx
 - **遵守契约**：函数签名、API 响应格式必须匹配 `docs/04-CONTRACTS.md`
+- **优先读项目规范**：若存在 `docs/06-CODING-STANDARDS.md`，以其为项目约束（冲突时项目文档 > skill 全量）；不存在则只用 skill
 - **只能用库清单中批准的库**（`docs/02-ARCHITECTURE.md` §6）
 - **实现顺序（不可跳过，按依赖关系）**：
   1. `domain/schema.ts`（类型定义，无依赖）
