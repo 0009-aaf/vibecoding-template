@@ -5,7 +5,7 @@ description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录�
 
 # 架构设计器
 
-<!-- sync-hash: 3 -->
+<!-- sync-hash: 4 -->
 > 输出模板与 `global/templates/ARCH-template.md` 双源镜像：任一侧改动须双向同步并 bump 两侧 sync-hash（scripts/check-sync.mjs 检查 5 校验相等）。本文件为真源。
 
 ## 核心目标
@@ -42,6 +42,10 @@ description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录�
 - 实体关系图（mermaid）
 - 关键字段列表
 - 不展开全部字段，只列核心
+- **迁移规范**（涉及数据库时必答，纯前端项目标"不适用(理由)"）：
+  - 迁移命名：`<时间戳>_<动作>_<对象>`（如 `20260823_create_users`）
+  - 每个迁移必须可回滚（提供 down/rollback 路径）
+  - destructive 迁移（删列/删表/改类型丢数据）：先记 ADR + RUNBOOK §7 备份先行，禁止直接执行
 
 ### Step 4: 服务端边界
 - 哪些逻辑必须在服务端？（鉴权、支付、数据写操作）
@@ -115,6 +119,7 @@ CI 要求：
 ### Step 9: 十维度选型（调用 architecture-selection skill）
 - 加载 `architecture-selection` skill，对 NFR 适用的维度用 question 工具弹选项（含 ⭐推荐 + 优劣）
 - 十维度：D1 架构风格 / D2 前端客户端 / D3 后端 / D4 数据库 / D5 缓存内存 / D6 高并发 / D7 事务锁 / D8 CICD / D9 灾备 / D10 部署
+- D5 选中缓存时必答**失效策略**（cache-aside / write-through / TTL + 主动失效，写进 §9"理由"列）；不用缓存标"不适用(理由)"
 - 每维输出到 docs/02-ARCHITECTURE.md §9 选型表，一行一维：
   `| 维度 | 选型 | 理由 | ADR# |`
 - **不适用必须显式标注**（如 `不适用(本地单机工具,无并发需求)`），禁止静默跳过
