@@ -55,6 +55,9 @@ function isGitCommit(command) {
   return /\bgit(?:\s+-C\s+\S+)?\s+commit\b/.test(command);
 }
 
+// 10 分钟上限：quality-gate 内 coverage 脚本自身限 5 分钟，外层须兜底防无限挂起阻塞 commit
+const GATE_TIMEOUT_MS = 10 * 60 * 1000;
+
 function runScript(scriptPath) {
   // quality-gate M07 / check-sync both support their own SKIP_* env — honored via env
   // script lives at <root>/<subdir>/script -> project root = dirname(dirname(scriptPath))
@@ -62,9 +65,18 @@ function runScript(scriptPath) {
     cwd: dirname(dirname(scriptPath)),
     encoding: "utf8",
     stdio: "pipe",
+    timeout: GATE_TIMEOUT_MS,
     env: { ...process.env },
   });
   return out;
+}
+
+/** 成功也要回显输出尾部（check-sync 的警告、quality-gate 的警告项否则不可见）。 */
+function showTail(label, out) {
+  const text = (out || "").toString().trim();
+  if (!text) return;
+  const tail = text.split("\n").slice(-12).join("\n");
+  console.log(`[vibe-gate] ${label} 通过，输出尾部：\n${tail}`);
 }
 
 export const VibeGate = async ({ directory, worktree }) => {
@@ -82,7 +94,7 @@ export const VibeGate = async ({ directory, worktree }) => {
       const checkSyncPath = findCheckSync(cwd);
       if (checkSyncPath) {
         try {
-          runScript(checkSyncPath);
+          showTail("check-sync", runScript(checkSyncPath));
         } catch (e) {
           const detail = (e?.stdout || e?.stderr || e?.message || "").toString();
           throw new Error(
@@ -98,7 +110,7 @@ export const VibeGate = async ({ directory, worktree }) => {
       if (!gatePath) return;
 
       try {
-        runScript(gatePath);
+        showTail("quality-gate", runScript(gatePath));
       } catch (e) {
         const detail = (e?.stdout || e?.stderr || e?.message || "").toString();
         throw new Error(
