@@ -15,6 +15,9 @@ export const DENY_PATTERNS = [
   // 递归删除（仅递归/批量才危险；单文件删允许）
   { re: /\brm\s+-[a-zA-Z]*r[a-zA-Z]*f\b/i, msg: "禁止递归强制删除 rm -rf" },
   { re: /\brm\s+-[a-zA-Z]*f[a-zA-Z]*r\b/i, msg: "禁止递归强制删除 rm -fr" },
+  // rm 递归+强制组合（含分写 flag "rm -r -f" 与长选项 "--recursive --force"；
+  // 双 lookahead 不限顺序，flag 须为独立 token，命令行边界止于 ; & | 换行）
+  { re: /\brm\b(?=[^;&|\n]*\s(?:-[a-zA-Z]*r|--recursive))(?=[^;&|\n]*\s(?:-[a-zA-Z]*f|--force))/i, msg: "禁止递归强制删除 rm -rf（含分写/长选项变体）" },
   { re: /\brmdir\s+\/s(?:\s+\/q)?\b/i, msg: "禁止递归删除 rmdir /s" },
   { re: /\brd\s+\/s(?:\s+\/q)?\b/i, msg: "禁止递归删除 rd /s" },
   { re: /\bdel\s+[^;&|\n]*\/s\b/i, msg: "禁止批量删除 del /s（递归）" },
@@ -22,14 +25,16 @@ export const DENY_PATTERNS = [
   // git 强推（--force-with-lease 是安全的，不拦）
   { re: /\bgit\s+push\b[^;\n]*--force(?!-)/i, msg: "禁止 git push --force" },
   { re: /\bgit\s+push\b[^;\n]*\s-f(?:\s|$)/i, msg: "禁止 git push -f" },
-  // 关机/重启 —— 仅拦"命令首 token 或分隔符后"的裸命令词，避免误伤
-  // 字符串内容（Write-Host "server will halt soon"）或子串（npm run shutdown-handler-test）。
+  // 关机/重启 —— 仅拦"命令首 token 或分隔符后"的裸命令词（允许 sudo/doas 提权前缀），
+  // 避免误伤字符串内容（Write-Host "server will halt soon"）或子串（npm run shutdown-handler-test）。
   // 实测矩阵见同目录 guard-matrix.mjs（误报/漏报回归，DoD 防御必测）。
-  { re: /(?:^|[;&|]\s*)(?:shutdown|reboot|halt|poweroff)(?:\.exe)?(?=\s|$)/i, msg: "禁止关机/重启类命令" },
+  { re: /(?:^|[;&|]\s*)(?:sudo\s+|doas\s+)?(?:shutdown|reboot|halt|poweroff)(?:\.exe)?(?=\s|$)/i, msg: "禁止关机/重启类命令" },
   // 磁盘/格式化（要求盘符后跟 / 参数或命令结尾，避免误伤字符串）
   { re: /\bmkfs\b/i, msg: "禁止 mkfs 文件系统创建" },
   { re: /\bdd\b[^;\n]*of=\/dev\//i, msg: "禁止 dd 直写设备" },
   { re: /\bformat\s+[a-zA-Z]:(?:\s*\/|\s*$)/i, msg: "禁止磁盘格式化 format <盘符>:" },
+  // Windows 参数前置变体：format /FS:NTFS D:（开关在前、盘符在后）
+  { re: /\bformat\s+\/[a-zA-Z]{2,}[^;\n]*\s[a-zA-Z]:/i, msg: "禁止磁盘格式化 format /FS:... <盘符>:" },
   { re: /\b(?:Format-Volume|Clear-Disk)\b/i, msg: "禁止 PowerShell 磁盘格式化" },
   // fork bomb
   { re: /:\(\)\s*\{\s*:\s*\|:\s*&\s*\}\s*;:/i, msg: "禁止 fork bomb" },

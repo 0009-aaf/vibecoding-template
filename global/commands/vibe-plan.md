@@ -101,7 +101,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 - **生成 `docs/08-CODING-STANDARDS.md`**：复制 `~/.config/opencode/templates/CODING-STANDARDS-template.md`
   - 按 02-ARCHITECTURE.md 技术栈选型裁剪 §3 技术栈专项：只保留主栈对应 coding-standards-<lang> 的 ≤15 条
   - 通用命名/文件组织/Commit 规范从模板直接带入（N1-N6、F1-F5、Conventional Commits）
-  - 保留 §6 引用（全量规范指向 skill，不复制 58 条）
+  - 保留 §6 引用（全量规范指向 skill，不复制规则全文）
   - 反臃肿原则：文档 ≤35 条约束，超出部分指向 skill 层
 - **PRD 确认含 §0 项目背景**（Why/用户/成功标志/排除项/约束）；缺则补齐
 

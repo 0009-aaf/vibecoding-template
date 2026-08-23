@@ -1,41 +1,40 @@
 // guard-matrix.mjs — guard 插件误报/漏报矩阵回归（DoD 防御机制必测）
 //
 // 运行: node global/plugins/guard/guard-matrix.mjs
-// 期望: 误伤 = 0/13  漏网 = 0/14
+// 期望: 误伤 = 0/16  漏网 = 0/22
 // 规则:
 //   - 合法命令必须全部放行（不误伤）
 //   - 危险命令必须全部拦截（不漏网）
 // 变更 DENY_PATTERNS 后必须先更新本矩阵并跑绿，否则视为"写了就当有用"。
 
-import { DENY_PATTERNS } from "./index.mjs";
-
-function isDangerous(command) {
-  if (!command || typeof command !== "string") return null;
-  for (const p of DENY_PATTERNS) {
-    if (p.re.test(command)) return p.msg;
-  }
-  return null;
-}
+// 判定函数直接 import 实现（单一真源）；本地重写一份测的就不是线上逻辑
+import { isDangerous } from "./index.mjs";
 
 const legal = [
   "git commit -m \"fix: update docs\"",
   "rm file.txt",
   "rm -r build",
+  "rm -r --interactive build", // 递归但无强制（-f/--force），交互确认，放行
+  "git rm -r --cached .", // git rm 非 rm，且无强制组合
   "git push origin main",
   "git push --force-with-lease origin main",
   "Remove-Item temp.log",
   "del /q file.txt",
   "dd if=backup.img of=disk.img",
+  "sudo ls /root", // sudo 前缀本身合法
   "npm run shutdown-handler-test", // 子串含 shutdown，放行
   "Write-Host \"server will halt soon\"", // 字符串含 halt，放行
   "echo \"please do not reboot the server\"", // 字符串含 reboot，放行
   "Get-Content format-guide.md",
-  "node script.js --force-clean", // 含 --force 但非 git push
+  "node script.js --force-clean", // 含 --force 但非 git push / rm
 ];
 
 const dangerous = [
   "rm -rf /",
   "rm -fr node_modules",
+  "rm -r -f /", // flag 分写两个 token
+  "rm --recursive --force ~", // 长选项组合
+  "sudo rm -rf /tmp/x", // 提权前缀 + 递归强制
   "rmdir /s /q C:\\temp",
   "rd /s D:\\foo",
   "del /f /s /q *.*",
@@ -43,6 +42,8 @@ const dangerous = [
   "git push --force origin main",
   "git push -f origin main",
   "shutdown /s",
+  "sudo shutdown now", // 提权前缀的关机
+  "doas reboot", // doas 变体
   "reboot now",
   "halt -p",
   "shutdown.exe /s /t 0", // .exe 变体
@@ -51,6 +52,7 @@ const dangerous = [
   "mkfs.ext4 /dev/sda1",
   "dd if=img.iso of=/dev/sdb",
   "format c: /q",
+  "format /FS:NTFS D:", // Windows 开关在前、盘符在后
   ":(){ :|:& };:",
 ];
 

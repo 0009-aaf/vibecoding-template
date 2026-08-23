@@ -23,7 +23,7 @@
  * 注：M04/M05/M09/M14/M15 历史声明未实现，已从检查项中移除，避免假安全感。
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -64,28 +64,29 @@ const PROTECTED_REGIONS = [
 
 const cwd = process.cwd();
 
-function tryExec(cmd) {
+// git 子命令统一走参数数组（execFileSync 不经 shell），杜绝文件名等外部输入的命令注入
+function gitOutput(args) {
   try {
-    return execSync(cmd, { cwd, encoding: 'utf8', stdio: 'pipe' });
+    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: 'pipe' });
   } catch (e) {
     return null;
   }
 }
 
 function getStagedFiles() {
-  const out = tryExec('git diff --cached --name-only');
+  const out = gitOutput(['diff', '--cached', '--name-only']);
   if (!out) return [];
   return out.trim().split('\n').filter(Boolean);
 }
 
 function getAllTrackedFiles() {
-  const out = tryExec('git ls-files');
+  const out = gitOutput(['ls-files']);
   if (!out) return [];
   return out.trim().split('\n').filter(Boolean);
 }
 
 function isGitRepo() {
-  return tryExec('git rev-parse --git-dir') !== null;
+  return gitOutput(['rev-parse', '--git-dir']) !== null;
 }
 
 function getFileContent(file) {
@@ -96,19 +97,23 @@ function getFileContent(file) {
   }
 }
 
+// M01 密钥模式（模块级导出：scripts/secret-matrix.mjs import 本数组做回归，避免手工双源漂移）
+const secretPatterns = [
+  /sk-[a-zA-Z0-9_-]{20,}/,           // API key (sk-xxx, 允许 - 和 _)
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----/, // PEM private key
+  /(?:api[_-]?key|password|secret|access[_-]?token|token)\s*"?\s*[:=]\s*["'][^"']{12,}["']/i, // key=value（12+字符降低误报；"? 兼容 JSON 键 `"access_token": "..."`）
+];
+
 // M01: 密钥扫描
 function checkSecrets(files) {
-  const secretPatterns = [
-    /sk-[a-zA-Z0-9_-]{20,}/,           // API key (sk-xxx, 允许 - 和 _)
-    /-----BEGIN [A-Z ]*PRIVATE KEY-----/, // PEM private key
-    /(?:api[_-]?key|password|secret|access[_-]?token|token)\s*"?\s*[:=]\s*["'][^"']{12,}["']/i, // key=value（12+字符降低误报；"? 兼容 JSON 键 `"access_token": "..."`）
-  ];
   // 排除测试文件和 mock 文件
   const testFilePattern = /\.(test|spec)\.(js|ts|tsx|jsx)$|\/(mock|fixture|__mocks__)\//i;
   const issues = [];
   for (const file of files) {
     if (testFilePattern.test(file)) continue; // 跳过测试文件
-    if (!/\.(js|ts|tsx|jsx|py|json|yaml|yml|env|cfg|conf|ini)$/.test(file) && !file.endsWith('.env')) continue;
+    // basename 以 .env 开头即纳入（.env / .env.local / .env.production），防止最常见的密钥文件漏扫
+    const base = path.basename(file);
+    if (!/\.(js|ts|tsx|jsx|py|json|yaml|yml|env|cfg|conf|ini)$/.test(file) && !/^\.env/.test(base)) continue;
     const content = getFileContent(file);
     for (const pattern of secretPatterns) {
       const match = content.match(pattern);
@@ -130,8 +135,8 @@ function checkProtectedRegion(stagedFiles) {
       const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
       const regex = new RegExp('^' + escaped + '$');
       if (regex.test(file)) {
-        // 检查文件在 HEAD 是否存在（首次创建允许）
-        const existsInHead = tryExec(`git cat-file -e "HEAD:${file.replace(/\\/g, '/')}"`) !== null;
+        // 检查文件在 HEAD 是否存在（首次创建允许）；文件名经参数数组传入，不拼接 shell
+        const existsInHead = gitOutput(['cat-file', '-e', `HEAD:${file.replace(/\\/g, '/')}`]) !== null;
         if (existsInHead) {
           issues.push({ file, pattern });
         }
@@ -304,13 +309,18 @@ function runCoverageCheck() {
   for (const name of scriptNames) {
     let ok = true;
     let out = '';
+    // 键名经参数数组传入，不拼接 shell（脚本键名可含 shell 元字符）
+    // Windows 的 npm 是 .cmd 批处理，不走 shell 时需显式调用 npm.cmd
+    const runOpts = {
+      cwd,
+      encoding: 'utf8',
+      stdio: 'pipe',
+      timeout: 300000, // 5 分钟上限，超时视为失败
+    };
     try {
-      out = execSync(`npm run ${name}`, {
-        cwd,
-        encoding: 'utf8',
-        stdio: 'pipe',
-        timeout: 300000, // 5 分钟上限，超时视为失败
-      });
+      out = process.platform === 'win32'
+        ? execFileSync('npm.cmd', ['run', name], runOpts)
+        : execFileSync('npm', ['run', name], runOpts);
     } catch (e) {
       ok = false;
       out = (e.stdout || e.stderr || e.message || '').toString();
@@ -640,4 +650,9 @@ function main() {
   }
 }
 
-main();
+// 导出供 scripts/secret-matrix.mjs 做回归（import 时不执行闸门主流程）
+module.exports = { secretPatterns };
+
+if (require.main === module) {
+  main();
+}

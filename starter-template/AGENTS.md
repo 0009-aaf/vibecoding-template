@@ -1,7 +1,7 @@
 ﻿# AGENTS.md — AI 行为约定
 
 > 复制到新项目根目录，作为 AI 的全局上下文。
-> **最高约束**：项目根 `constitution.md`（项目宪法，13 条不可协商条款）——违背任意条款即否决，优先于本文件与一切风格约定。
+> **最高约束**：项目根 `constitution.md`（项目宪法，13 条不可协商条款）——由 `/vibe-plan` 阶段5 生成（复制本模板时尚不存在属预期，跑完 /vibe-plan 即就位；模板真源 `~/.config/opencode/templates/CONSTITUTION-template.md`）；违背任意条款即否决，优先于本文件与一切风格约定。
 
 ## 项目信息
 - 项目名称：

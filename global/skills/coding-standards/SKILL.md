@@ -1,13 +1,13 @@
 ---
 name: coding-standards
-description: 编码规范 v1.8（58 条核心规则）。每次编码任务开始前必读。核心底线：入口判空、精准修改、catch 必处理、异常不吞。语言专项已拆分到 coding-standards-{ts,python,api,vue,c,react,node,wx} 子 skill。
+description: 编码规范 v1.8（通用规则 80 条编号，B/C/CM/CX/D/EN/F/M/N/P/S/T 系列）。每次编码任务开始前必读。核心底线：入口判空、精准修改、catch 必处理、异常不吞。语言专项已拆分到 coding-standards-{ts,react,vue,html,node,python,c,api,shell,wx} 子 skill（路由表见 §六）。
 ---
 
 # 编码规范 v1.8
 
 > **CRITICAL**：每次编码任务开始前，先读取本文件。本文件会从每次踩坑中自动进化。
 >
-> 最后更新：2026-08-09 | 核心规则：58 条 | 版本：v1.8
+> 最后更新：2026-08-23 | 通用规则：80 条编号（各系列见 §一~五、§十二） | 版本：v1.8
 > 语言专项规则：见各 coding-standards-<lang> 子 skill（TS/Python/API/Vue/C/React/Node/WX）
 > 经验教训：见 vault `40_Knowledge/lessons-learned.md`
 >
@@ -23,7 +23,7 @@ description: 编码规范 v1.8（58 条核心规则）。每次编码任务开�
 | M2 | 踩坑后**立即**追加到 §七·经验教训，并同步 vault `40_Knowledge/lessons-learned.md` | Bug 修复 / 用户纠正 |
 | M3 | 新规则编号递增，标注日期和来源 | 追加规则时 |
 | M4 | 同类规则累积 ≥3 条 → 提炼为正式条目升入 §一~六 | 经验教训区同类 ≥3 |
-| M5 | 本文件与 `karpathy-guidelines` skill 互补：skill 管编码时的行为准则，本文件管具体技术规范 | 全程 |
+| M5 | 本文件与项目宪法 `constitution.md` 互补：宪法管不可协商行为底线（C1 判空/C2 精准修改/C3-C4 异常），本文件管具体技术规范 | 全程 |
 | M6 | 语言专项规则优先于通用规则，有冲突时以专项为准 | 多语言项目 |
 
 ---
@@ -125,14 +125,16 @@ description: 编码规范 v1.8（58 条核心规则）。每次编码任务开�
 
 | 语言/场景 | Skill | 触发条件 | 条数 |
 |-----------|-------|----------|------|
-| TypeScript | `coding-standards-ts` | `.ts`/`.tsx` 文件 | 10 |
-| React | `coding-standards-react` | `.jsx`/`.tsx` 组件 | 15 |
+| TypeScript | `coding-standards-ts` | `.ts` 文件（`.tsx` 优先加载 react） | 10 |
+| React | `coding-standards-react` | `.jsx`/`.tsx` 组件 | 3 |
 | Vue 3 | `coding-standards-vue` | `.vue` 文件 | 10 |
-| Node.js 后端 | `coding-standards-node` | Express/Koa/Fastify 入口 | 12 |
+| HTML/CSS | `coding-standards-html` | `.html`/`.css` 静态页 | 3 |
+| Node.js 后端 | `coding-standards-node` | Express/Koa/Fastify 入口 | 24 |
 | Python | `coding-standards-python` | `.py` 文件 | 9 |
 | C 语言 | `coding-standards-c` | `.c`/`.h` 文件 | 8 |
 | REST API | `coding-standards-api` | API 路由/controller | 9 |
-| 微信小程序 | `coding-standards-wx` | `.wxml` 文件 | 4 |
+| Shell/PowerShell | `coding-standards-shell` | `.sh`/`.ps1` 脚本 | 12 |
+| 微信小程序 | `coding-standards-wx` | `.wxml` 文件 | 16 |
 
 > 触发：Agent 检测到对应文件类型时自动 `skill("coding-standards-<lang>")`
 
@@ -175,8 +177,7 @@ description: 编码规范 v1.8（58 条核心规则）。每次编码任务开�
 
 ## 九、代码审查策略
 
-> 完整审查方法论见 `code-review-and-quality` skill（5 轴审查、三层阅读、Nx 边界、审查输出格式 RV1-RV4）。
-> 方法论细节见 [[2026-06-12-代码阅读与审查方法论]]
+> 审查输出格式见本文件 §九 RV1-RV4；方法论细节见 [[2026-06-12-代码阅读与审查方法论]]（vault）
 
 ### OpenAI Codex 最佳实践
 
