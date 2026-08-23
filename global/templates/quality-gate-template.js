@@ -387,7 +387,37 @@ function checkArchitectureCompleteness() {
   return { skipped: false, issues };
 }
 
-// === 主流程 ===
+// G06: 文档完备性检查（vibe 工作流项目）
+// 校验项目级规范文档已生成且非空（docs/06-CODING-STANDARDS.md、docs/06-RUNBOOK.md）。
+// 反臃肿/防误伤原则：
+//   - 非 vibe 项目（无 PRD/ARCH）→ 跳过
+//   - 只检查"文件存在且非空占位"，不校验内容质量（G05 已管架构内容）
+//   - RUNBOOK 允许 v0 占位（plan 阶段生成、implement 后修正）；CODING-STANDARDS 必须含命名规则
+function checkDocumentationCompleteness() {
+  const arch = getFileContent('docs/02-ARCHITECTURE.md');
+  const prd = getFileContent('docs/01-PRD.md');
+
+  // 非 vibe 项目 → 跳过，不误伤（与 G05 同口径）
+  if (!arch && !prd) return { skipped: true, issues: [] };
+
+  const issues = [];
+  const standards = getFileContent('docs/06-CODING-STANDARDS.md');
+  const runbook = getFileContent('docs/06-RUNBOOK.md');
+
+  // G06.1: CODING-STANDARDS 存在且含实际命名规则（非空模板占位）
+  if (!standards) {
+    issues.push({ type: 'missing-standards', msg: 'docs/06-CODING-STANDARDS.md 不存在（vibe 项目须产出项目级代码规范）' });
+  } else if (!/N\d/.test(standards) && !/命名/.test(standards)) {
+    issues.push({ type: 'standards-empty', msg: 'docs/06-CODING-STANDARDS.md 缺少命名规范内容（疑似空占位）' });
+  }
+
+  // G06.2: RUNBOOK 存在（允许占位——plan 阶段生成）
+  if (!runbook) {
+    issues.push({ type: 'missing-runbook', msg: 'docs/06-RUNBOOK.md 不存在（vibe 项目须产出运行/环境/部署文档）' });
+  }
+
+  return { skipped: false, issues };
+}
 
 function main() {
   // M07: SKIP_VIBE_GATE
@@ -532,6 +562,21 @@ function main() {
       code: 'G05',
       name: '架构完备性（NFR/十维度选型/ADR 缺失）',
       issues: archCheck.issues,
+    });
+  } else {
+    checks.pass++;
+  }
+
+  // G06: 文档完备性（vibe 项目强制，非 vibe 项目跳过）
+  const docCheck = checkDocumentationCompleteness();
+  if (docCheck.skipped) {
+    checks.pass++; // 非 vibe 项目，无文档检查依据
+  } else if (docCheck.issues.length > 0) {
+    checks.block++;
+    blockers.push({
+      code: 'G06',
+      name: '文档完备性（CODING-STANDARDS/RUNBOOK 缺失）',
+      issues: docCheck.issues,
     });
   } else {
     checks.pass++;
