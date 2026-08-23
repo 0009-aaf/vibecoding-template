@@ -7,6 +7,7 @@
 
 ### Added
 - **文档规范体系**（ADR-004）：`docs/00-DOC-STANDARD.md`（编号白名单/必备四件/内容规范/反臃肿）+ 模板；check-sync 新增 S6 文档结构校验（野编号/四件缺失即阻断，实测拦截）
+- **check-sync S7：skill 路由完整性 + 引用存在性机器校验**——S7a 总纲路由表（含 description 花括号枚举）与 `global/skills/` 实际目录双向比对（悬空/孤儿均阻断）；S7b 全仓 markdown 的 `` `X` skill`` / `skill("X")` 引用必须真实存在（与 S3 命令引用同构）。已注入自测：孤儿目录与悬空引用均检出、参数化写法无误报。同步清理 3 处历史悬空引用（coding-standards M5 改指 constitution、§九改自引用 RV1-RV4、DoD-template 改指宪法 C2）
 - **项目宪法** `constitution.md`（ADR-005）：13 条不可协商条款自既有约定提炼；starter AGENTS 顶部引用 + vibe-plan/spec/implement/audit 四命令守卫注入"违背即否决"；变更须 ADR
 - **界面设计文档体系**（ADR-005）：DESIGN-template（设计令牌/页面清单/组件复用/交互五态/响应式/无障碍基线 8 章）→ vibe-plan 阶段4 生成 `docs/09-DESIGN.md`；G05.6 门禁（判定与 M18 共用 isUiFile）；audit 视觉走查清单；UI 切片 spec 强制引用 09-DESIGN 条目
 - **04-CONTRACTS 独立模板**：补结构性欠账（此前结构仅内嵌命令文本）；含全局错误码注册表（`<域>-<三位数>`，禁私造/禁复用语义）+ 端点契约含错误码与性能预算
@@ -18,6 +19,14 @@
 
 ### Fixed
 - 存量文档合规整改：01-PRD/02-ARCHITECTURE 补引言 blockquote、03-STATUS 补引言、06-RUNBOOK/08-CODING-STANDARDS 补变更记录、RUNBOOK/CODING-STANDARDS 模板补变更记录占位（S6 上线即发现）
+- **安全（P1）**：quality-gate M02/M17 命令注入修复——staged 文件名与 npm 脚本键名全部改 `execFileSync` 参数数组（不经 shell），三副本同步；M01 密钥扫描补 `.env*` 前缀文件（`.env.local` 等此前漏扫）；`secretPatterns` 提升为模块级导出（`require.main` 守卫，import 不执行主流程）
+- **安全（P1）**：clawd-bridge 权限转发 token 先发后验证 → verify-before-send——含 `bridge_token` 的 `/permission` 请求仅在端口已通过 Clawd 身份验证后发送（冷启动先发无 token 探针），state 广播维持先发后验证（无敏感内容）
+- **安全**：guard 补三类日常写法漏拦——`rm -r -f /`（flag 分写/`--recursive --force` 长选项组合）、`sudo/doas` 前缀关机命令、`format /FS:NTFS D:`（开关前置变体）；矩阵扩容至 16 合法 + 22 危险全绿，并改为 import 单一真源 `isDangerous`（删除本地重写副本）
+- **文档对齐**：README 快速开始路径修正（`scripts/sync-global.ps1`）与计数口径统一（16 Skill）；02-ARCHITECTURE §2 目录树刷新为实际结构、§6/§7/§8 重排对齐 ARCH-template（新增库清单/命名约定含术语表/测试策略，原浏览器验证/并行安全/验证降级收编为 §8 子节）——constitution C6、00-DOC-STANDARD X3、vibe-implement §6/§8、07-SECURITY 引用全部落地；00-DOC-STANDARD 补 04-CONTRACTS 与 DoD 缺席规则（与 09 缺席同构）；starter AGENTS 标注 constitution 的 /vibe-plan 生成来源
+- **命令/skill 对齐**：vibe-implement 清除已删除门禁 M14/M15 悬空引用（改为 M16 库清单边界）；coding-standards 路由表补 shell/html 两个孤儿子 skill + 全部条数修正（react 15→3、node 12→24、wx 4→16、总纲 58→80 编号）；architecture-designer/selection 触发词互斥（"技术选型"归 selection，designer 改文档产出类触发词）；vibe-README 补 frontmatter description（满足 08 D1）
+- **跨平台**：check-sync S4 改 `os.homedir()`（原 `USERPROFILE` 在非 Windows 退化为相对路径、检查静默失效）
+- **可观测**：vibe-gate gate 执行加 10 分钟超时（防脚本挂起阻塞 commit）；成功时回显输出尾部（check-sync 警告/quality-gate 警告项此前不可见）
+- **单一真源**：secret-matrix 改为 import quality-gate 导出的 `secretPatterns`（消除正则手工双源——正是该矩阵注释自己警告的"假验证"模式）
 
 ### Changed
 - vibe-plan 阶段4 定视觉产出升级：从"写入 PRD §2"改为生成 09-DESIGN.md（PRD §2 收敛为方向 + 指向）

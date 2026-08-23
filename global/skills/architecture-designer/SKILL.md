@@ -1,6 +1,6 @@
 ---
 name: architecture-designer
-description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录分层、数据模型、服务端边界、Protected Region 标记。使用场景：/vibe-plan 的架构设计阶段（打地基）。触发词："出架构"、"设计架构"、"技术选型"、"定技术栈"
+description: 根据 PRD 输出轻量化架构方案，包含技术栈、目录分层、数据模型、服务端边界、Protected Region 标记。使用场景：/vibe-plan 的架构设计阶段（打地基）。触发词："出架构"、"设计架构"、"写架构文档"、"定目录分层"（选型类触发词归 architecture-selection：先选型后出文档）
 ---
 
 # 架构设计器

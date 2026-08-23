@@ -48,6 +48,7 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-global.ps1
 | `global/`（commands/skills/templates/plugins） | `~/.config/opencode/` | 仓库变更合入后 | check-sync 检查 4 + sync-global.ps1 自检 |
 | `global/skills/architecture-designer` | `global/templates/ARCH-template.md` | 任一侧改动后 | check-sync 检查 5（sync-hash 标记） |
 | `global/commands/*` 引用的命令/文件 | 实际文件 | 引用增删后 | check-sync 检查 3 |
+| `global/skills/coding-standards` 路由表 + 全仓引用的 skill 名 | 实际 skill 目录 | skill 增删/路由改动后 | check-sync 检查 7（路由双向比对 + 引用存在性） |
 
 ## 5. 部署（新机器初始化）
 

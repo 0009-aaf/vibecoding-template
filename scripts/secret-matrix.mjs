@@ -3,15 +3,11 @@
 // 运行: node scripts/secret-matrix.mjs
 // 期望: 误报 = 0/10  漏网 = 0/8（矩阵必须全绿才能认为 M01 有效）
 //
-// ⚠️ 单一真源警告：本脚本的 secretPatterns 必须与 quality-gate.js checkSecrets()
-// 中的正则**同步维护**。改动 M01 正则时必须同步更新本文件，否则矩阵测的是旧逻辑，
-// 属于"写了就当有用"的假验证。guard 侧同类回归见 global/plugins/guard/guard-matrix.mjs。
+// 正则真源：直接 import quality-gate.js 导出的 secretPatterns（单一真源）——
+// 改 M01 正则只改 quality-gate 一处，本矩阵自动跟随，消除手工双源"假验证"。
+// guard 侧同类回归见 global/plugins/guard/guard-matrix.mjs。
 
-const secretPatterns = [
-  /sk-[a-zA-Z0-9_-]{20,}/, // API key (sk-xxx)
-  /-----BEGIN [A-Z ]*PRIVATE KEY-----/, // PEM private key
-  /(?:api[_-]?key|password|secret|access[_-]?token|token)\s*"?\s*[:=]\s*["'][^"']{12,}["']/i, // key=value（12+ 字符降误报；"? 兼容 JSON 键 `"access_token": "..."`）
-];
+import { secretPatterns } from '../.opencode/quality-gate.js';
 
 function scan(content) {
   for (const p of secretPatterns) {

@@ -10,7 +10,9 @@
 | 命名 | `docs/NN-NAME.md`，NN 两位数字 = vibe-plan 生成顺序，NAME 大写英文 |
 | 现行编号表 | 00-DOC-STANDARD（本文件）/ 01-PRD / 02-ARCHITECTURE / 03-STATUS / 04-CONTRACTS / 05-DECISIONS / 06-RUNBOOK / 07-SECURITY / 08-CODING-STANDARDS / 09-DESIGN |
 | 编号增删 | 新文档续用下一个空闲编号；编号与文件名一经发布不回收不复用（防引用断链） |
-| 09 缺席 | 纯后端项目允许无 09-DESIGN（须在 02-ARCHITECTURE §1 或 PRD §3 说明"无 UI"） |
+| 09 缺席 | 纯后端项目允许无 09-DESIGN（须在 02-ARCHITECTURE §1 或 PRD 说明"无 UI"） |
+| 04 缺席 | 无跨端契约的项目（纯 CLI/配置/嵌入式单机）允许无 04-CONTRACTS（须在 02-ARCHITECTURE §4 说明"无服务端边界"）；本仓库 dogfood 即此情形 |
+| DoD 缺席 | 无切片交付的仓库（模板/配置类）允许无 docs/DoD.md，跨阶段底线由 constitution 承载；应用项目由 /vibe-plan 阶段5 生成（本仓库 dogfood 即此情形，模板真源在 `global/templates/DoD-template.md`） |
 | 无编号白名单 | `DoD.md`（跨阶段底线）/ `TECH-DEBT.md`（implement 增量）/ `CHANGELOG.md`（项目根，面向使用者）/ `constitution.md`（项目根，最高约束）——四者不入编号体系，各有归属理由 |
 
 ## 2. 结构规范（每份 plan 期文档必备四件）
@@ -62,3 +64,4 @@
 | 日期 | 变更 | 原因 |
 |---|---|---|
 | 2026-08-23 | 初版（模板 + 本仓库 dogfood 同步落地） | 文档规范性体系化（ADR-004） |
+| 2026-08-23 | 补 04-CONTRACTS 与 DoD 缺席规则（与 09 缺席同构）；09 缺席说明位置放宽为"PRD（不限定节号）" | 全量审查 A3/A5：元规范对 dogfood 自身文件缺席无解释，C12/关系表引用悬空 |
