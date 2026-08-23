@@ -71,3 +71,9 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-global.ps1
 - quality-gate.js 自身在 Protected Region（M02）内：更新三份副本需 `SKIP_VIBE_GATE=1` 提交并在 message 说明
 - `.opencode/node_modules/` 存在历史残留（zod），package.json 未声明——重装即可清理
 - sync-global.ps1 的 checks.py 自检依赖本机 harness 路径，新机器用 `-SkipCheck` 跳过
+
+## 变更记录
+
+| 日期 | 变更 | 原因 |
+|---|---|---|
+| 2026-08-23 | 初版 | 文档生命周期补强（G06 门禁项） |

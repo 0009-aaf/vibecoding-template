@@ -74,3 +74,9 @@
 | 全量通用规范（58 条） | `global/skills/coding-standards/SKILL.md` |
 | 语言专项 | `global/skills/coding-standards-{ts,react,node,python,vue,c,api,html,shell,wx}/` |
 | 经验教训 | vault `40_Knowledge/lessons-learned.md`（本机踩坑教训） |
+
+## 变更记录
+
+| 日期 | 变更 | 原因 |
+|---|---|---|
+| 2026-08-23 | 初版 | 文档生命周期补强（G06 门禁项） |

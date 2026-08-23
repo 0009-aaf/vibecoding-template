@@ -27,22 +27,25 @@
 
 ```
 vibecoding-template/
+├── constitution.md       # ★ 项目宪法（13 条不可协商条款，违背即否决）
 ├── starter-template/     # ★ 项目脚手架（复制到新项目）
-│   ├── AGENTS.md         # AI 行为约束
+│   ├── AGENTS.md         # AI 行为约束（顶部引用宪法）
 │   ├── README.md
-│   ├── docs/             # 01-PRD / 02-ARCH / 03-STATUS / 04-CONTRACTS / 05-DECISIONS /
-│   │                     # 06-RUNBOOK / 07-SECURITY / 08-CODING-STANDARDS / DoD / TECH-DEBT
+│   ├── docs/             # 00-DOC-STANDARD / 01-PRD / 02-ARCH / 03-STATUS / 04-CONTRACTS /
+│   │                     # 05-DECISIONS / 06-RUNBOOK / 07-SECURITY / 08-CODING-STANDARDS /
+│   │                     # 09-DESIGN / DoD / TECH-DEBT
 │   ├── slices/
 │   └── .opencode/quality-gate.js  # G05/G06 门禁（提交前校验）
 ├── global/               # ★ 全局镜像（同步到 ~/.config/opencode）
 │   ├── skills/           # 16 Skill 真源：5 方法 skill + coding-standards 族 ×11
 │   ├── commands/         # 7 命令真源：vibe-plan … vault-sync（+5 Agent Team 命令）
-│   ├── templates/        # ARCH / DoD / SECURITY / RUNBOOK / CODING-STANDARDS / quality-gate 模板
+│   ├── templates/        # DOC-STANDARD / ARCH / DoD / SECURITY / DESIGN / CONTRACTS /
+│   │                     # RUNBOOK / CODING-STANDARDS / CONSTITUTION / quality-gate 模板
 │   └── plugins/          # vibe-gate（commit 前门禁 + 漂移检测）等插件
 ├── scripts/
 │   ├── sync-global.ps1   # 自动同步 global/ → ~/.config/opencode
-│   └── check-sync.mjs    # 漂移检测器（多副本一致/引用存在性，commit 前强制）
-└── docs/                 # 本仓库自身的 PRD / 架构 / 状态（Dogfood）
+│   └── check-sync.mjs    # 漂移检测器（S1-S6：多副本/引用/双源/文档结构，commit 前强制）
+└── docs/                 # 本仓库自身的全套文档（Dogfood）
 ```
 
 ## 快速开始

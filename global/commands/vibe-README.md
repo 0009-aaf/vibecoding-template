@@ -7,7 +7,7 @@
 
 | 命令 | 一句话职责 | 调用时机（When to Use） | 前置要求 |
 |---|---|---|---|
-| `/vibe-plan <需求>` | 项目启动：导需求 → PRD → 架构 → 安全基线 → 契约 → DoD → quality-gate | **新项目 / 大功能**，还没有 docs/ 时 | 无（问答式收集需求） |
+| `/vibe-plan <需求>` | 项目启动：导需求 → PRD → 架构 → 安全基线 → 界面设计 → 契约 → DoD → 宪法/规范 → quality-gate | **新项目 / 大功能**，还没有 docs/ 时 | 无（问答式收集需求） |
 | `/vibe-spec` | 拆切片：PRD+架构 → 垂直切片 + 依赖图 + 每切片 spec | plan 完成后，要开始实现前 | `docs/01-PRD.md` + `docs/02-ARCHITECTURE.md` |
 | `/vibe-implement <编号> [--fast\|--full\|--loop]` | 实现一个切片：测试 → 实现 → 闸门 → CHANGELOG/技术债登记 → 验收 → 合并 | **切片就绪后**（依赖已完成） | spec.md + CONTRACTS.md + quality-gate.js |
 | `/vibe-audit` | 提交前审计：密钥/契约/范围/文档/测试/UI/诊断痕迹/安全基线/技术债对账/漂移 + **DoD 双闸门** | **合并前**，或 rebase 后 | 至少一个切片处于待验收 |
@@ -53,6 +53,8 @@
 | 反合理化表 ×4 | addyosmani | implement 阶段2a/2b/3/5 | 防"跳过步骤"的最后防线 |
 | DoD 双闸门 | addyosmani | implement 阶段5 + audit | DoD 定稿后不重谈 |
 | 渐进披露 | claude-mem | status 稠密轨 | 只显索引行，回复"展开 <层> 详情"读详情 |
+| 项目宪法 constitution.md | Spec Kit | vibe-plan 阶段5 生成 + 4 命令守卫 | 13 条不可协商，违背即否决；变更须 ADR（C13） |
+| 文档结构规范（00-DOC-STANDARD） | — | check-sync S6（commit 前） | 编号白名单/H1/引言/变更记录四件 |
 | 质量闸门强制 | — | **git commit 前**（vibe-gate hook） | 非 vibe 项目放行；`SKIP_VIBE_GATE=1` 逃生阀 |
 
 ## 周边组件关系
@@ -62,8 +64,9 @@
 │                            另有 5 个 Agent Team 命令（focus-* / plan-design / execution-plan）
 ├─ skills/                   方法 skill（prd-generator / architecture-designer / slice-spec-writer /
 │                            architecture-selection / e2e-verifier / coding-standards 族 ×11）
-├─ templates/                PRD / ARCH / DoD / SECURITY / RUNBOOK / CODING-STANDARDS /
-│                            quality-gate 模板（/vibe-plan 复制生成）
+├─ templates/                DOC-STANDARD / ARCH / DoD / SECURITY / DESIGN / CONTRACTS /
+│                            RUNBOOK / CODING-STANDARDS / CONSTITUTION / quality-gate 模板
+│                            （/vibe-plan 复制生成；ARCH 与 skill 双源由 sync-hash 校验）
 ├─ plugins/vibe-gate/        commit 前强制 quality-gate 的 hook plugin（+ check-sync 漂移检测）
 ├─ scripts/check-sync.mjs    多副本/引用漂移检测（commit 前 + /vibe-audit）
 └─ ~/.claude/harness/tasks/vibe-command-structure/

@@ -14,6 +14,7 @@
  *   S3 命令引用真实存在（/xxx 必须有 global/commands/xxx.md 或在 EXTERNAL_COMMANDS 白名单）
  *   S4 global/ 与 ~/.config/opencode 副本哈希对比（警告级：部署是手动动作，不阻断）
  *   S5 ARCH-template 与 architecture-designer 双源 sync-hash 标记相等
+ *   S6 文档结构校验（docs/00-DOC-STANDARD：编号白名单/H1/引言/变更记录）
  *
  * 退出码：0 = 通过（可含警告），1 = 存在漂移（阻断）。
  * 逃生阀：SKIP_CHECK_SYNC=1 跳过全部检查（须在 commit message 说明原因）。
@@ -213,14 +214,90 @@ function checkDeployedSync() {
   return { warnings };
 }
 
-// === S5: ARCH-template 与 architecture-designer 双源 sync-hash ===
+// S5: ARCH-template 与 architecture-designer 双源 sync-hash
+// （双源对清单——新增双源镜像时在此追加）
+const SYNC_HASH_PAIRS = [
+  ['global/templates/ARCH-template.md', 'global/skills/architecture-designer/SKILL.md'],
+];
+
+// === S6: 文档结构校验（docs/00-DOC-STANDARD） ===
+
+// 编号白名单（见 00-DOC-STANDARD §1）：docs/ 下出现白名单外的 NN- 前缀文件即漂移
+const DOC_NUMBER_WHITELIST = new Set([
+  '00-DOC-STANDARD', '01-PRD', '02-ARCHITECTURE', '03-STATUS', '04-CONTRACTS',
+  '05-DECISIONS', '06-RUNBOOK', '07-SECURITY', '08-CODING-STANDARDS', '09-DESIGN',
+]);
+
+// 变更记录例外（00-DOC-STANDARD S4）：变更由文档自身机制承载
+const CHANGELOG_EXEMPT = new Set(['03-STATUS', '04-CONTRACTS', '05-DECISIONS']);
+
+// 模板侧变更记录/sync-hash 例外（DoD：定稿不重谈走 ADR；CONTRACTS：变更由 @slice 标记承载）
+const TEMPLATE_EXEMPT = new Set(['DoD-template.md', 'CONTRACTS-template.md']);
+
+// 围栏感知扫描：跳过 ``` 代码块内的行（防把 bash 注释/h1 样例误判为正文结构）
+function scanMarkdownStructure(text) {
+  const lines = text.split(/\r?\n/);
+  let inFence = false;
+  const structural = [];
+  for (const line of lines) {
+    if (/^```/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence) structural.push(line);
+  }
+  return structural;
+}
+
+function checkDocStructure() {
+  const issues = [];
+  const docsDir = path.join(repoRoot, 'docs');
+  if (!fs.existsSync(docsDir)) return { issues, docs: 0 };
+  const files = fs.readdirSync(docsDir).filter((f) => f.endsWith('.md'));
+  for (const name of files) {
+    const base = name.replace(/\.md$/, '');
+    // S6a: 编号白名单（防野编号）
+    if (/^\d\d-/.test(name) && !DOC_NUMBER_WHITELIST.has(base)) {
+      issues.push(`docs/${name}: 编号不在白名单（见 docs/00-DOC-STANDARD.md §1，新文档续用空闲编号）`);
+    }
+    if (!/^\d\d-/.test(name)) continue; // 无编号文件（DoD/TECH-DEBT 等）不查四件
+    const lines = scanMarkdownStructure(readText(path.join(docsDir, name)) || '');
+    // S6b: H1 恰好一个
+    const h1Lines = lines.filter((l) => /^# [^\s]/.test(l));
+    const h1Idx = lines.findIndex((l) => /^# [^\s]/.test(l));
+    if (h1Lines.length !== 1) {
+      issues.push(`docs/${name}: H1 标题数量=${h1Lines.length}（须恰好 1 个）`);
+      continue;
+    }
+    // S6c: H1 后 3 行内引言 blockquote
+    const introWindow = lines.slice(h1Idx + 1, h1Idx + 4);
+    if (!introWindow.some((l) => l.startsWith('>'))) {
+      issues.push(`docs/${name}: 缺引言 blockquote（H1 后 3 行内，见 00-DOC-STANDARD S2）`);
+    }
+    // S6d: 变更记录（例外清单）
+    if (!CHANGELOG_EXEMPT.has(base) && !lines.some((l) => /^##\s*(\d+[.、]\s*)?变更记录/.test(l))) {
+      issues.push(`docs/${name}: 缺"## 变更记录"章节（见 00-DOC-STANDARD S4）`);
+    }
+  }
+  // S6e: 模板侧变更记录占位或 sync-hash 标记
+  const templatesDir = path.join(repoRoot, 'global', 'templates');
+  if (fs.existsSync(templatesDir)) {
+    for (const name of fs.readdirSync(templatesDir)) {
+      if (!name.endsWith('.md') || TEMPLATE_EXEMPT.has(name)) continue;
+      const lines = scanMarkdownStructure(readText(path.join(templatesDir, name)) || '');
+      const hasChangelog = lines.some((l) => /^##\s*(\d+[.、]\s*)?变更记录/.test(l));
+      const raw = readText(path.join(templatesDir, name)) || '';
+      if (!hasChangelog && !/<!--\s*sync-hash:/.test(raw)) {
+        issues.push(`global/templates/${name}: 缺变更记录占位或 sync-hash 标记（模板侧规范）`);
+      }
+    }
+  }
+  return { issues, docs: files.length };
+}
 
 function checkSyncHash() {
-  const pairs = [
-    ['global/templates/ARCH-template.md', 'global/skills/architecture-designer/SKILL.md'],
-  ];
   const issues = [];
-  for (const [a, b] of pairs) {
+  for (const [a, b] of SYNC_HASH_PAIRS) {
     const textA = readText(path.join(repoRoot, a));
     const textB = readText(path.join(repoRoot, b));
     const hashA = textA ? textA.match(/<!--\s*sync-hash:\s*(\d+)\s*-->/) : null;
@@ -255,6 +332,8 @@ function main() {
   if (s3.issues.length > 0) blockers.push({ code: 'S3', name: '悬空命令引用', issues: s3.issues });
   const s5 = checkSyncHash();
   if (s5.issues.length > 0) blockers.push({ code: 'S5', name: '双源 sync-hash 漂移', issues: s5.issues });
+  const s6 = checkDocStructure();
+  if (s6.issues.length > 0) blockers.push({ code: 'S6', name: '文档结构不符合 00-DOC-STANDARD', issues: s6.issues });
   const s4 = checkDeployedSync();
   if (s4.warnings.length > 0) warnings.push({ code: 'S4', name: '全局部署滞后（运行 sync-global.ps1）', issues: s4.warnings });
 
@@ -267,6 +346,7 @@ function main() {
   console.log(`[S3] 命令引用存在性: ${s3.issues.length ? '❌' : '✅'}（现有命令 ${s3.existingCount} 个 + 外部白名单 ${EXTERNAL_COMMANDS.size} 个）`);
   console.log(`[S4] 全局部署同步: ${s4.warnings.length ? '⚠️  ' + s4.warnings.length + ' 项滞后' : '✅'}${s4.note ? '（' + s4.note + '）' : ''}`);
   console.log(`[S5] 双源 sync-hash: ${s5.issues.length ? '❌' : '✅'}`);
+  console.log(`[S6] 文档结构规范: ${s6.issues.length ? '❌' : '✅'}（docs ${s6.docs} 份 + 模板侧）`);
 
   if (blockers.length > 0) {
     console.log('\n❌ 阻断项：');
