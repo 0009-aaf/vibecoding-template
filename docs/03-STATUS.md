@@ -7,7 +7,7 @@
 - [x] 开发中（已落地）
 
 ## 上下文摘要
-- 上次做了什么：第二轮全量审查修复——术语统一十维度（§9 表 10 行 + G05 升级为 §9 段内十维检查，D1/D2/D3/D10 不再漏检）+ M18 UI 判定扩展 + M02 路径加引号 + 孤儿模板清理（删 PRD-template/decision-log，ARCH-template 对齐 skill 真源 §1–§10）+ 机器路径可移植化（blackboard → `~/.claude/harness/`，vault 路径改读 opencode.json 配置）+ audit 报告路径统一 `docs/reports/` + sync-global 修复 `-Exclude` 递归失效
-- 关键决策：5 个 Skill、7 个 vibe 命令移入全局 `~/.config/opencode/`；仓库新增 `global/` 真源镜像 + `scripts/sync-global.ps1` 支持从仓库恢复完整工作流；项目只保留双份 `quality-gate.js`（根 + starter-template，MD5 必须一致）；guard 误报/漏报矩阵落盘 `global/plugins/guard/guard-matrix.mjs`（DoD 防御必测）；模板权威清单 5→3（checks.py AUTHORITATIVE_TEMPLATES 同步）；选型口径与 ZCode 插件版（zcode-vibe-plugin v1.1.0）统一为十维度
-- 下一步：项目完成，可复制 starter-template/ 到新项目使用
+- 上次做了什么：文档生命周期补强 + 防漂移机制——①G06 文档完备性门禁同步到两份 quality-gate 副本（修复实测漂移）并新增 G05.5 安全基线校验；②docs 编号重排：06-RUNBOOK / 07-SECURITY（新增，vibe-plan 阶段3 生成）/ 08-CODING-STANDARDS（原 06 改名）；③vibe-implement 阶段4 新增 CHANGELOG 追加 + TECH-DEBT 登记（NOTICED BUT NOT TOUCHING 有了落点）；④新增 scripts/check-sync.mjs 五项漂移检测（S1 双指标：强制注册 ID + 配置区剥离哈希），vibe-gate 插件 commit 前强制执行；⑤coding-standards skill 族 11 个从 ~/.claude/skills/ 收编进 global/skills/（原部署位置 opencode 读不到）；⑥vibe-audit 新增安全基线对照/技术债对账/漂移检测三个独立检查项；⑦vibe-README 决策表收口（plan-design/execution-plan 与 vibe-plan 边界 + 外部命令白名单标注）
+- 关键决策：ADR-002 文档按生命周期分配（plan 产基线 / implement 增量维护）；ADR-003 防漂移机器校验（check-sync + vibe-gate 挂钩）。同步约定升级：quality-gate **三份一致**（模板源 + 根副本 + starter 副本，check-sync S1 强制），不再是"双份 MD5 人工约定"
+- 下一步：项目完成，可复制 starter-template/ 到新项目使用；仓库变更合入后运行 scripts/sync-global.ps1 部署全局
 - ⚠️ 重要提示：使用前确保全局 skills 和 commands 已就位（`~/.config/opencode/`，可从仓库 `global/` 用 `scripts/sync-global.ps1` 同步），复制 starter-template/ 到新项目根目录，修改 AGENTS.md

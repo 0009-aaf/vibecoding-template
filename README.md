@@ -15,10 +15,10 @@
 
 | 命令 | 阶段 | 产出 |
 |------|------|------|
-| `/vibe-plan` | 定图纸 | PRD + NFR + 架构初稿（docs/01-PRD.md、02-ARCHITECTURE.md） |
+| `/vibe-plan` | 定图纸 | PRD + NFR + 架构 + 安全基线（01-PRD / 02-ARCH / 07-SECURITY） |
 | `/vibe-spec` | 立规矩 | 切片规格（docs/04-CONTRACTS.md + slices/<n>/spec.md） |
-| `/vibe-implement` | 开发 | 切片实现 + 测试 + e2e 验证 |
-| `/vibe-audit` | 收尾 | 全量审查（维度：质量/架构一致性/文档同步/安全） |
+| `/vibe-implement` | 开发 | 切片实现 + 测试 + e2e 验证 + CHANGELOG/技术债登记 |
+| `/vibe-audit` | 收尾 | 全量审查（质量/架构一致性/文档同步/安全基线/技术债/漂移检测） |
 | `/vibe-status` | 查看 | 项目全貌：切片进度/活跃项/下一步 |
 | `/vibe-clean` | 维护 | 清理孤儿 worktree/分支/临时文件 |
 | `/vault-sync` | 同步 | 决策/教训写入 Obsidian Vault |
@@ -30,15 +30,18 @@ vibecoding-template/
 ├── starter-template/     # ★ 项目脚手架（复制到新项目）
 │   ├── AGENTS.md         # AI 行为约束
 │   ├── README.md
-│   ├── docs/             # 01-PRD / 02-ARCH / 03-STATUS / 04-CONTRACTS / 05-DECISIONS / DoD
+│   ├── docs/             # 01-PRD / 02-ARCH / 03-STATUS / 04-CONTRACTS / 05-DECISIONS /
+│   │                     # 06-RUNBOOK / 07-SECURITY / 08-CODING-STANDARDS / DoD / TECH-DEBT
 │   ├── slices/
-│   └── .opencode/quality-gate.js  # G05 门禁（提交前校验）
+│   └── .opencode/quality-gate.js  # G05/G06 门禁（提交前校验）
 ├── global/               # ★ 全局镜像（同步到 ~/.config/opencode）
-│   ├── skills/           # 5 Skill 真源：prd-generator / architecture-designer /
-│   │                     #        architecture-selection / slice-spec-writer / e2e-verifier
-│   ├── commands/         # 7 命令真源：vibe-plan … vault-sync
-│   ├── templates/        # ARCH-template / DoD-template / quality-gate-template
-│   └── sync-global.ps1   # 自动同步 global/ → ~/.config/opencode
+│   ├── skills/           # 16 Skill 真源：5 方法 skill + coding-standards 族 ×11
+│   ├── commands/         # 7 命令真源：vibe-plan … vault-sync（+5 Agent Team 命令）
+│   ├── templates/        # ARCH / DoD / SECURITY / RUNBOOK / CODING-STANDARDS / quality-gate 模板
+│   └── plugins/          # vibe-gate（commit 前门禁 + 漂移检测）等插件
+├── scripts/
+│   ├── sync-global.ps1   # 自动同步 global/ → ~/.config/opencode
+│   └── check-sync.mjs    # 漂移检测器（多副本一致/引用存在性，commit 前强制）
 └── docs/                 # 本仓库自身的 PRD / 架构 / 状态（Dogfood）
 ```
 
@@ -56,8 +59,9 @@ opencode /vibe-plan
 ## 核心机制（值得看的三个点）
 
 1. **成熟架构选择**：`architecture-selection` skill 内嵌 10 维选型目录（架构风格/前端/后端/数据库/缓存/高并发/事务/CI/CD/灾备/部署），每维带 ⭐ 推荐与优劣；`/vibe-plan` 强制加载 → 决策有据可查。
-2. **G05 门禁**：`quality-gate.js` 在提交前校验 NFR 是否量化、选型是否落地、ADR 是否可溯源，防"写了就当有用"。
-3. **Dogfooding**：本仓库自己就是按这套工作流跑的（docs/ 下即有 PRD + 架构 + 状态）。
+2. **G05/G06 门禁**：`quality-gate.js` 在提交前校验 NFR 是否量化、选型是否落地、ADR 是否可溯源、安全基线与规范文档是否生成，防"写了就当有用"。
+3. **防漂移机器校验**：`check-sync.mjs` 在 commit 前校验三份 quality-gate 一致、命令引用真实存在、双源模板 sync-hash 相等——同步约定不再靠自觉（ADR-003）。
+4. **Dogfooding**：本仓库自己就是按这套工作流跑的（docs/ 下即有 PRD / 架构 / 安全基线 / 状态 / 技术债登记）。
 
 ## 关键词 / Topics
 

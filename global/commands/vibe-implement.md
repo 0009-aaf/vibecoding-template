@@ -24,7 +24,7 @@ $ARGUMENTS
 #### fast 轻量路径（跳过 worktree 与 OS 锁，直接改 main）
 - **不做**：切片锁/合并锁、worktree 创建、rebase、原子合并流程（阶段6）
 - **仍执行**：阶段1 读契约 -> 阶段2b 写实现 -> 阶段3 全量测试 + quality-gate ->
-  阶段5 人类验收 -> 直接 commit + 更新 `docs/03-STATUS.md` + 清 blackboard SID
+  阶段4 CHANGELOG/技术债登记 -> 阶段5 人类验收 -> 直接 commit + 更新 `docs/03-STATUS.md` + 清 blackboard SID
   （`python ~/.claude/harness/blackboard.py archive <SID>`）
 - **测试要求**：fast 仅适用于"无新行为"的改动（文案/样式/配置/纯机械修改）。
   若改动引入新行为 -> 不满足 fast 条件，回退 `--full`/`--loop`（需写测试满足 DoD 红→绿）。
@@ -158,7 +158,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
     - API 路由 -> coding-standards-api
     - `.wxml` -> coding-standards-wx
 - **遵守契约**：函数签名、API 响应格式必须匹配 `docs/04-CONTRACTS.md`
-- **优先读项目规范**：若存在 `docs/06-CODING-STANDARDS.md`，以其为项目约束（冲突时项目文档 > skill 全量）；不存在则只用 skill
+- **优先读项目规范**：若存在 `docs/08-CODING-STANDARDS.md`，以其为项目约束（冲突时项目文档 > skill 全量）；不存在则只用 skill
 - **只能用库清单中批准的库**（`docs/02-ARCHITECTURE.md` §6）
 - **实现顺序（不可跳过，按依赖关系）**：
   1. `domain/schema.ts`（类型定义，无依赖）
@@ -189,7 +189,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
 #### 反合理化表（阶段2b：写实现）
 | 常见借口 | 现实 |
 |---|---|
-| "顺手把旁边文件也重构一下" | 混入范围外改动让 review 和回滚都变难；注意到的问题记下来，另开任务（NOTICED BUT NOT TOUCHING） |
+| "顺手把旁边文件也重构一下" | 混入范围外改动让 review 和回滚都变难；注意到的问题记入 `docs/TECH-DEBT.md` 另开任务（NOTICED BUT NOT TOUCHING），不当场动手 |
 | "这个抽象以后肯定用得上" | 为假想需求建抽象 = 过早抽象；三次使用需求出现前，用朴素实现（incremental Rule 0） |
 | "实现不按契约来，反正测试会过" | 契约是团队契约，测试只证明你过了自己的测试；契约漂移是架构债（J-Space 表征漂移） |
 | "逐层验证太慢，全部写完再跑" | 一个 bug 会在下游 3 层扩散，最后找不到是哪 500 行改坏的；逐层验证是省时间的 |
@@ -299,6 +299,15 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
   - 切片状态改为 `待验收`
   - 记录实现摘要（修改了哪些文件、测试覆盖率、验证结果）
 - 如果 `docs/03-STATUS.md` 不存在，先创建再写入
+- **追加 CHANGELOG 条目**（增量文档，归属 implement 不归属 plan）：
+  - `CHANGELOG.md` 不存在 -> 先创建（Keep a Changelog 格式：Unreleased 分组框架）
+  - 按 commit type 映射分组：feat -> Added / fix -> Fixed / refactor -> Changed
+  - 一行一条：`- <切片编号> <面向使用者的一句话变更>`（不写实现细节）
+- **技术债登记**（增量文档，归属 implement 不归属 plan）：
+  - 收集本切片的所有"注意到但未处理"项（NOTICED BUT NOT TOUCHING）与代码中新增的 TODO/TBD/FIXME/XXX 注释
+  - 逐条记入 `docs/TECH-DEBT.md`（不存在则创建表头）：
+    `| 日期 | 位置(文件:行) | 问题 | 影响 | 建议处理时机 |`
+  - 未登记的 TODO/TBD 会在 /vibe-audit 对账时列为缺陷
 
 ### 阶段5: 人类验收（调整）
 - **DoD 自检（进入验收前必须完成）**：
