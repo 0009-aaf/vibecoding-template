@@ -36,6 +36,7 @@ $ARGUMENTS
 
 ### 守卫
 若 $ARGUMENTS 为空 -> 列出 `slices/` 下所有待实现的切片，让用户选择
+全程约束：项目根 `constitution.md` 为最高约束，任何实现/提交违背其条款即否决重做
 
 ### 依赖检查
 - 读取 `slices/<编号>-<名称>/spec.md` 的"前置依赖"

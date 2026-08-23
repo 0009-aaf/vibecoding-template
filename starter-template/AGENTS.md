@@ -1,6 +1,7 @@
 ﻿# AGENTS.md — AI 行为约定
 
 > 复制到新项目根目录，作为 AI 的全局上下文。
+> **最高约束**：项目根 `constitution.md`（项目宪法，13 条不可协商条款）——违背任意条款即否决，优先于本文件与一切风格约定。
 
 ## 项目信息
 - 项目名称：
@@ -10,14 +11,16 @@
 - Obsidian vault：`~/.config/opencode/opencode.json` 中配置（`references.vault.path`）
 
 ## 核心文档
+- `docs/00-DOC-STANDARD.md` — 文档元规范（编号/结构/内容/引用规则，所有文档遵守）
 - `docs/01-PRD.md` — 需求与验收标准（含 §3.1 NFR）
 - `docs/02-ARCHITECTURE.md` — 架构方案（含 §9 十维度选型）
 - `docs/03-STATUS.md` — 项目状态（每次更新）
-- `docs/04-CONTRACTS.md` — 接口契约（/vibe-spec 生成，切片实现依据）
+- `docs/04-CONTRACTS.md` — 接口契约 + 全局错误码注册表（/vibe-spec 生成，切片实现依据）
 - `docs/05-DECISIONS.md` — ADR 决策记录（选型必记）
-- `docs/06-RUNBOOK.md` — 运行/环境/部署/回滚/备份（/vibe-plan 阶段5 生成，实现后修正）
+- `docs/06-RUNBOOK.md` — 运行/环境/部署/回滚/备份/日志追踪（/vibe-plan 阶段5 生成，实现后修正）
 - `docs/07-SECURITY.md` — 安全基线（/vibe-plan 阶段3 生成，与架构同生命周期，评审对照基准）
 - `docs/08-CODING-STANDARDS.md` — 项目级代码规范（/vibe-plan 阶段5 生成，冲突时优先于全局 skill）
+- `docs/09-DESIGN.md` — 界面设计（设计令牌/页面/组件/五态/响应式/无障碍，/vibe-plan 阶段4 生成，UI 切片唯一视觉依据）
 - `docs/DoD.md` — 项目级完成底线（/vibe-plan 生成，五段固定清单，切片完成须 AC ∩ DoD 双达标）
 - `docs/TECH-DEBT.md` — 技术债登记（/vibe-implement 阶段4 维护，NOTICED BUT NOT TOUCHING 的落点）
 - `CHANGELOG.md` — 面向使用者的变更记录（/vibe-implement 阶段6 commit 时追加）
