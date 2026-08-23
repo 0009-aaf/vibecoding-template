@@ -134,6 +134,7 @@ Task 6, Task 7 — 无文件冲突，同时派发
 
 ## 输出到 Obsidian
 执行方案完成后，写入 Obsidian vault：
-- 路径：`D:/learning/计算机/Obsidian Vault/_Team/plans/YYYY-MM-DD-执行方案标题.md`
+- Vault 路径：从 `~/.config/opencode/opencode.json` 的 `references.vault.path` 读取（未配置则询问用户），下记为 `{Vault}`
+- 路径：`{Vault}/_Team/plans/YYYY-MM-DD-执行方案标题.md`
 - 使用 `obsidian_create_note` 工具写入完整执行方案文档
-- 同时写入 session blackboard：`D:/learning/计算机/Obsidian Vault/_Team/sessions/{SID}/blackboard.md` 标记 `execution_status: planned`
+- 同时写入 session blackboard：`{Vault}/_Team/sessions/{SID}/blackboard.md` 标记 `execution_status: planned`

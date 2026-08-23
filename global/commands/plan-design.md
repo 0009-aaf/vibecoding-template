@@ -72,6 +72,7 @@ subtask: true
 
 ## 输出到 Obsidian
 方案文档完成后，写入 Obsidian vault：
-- 路径：`D:/learning/计算机/Obsidian Vault/30_Decisions/YYYY-MM-DD-方案标题.md`
+- Vault 路径：从 `~/.config/opencode/opencode.json` 的 `references.vault.path` 读取（未配置则询问用户），下记为 `{Vault}`
+- 路径：`{Vault}/30_Decisions/YYYY-MM-DD-方案标题.md`
 - 使用 `obsidian_create_note` 工具写入完整方案文档
-- 同时写入 session blackboard：`D:/learning/计算机/Obsidian Vault/_Team/sessions/{SID}/blackboard.md` 标记 `plan_status: done`
+- 同时写入 session blackboard：`{Vault}/_Team/sessions/{SID}/blackboard.md` 标记 `plan_status: done`

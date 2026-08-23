@@ -5,8 +5,8 @@ description: 审计命令：commit 前检查密钥扫描、契约一致性、变
 ## /vibe-audit - 提交前审计
 
 ### 会话隔离
-生成 SID = `audit-{今日日期}-{4位随机}`。注册：`python C:/Users/fms/.claude/harness/blackboard.py register <SID> "vibe-audit (<审查摘要>)"`
-> 会话异常中断时，需手动从 blackboard 清除本 SID：`python C:/Users/fms/.claude/harness/blackboard.py remove <SID>`
+生成 SID = `audit-{今日日期}-{4位随机}`。注册：`python ~/.claude/harness/blackboard.py register <SID> "vibe-audit (<审查摘要>)"`
+> 会话异常中断时，需手动从 blackboard 清除本 SID：`python ~/.claude/harness/blackboard.py remove <SID>`
 
 ### 守卫
 先检查项目根是否存在 `.opencode/quality-gate.js`：
@@ -90,15 +90,15 @@ DoD 行独立判定（不受 quality-gate 覆盖）；quality-gate.js 不存在 
 ```
 
 ### 报告持久化
-- 审计完成后，将报告写入文件：`references/audit-reports/YYYY-MM-DD-HHMM.md`
+- 审计完成后，将报告写入文件：`docs/reports/YYYY-MM-DD-HHMM.md`
   - 目录不存在则创建（`New-Item -ItemType Directory -Force` / `mkdir -p`）
   - 文件名用审计完成时间戳，避免覆盖
 - 文件内容 = 对话中输出的完整审计报告（含密钥/契约/范围/文档/测试/UI/诊断痕迹/DoD 各项结论）
-- 在对话中告知用户报告路径（"审计报告已保存到 references/audit-reports/..."）
+- 在对话中告知用户报告路径（"审计报告已保存到 docs/reports/..."）
 - 阻断型审计（❌ 需修复）也保存报告，方便用户对照修复
 
 ### 审计通过后
 - 如果本次变更有**架构决策/技术选型/PRD 变更**，运行 `/vault-sync` 同步到 Obsidian
 - 如果 `docs/` 有变更（PRD/架构/契约），审计报告会提示运行 `/vault-sync --sync-docs`
 - 如果只是代码实现（切片内无决策变更），不需要跑 vault-sync
-- 从 blackboard 移除本会话：`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`
+- 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py archive <SID>`
