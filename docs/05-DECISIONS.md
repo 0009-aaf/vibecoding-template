@@ -29,3 +29,21 @@
 - **Alternatives**: 继续 MD5 人工约定（已失效过一次）/ CI 远程校验（本地模板仓库无 CI 场景）
 - **Consequences**: + 漂移在 commit 时被拦截，S1 双指标连注释级行差异都能抓住（实测：故意漂移与历史遗留 // === 主流程 === 行差均命中）；- commit 路径多一次脚本执行（<1s）
 - **Verification**: 故意删副本检查项 ID → check-sync exit 1 并定位到文件；还原后 exit 0（已实测）
+
+## ADR-004: 文档规范体系化（00-DOC-STANDARD + S6 机器校验）
+
+- 日期: 2026-08-23 | 状态: Accepted
+- **Context**: 文档数量增长至 10 编号 + 4 无编号后，结构/编号/引用格式无成文规范，靠惯例维护必然漂移（编号冲突 06 双用已是先例）。
+- **Decision**: 编号 00 为元规范层：`docs/00-DOC-STANDARD.md` 定义编号体系（含白名单与无编号例外）、必备四件（H1/引言/编号章节/变更记录）、内容规范（数值带单位/不适用带理由/禁空洞词）、交叉引用与术语统一、反臃肿（章节 ≤10）；由 check-sync 新增 S6 强制（编号白名单防野编号、四件缺失即阻断、模板侧变更记录占位校验）。
+- **Alternatives**: 规范写在 AGENTS.md（与 AI 行为约定混杂，非文档规范专责）/ 不成文靠 review（已证明会漂移）
+- **Consequences**: + 新文档有统一模板与机器校验，存量 10 份已合规整改；- 新增文档多一道结构门槛（S6 即时反馈，成本低）
+- **Verification**: S6 上线即抓到 03-STATUS 缺引言与 CONTRACTS 模板缺占位两处真实问题；野编号文件（docs/10-TEST.md）实测 exit 1 拦截，清理后恢复
+
+## ADR-005: 引入界面设计文档（09-DESIGN）与项目宪法（constitution.md）
+
+- 日期: 2026-08-23 | 状态: Accepted
+- **Context**: 对照 Kiro（design.md 含 UI 节）与 GitHub Spec Kit（constitution.md 实践）发现两类缺口：视觉决策散落 PRD §2 几行字，AI 实现 UI 无一致性锚点；不可协商原则散落 AGENTS/DoD/反合理化表，无单一最高约束。
+- **Decision**: ①`docs/09-DESIGN.md`（设计令牌/页面清单/组件复用/交互五态/响应式/无障碍基线，vibe-plan 阶段4 生成，G05.6 门禁校验存在性[判定与 M18 共用 isUiFile]，audit 增视觉走查，UI 切片 spec 强制引用其条目）；②`constitution.md` 项目根（13 条全部提炼自既有约定不发明新规则，4 个 vibe 命令守卫注入"违背即否决"，变更须 ADR[C13]，vibe-plan 阶段5 生成且增量保护）。同步引入 04-CONTRACTS 独立模板（含全局错误码注册表，治跨切片错误码冲突）。
+- **Alternatives**: 视觉继续留在 PRD §2（信息密度不足，五态/令牌无处安放）/ 宪法并入 AGENTS.md（AGENTS 是 AI 入口约定，宪法是人与 AI 共同底线且须 ADR 变更，层级不同）
+- **Consequences**: + UI 实现有令牌/五态/断点锚点，错误码跨切片唯一，13 条底线可一键引用；- plan 期产出从 11 项增至 14 项（每项均允许"不适用(理由)"，反臃肿原则延续）
+- **Verification**: G05.6 三份门禁同步且 S1 哈希一致；本仓库 dogfood 09-DESIGN（整体不适用留档）与 constitution 已生成并过 S6；架构设计器与 ARCH-template 双源同步（sync-hash 3→4）由 S5 校验相等
