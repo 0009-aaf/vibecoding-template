@@ -25,10 +25,8 @@
 │   ├── vibe-clean.md            # 崩溃恢复清理
 │   ├── vault-sync.md            # 同步 Obsidian
 │   └── ...（focus-* / execution-plan / plan-design）
-├── templates/                   # 5 个模板
-│   ├── PRD-template.md
-│   ├── ARCH-template.md
-│   ├── decision-log.md
+├── templates/                   # 3 个模板
+│   ├── ARCH-template.md         # 架构文档快速参考（真源在 architecture-designer skill）
 │   ├── DoD-template.md          # 项目级 Definition of Done
 │   └── quality-gate-template.js # quality-gate 生成源
 ├── plugins/                     # commit 前强制 quality-gate 等
@@ -98,20 +96,22 @@ N/A — 纯本地模板项目，无服务端
 - **浏览器可用**：e2e-verifier 走完整 Playwright 操控 + 截图 + 视觉核对
 - **CLI 环境（浏览器不可用）**：自动降级为 HTTP curl 测试，纯 UI 项标记 SKIP 不阻断合并，人类验收时补充
 
-## 9. 六主题选型（来自 architecture-selection 目录）
+## 9. 十维度选型（D1–D10，来自 architecture-selection 目录）
 > 模板项目为纯配置/Markdown 项目，绝大多数维度显式"不适用"——这本身就是 fit-driven 的示范。
 > 新项目必须对 NFR 适用的维度完成选型（调 `architecture-selection` skill，逐维弹选项），每维"有决策 或 显式不适用"。
 
 | 维度 | 选型 | 理由 | ADR# |
 |------|------|------|------|
-| 架构风格 | 不适用（无应用代码，纯配置模板） | 模板自身无需架构风格 | - |
-| 数据库 | 不适用（无数据存储） | 纯 Markdown/配置 | - |
-| 缓存/内存 | 不适用（无运行时） | - | - |
-| 高并发 | 不适用（单用户本地） | - | - |
-| 事务和锁 | 不适用（无事务性写） | - | - |
-| CICD | 不适用（本地模板，无流水线） | quality-gate 即门禁 | - |
-| 灾备 | Git 即灾备 | 仓库多副本可回滚 | ADR-001 |
-| 部署 | 不适用（本地） | 无服务部署 | - |
+| D1 架构风格 | 不适用（无应用代码，纯配置模板） | 模板自身无需架构风格 | - |
+| D2 前端客户端 | 不适用（纯配置模板，无前端） | - | - |
+| D3 后端 | 不适用（纯配置模板，无后端） | - | - |
+| D4 数据库 | 不适用（无数据存储） | 纯 Markdown/配置 | - |
+| D5 缓存/内存 | 不适用（无运行时） | - | - |
+| D6 高并发 | 不适用（单用户本地） | - | - |
+| D7 事务和锁 | 不适用（无事务性写） | - | - |
+| D8 CICD | 不适用（本地模板，无流水线） | quality-gate 即门禁 | - |
+| D9 灾备 | Git 即灾备 | 仓库多副本可回滚 | ADR-001 |
+| D10 部署 | 不适用（本地） | 无服务部署 | - |
 
 ## 10. ADR 决策记录
 - 详见 `docs/05-DECISIONS.md`（每决策：Context/Decision/Alternatives/Consequences/Verification）
@@ -127,3 +127,4 @@ N/A — 纯本地模板项目，无服务端
 | 2026-08-09 | 合并前 rebase main + CLI 降级验证（浏览器不可用时 HTTP 测试） | 实战踩坑修复 |
 | 2026-08-18 | 加入成熟架构选择机制（architecture-selection skill + NFR + 六主题选型 + ADR + G05 门禁） | 从"现场发明"改为"目录选择" |
 | 2026-08-22 | 文档实体清单统一（5 skill/7 命令/5 模板）+ 新增 global/ 真源镜像与 sync-global.ps1 | 修复文档漂移与自举断裂 |
+| 2026-08-23 | 术语统一十维度（§9 表 10 行）+ G05 升级为 §9 段内十维检查 + 孤儿模板清理（PRD/decision-log 删除）+ 路径可移植化 + 与 ZCode 插件版口径对齐 | 全量审查修复（N-01~N-07/D-02/C-04） |
