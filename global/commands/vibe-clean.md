@@ -5,7 +5,7 @@ description: 清理命令：检测并清理 worktree 残留、分支残留、锁
 ## /vibe-clean - 崩溃恢复清理
 
 ### 会话隔离
-生成 SID = `clean-{今日日期}-{4位随机}`。注册：`python C:/Users/fms/.claude/harness/blackboard.py register <SID> "vibe-clean (<清理摘要>)"`
+生成 SID = `clean-{今日日期}-{4位随机}`。注册：`python ~/.claude/harness/blackboard.py register <SID> "vibe-clean (<清理摘要>)"`
 
 ### 守卫
 $ARGUMENTS 可选指定清理目标：
@@ -148,5 +148,5 @@ $ARGUMENTS 可选指定清理目标：
 
 ### 收尾
 - 输出清理总结：清理了哪些项、保留了哪些项
-- 从 blackboard 移除本会话：`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`
+- 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py archive <SID>`
 - 提示用户运行 `/vibe-status` 确认状态正常

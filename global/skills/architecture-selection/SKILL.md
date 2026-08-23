@@ -1,6 +1,6 @@
 ---
 name: architecture-selection
-description: 从成熟架构目录选择可验证方案，不现场发明。覆盖架构风格/前端客户端/后端/数据库/缓存内存/高并发/事务与锁/CICD/灾备/部署 10 个维度，每维给出选项+推荐+优劣。使用场景：/vibe-plan Phase 3 选型阶段。触发词："架构选型"、"技术选型"、"成熟方案"、"NFR"、"选技术栈"
+description: 从成熟架构目录选择可验证方案，不现场发明。覆盖架构风格/前端客户端/后端/数据库/缓存内存/高并发/事务与锁/CICD/灾备/部署 10 个维度，每维给出选项+推荐+优劣。使用场景：/vibe-plan 的架构选型阶段。触发词："架构选型"、"技术选型"、"成熟方案"、"NFR"、"选技术栈"
 ---
 
 # 成熟架构选择器
@@ -17,7 +17,7 @@ description: 从成熟架构目录选择可验证方案，不现场发明。覆�
 5. **每决策记 ADR** — Context/Decision/Alternatives/Consequences/Verification，写 `docs/05-DECISIONS.md`。
 6. **推荐度 ⭐ = 业界默认** — 用户回车即接受；只有偏离默认时才需要思考。
 
-## 交互式选型流程（由 /vibe-plan Phase 3 触发）
+## 交互式选型流程（由 /vibe-plan 的架构选型步骤触发）
 
 ```
 1. 读 docs/01-PRD.md §3 NFR（规模/SLO/数据量/并发/合规/RTO·RPO）

@@ -11,7 +11,7 @@
 
 ## 核心文档
 - `docs/01-PRD.md` — 需求与验收标准（含 §3.1 NFR）
-- `docs/02-ARCHITECTURE.md` — 架构方案（含 §9 六主题选型）
+- `docs/02-ARCHITECTURE.md` — 架构方案（含 §9 十维度选型）
 - `docs/03-STATUS.md` — 项目状态（每次更新）
 - `docs/04-CONTRACTS.md` — 接口契约（/vibe-spec 生成，切片实现依据）
 - `docs/05-DECISIONS.md` — ADR 决策记录（选型必记）

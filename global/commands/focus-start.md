@@ -8,7 +8,7 @@ subtask: true
 
 ### 会话隔离
 生成 SID = `focus-{今日日期}-{4位随机}`。
-- Vault = `D:/learning/计算机/Obsidian Vault`
+- Vault = 从 `~/.config/opencode/opencode.json` 的 `references.vault.path` 读取（未配置则询问用户）
 - Session 目录 = `{Vault}/_Team/sessions/{SID}`
 - Session blackboard = `{Session目录}/blackboard.md`
 - Memories 目录 = `{Vault}/_Team/memories/{SID}/`

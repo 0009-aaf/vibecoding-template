@@ -7,7 +7,7 @@ description: 实现命令：阶段0环境检测 -> 读契约 -> 写测试 -> 写
 $ARGUMENTS
 
 ### 会话隔离
-生成 SID = `impl-{切片编号}-{今日日期}-{4位随机}`（fast 模式为 `impl-{切片编号}-{今日日期}-fast-{4位随机}`）。注册：`python C:/Users/fms/.claude/harness/blackboard.py register <SID> "vibe-implement (<切片编号> <切片名>)"`
+生成 SID = `impl-{切片编号}-{今日日期}-{4位随机}`（fast 模式为 `impl-{切片编号}-{今日日期}-fast-{4位随机}`）。注册：`python ~/.claude/harness/blackboard.py register <SID> "vibe-implement (<切片编号> <切片名>)"`
 
 ### 模式门控（J-Space 门控分级）
 按任务复杂度选择运行档位，**只加载任务挣得的机制**（fast 减隔离/流程成本，不减验证强度）：
@@ -25,7 +25,7 @@ $ARGUMENTS
 - **不做**：切片锁/合并锁、worktree 创建、rebase、原子合并流程（阶段6）
 - **仍执行**：阶段1 读契约 -> 阶段2b 写实现 -> 阶段3 全量测试 + quality-gate ->
   阶段5 人类验收 -> 直接 commit + 更新 `docs/03-STATUS.md` + 清 blackboard SID
-  （`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`）
+  （`python ~/.claude/harness/blackboard.py archive <SID>`）
 - **测试要求**：fast 仅适用于"无新行为"的改动（文案/样式/配置/纯机械修改）。
   若改动引入新行为 -> 不满足 fast 条件，回退 `--full`/`--loop`（需写测试满足 DoD 红→绿）。
 - **阶段2b 增量验证退化为**：无新增测试，每改完一文件跑既有相关测试（如无则跳过），
@@ -325,7 +325,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
 ### 阶段6: 原子化合并（重构）
 > **fast 模式跳过本阶段**：无 worktree/分支/锁，验收通过后直接在主工作区 `git commit`
 > （见"模式门控"），然后更新 `docs/03-STATUS.md` 为已完成并清 blackboard SID
-> （`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`）。
+> （`python ~/.claude/harness/blackboard.py archive <SID>`）。
 > 以下仅 `--loop` / `--full` 执行。
 
 #### 6.1 合并准备（在 worktree 内）
@@ -365,7 +365,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
    node -e "require('fs').unlinkSync('<主工作区>/.merge-lock-<编号>'); require('fs').unlinkSync('<主工作区>/.slice-lock-<编号>')"
    ```
    - 文件不存在 -> 忽略（可能已被清理）
-7. **从 blackboard 移除本会话**：`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`
+7. **从 blackboard 移除本会话**：`python ~/.claude/harness/blackboard.py archive <SID>`
 
 > 如果步骤 4-5 失败（代码已合并但状态未更新）：
 > 下次 `/vibe-status` 检测到 main 已包含该切片 commit 但状态仍为"待验收"，
@@ -388,7 +388,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
 3. 删除 worktree：`git -C <主工作区> worktree remove --force ../<项目名>-slice-<编号>`
 4. 删除切片分支：`git -C <主工作区> branch -D slice/<编号>-<名称>`
 5. 编辑 `slices/README.md`：清空 `session-id`，状态改回 `待开始`（或 `阻塞` 并注明原因）-> `git -C <主工作区> add && commit`
-6. 从 blackboard 移除本会话：`python C:/Users/fms/.claude/harness/blackboard.py remove <SID>`
+6. 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py remove <SID>`
 7. **保留半成品代码**（可选）：
    - 如果部分代码有价值 -> 创建 backup 分支：`git -C <主工作区> branch backup/<编号>-<日期>`
    - 提示用户"已创建备份分支 backup/<编号>-<日期>，可稍后参考"

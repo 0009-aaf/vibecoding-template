@@ -7,8 +7,8 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 需求: $ARGUMENTS
 
 ### 会话隔离
-生成 SID = `plan-{今日日期}-{4位随机}`。注册：`python C:/Users/fms/.claude/harness/blackboard.py register <SID> "vibe-plan (<需求摘要>)"`
-> 会话异常中断时，需手动从 blackboard 清除本 SID：`python C:/Users/fms/.claude/harness/blackboard.py remove <SID>`
+生成 SID = `plan-{今日日期}-{4位随机}`。注册：`python ~/.claude/harness/blackboard.py register <SID> "vibe-plan (<需求摘要>)"`
+> 会话异常中断时，需手动从 blackboard 清除本 SID：`python ~/.claude/harness/blackboard.py remove <SID>`
 
 ### 守卫
 若 $ARGUMENTS 为空 → 先用 question 工具询问项目目标，再继续
@@ -71,7 +71,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 
 ### 产出
 - `docs/01-PRD.md`（含 §3.1 NFR）
-- `docs/02-ARCHITECTURE.md`（含库清单、命名约定、测试策略、§9 六主题选型）
+- `docs/02-ARCHITECTURE.md`（含库清单、命名约定、测试策略、§9 十维度选型）
 - `docs/04-CONTRACTS.md`（契约框架：库清单 + 命名约定 + 共享类型占位）
 - `docs/05-DECISIONS.md`（ADR 决策记录，随选型追加）
 - `docs/DoD.md`（项目级 Definition of Done，五段固定清单）
@@ -84,4 +84,4 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 - 将项目名称、技术栈、数据库、部署方式回填到 `AGENTS.md`
 - 向用户汇报文档位置、参考截图位置和关键决策
 - 提示用户：可运行 `/vibe-spec` 拆分切片
-- 从 blackboard 移除本会话：`python C:/Users/fms/.claude/harness/blackboard.py archive <SID>`
+- 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py archive <SID>`

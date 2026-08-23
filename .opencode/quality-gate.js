@@ -17,7 +17,7 @@
  *   M18 有 UI 切片缺 E2E（阻断）
  *   M19 spec 测试用例未实现（阻断）
  *   M20 测试文件不在规定目录（警告）
- *   G05 架构完备性（vibe 项目：NFR+六主题选型+ADR，阻断）
+ *   G05 架构完备性（vibe 项目：NFR+十维度选型+ADR，阻断）
  *
  * 注：M04/M05/M09/M14/M15 历史声明未实现，已从检查项中移除，避免假安全感。
  */
@@ -130,7 +130,7 @@ function checkProtectedRegion(stagedFiles) {
       const regex = new RegExp('^' + escaped + '$');
       if (regex.test(file)) {
         // 检查文件在 HEAD 是否存在（首次创建允许）
-        const existsInHead = tryExec(`git cat-file -e HEAD:${file.replace(/\\/g, '/')}`) !== null;
+        const existsInHead = tryExec(`git cat-file -e "HEAD:${file.replace(/\\/g, '/')}"`) !== null;
         if (existsInHead) {
           issues.push({ file, pattern });
         }
@@ -231,8 +231,13 @@ function checkTests(files, cwd) {
   }
 
   // M18: 有 UI 切片缺 E2E 测试
-  // 检查 src/ 下是否有 UI 组件变更但 e2e/ 目录无对应 spec
-  const hasUiChange = files.some(f => f.includes('/ui/') || f.includes('/components/'));
+  // 检查是否有 UI 组件变更但 e2e/ 目录无对应 spec
+  // UI 判定：目录段 ui/components/pages/views/screens，或 src/ 下前端组件扩展名；排除测试与 e2e 文件
+  const isUiFile = (f) => {
+    if (/\.(test|spec)\./.test(f) || f.startsWith(TEST_DIRS.e2e)) return false;
+    return /\/(ui|components|pages|views|screens)\//.test(f) || (/^src\//.test(f) && /\.(tsx|jsx|vue|svelte)$/.test(f));
+  };
+  const hasUiChange = files.some(isUiFile);
   const hasE2e = files.some(f => f.startsWith(TEST_DIRS.e2e));
   if (hasUiChange && !hasE2e) {
     issues.push({ code: 'M18', type: 'missing-e2e', msg: '有 UI 变更但无 E2E 测试' });
@@ -326,7 +331,7 @@ function runCoverageCheck() {
 // G05: 架构完备性检查（vibe 工作流项目）
 // 采用 vibe 工作流（存在 docs/01-PRD.md 或 docs/02-ARCHITECTURE.md）时强制：
 //   - NFR 已量化（PRD §3.1 或 ARCHITECTURE 含 规模/SLO/并发/数据量/RTO·RPO）
-//   - 六主题选型表存在且六主题均有答案（允许显式"不适用"）
+//   - 十维度选型表存在且十维均有答案（允许显式"不适用"）
 //   - ADR 决策记录存在
 // 反臃肿原则：校验"有答案"而非"有内容"；非 vibe 项目（无 PRD/ARCH）跳过。
 function checkArchitectureCompleteness() {
@@ -347,23 +352,29 @@ function checkArchitectureCompleteness() {
     issues.push({ type: 'missing-nfr', msg: '缺少 NFR 量化（规模/SLO/并发/数据量/RTO·RPO 至少一项）' });
   }
 
-  // G05.2: 六主题选型表（§9 或等价表头）
-  if (!/六主题选型|\| 维度 \| 选型 \||架构风格/.test(arch)) {
-    issues.push({ type: 'missing-selection-table', msg: '缺少六主题选型表（docs/02-ARCHITECTURE.md §9）' });
+  // G05.2: 十维度选型表（§9 段落或等价表头）
+  const sectionMatch = arch.match(/##\s*9[.、][^\n]*\n([\s\S]*?)(?=\n##\s|$)/);
+  if (!sectionMatch && !/\| 维度 \| 选型 \|/.test(arch)) {
+    issues.push({ type: 'missing-selection-table', msg: '缺少十维度选型表（docs/02-ARCHITECTURE.md §9）' });
   }
 
-  // G05.3: 六主题每维必须有答案（选型 或 显式"不适用"）
+  // G05.3: 十维度每维必须有答案（选型 或 显式"不适用"），限定 §9 段落内检查
+  const section = sectionMatch ? sectionMatch[1] : arch;
   const topics = [
-    { key: '数据库', label: '数据库' },
-    { key: '内存|缓存', label: '内存/缓存' },
-    { key: '并发', label: '高并发' },
-    { key: '事务', label: '事务和锁' },
-    { key: 'CICD|CI', label: 'CICD' },
-    { key: '灾备|备份', label: '灾备' },
+    { key: '架构风格', label: 'D1 架构风格' },
+    { key: '前端|客户端', label: 'D2 前端/客户端' },
+    { key: '后端', label: 'D3 后端' },
+    { key: '数据库', label: 'D4 数据库' },
+    { key: '内存|缓存', label: 'D5 内存/缓存' },
+    { key: '并发', label: 'D6 高并发' },
+    { key: '事务', label: 'D7 事务和锁' },
+    { key: 'CICD|CI', label: 'D8 CICD' },
+    { key: '灾备|备份', label: 'D9 灾备' },
+    { key: '部署', label: 'D10 部署' },
   ];
   for (const t of topics) {
-    if (!new RegExp(t.key, 'i').test(arch)) {
-      issues.push({ type: 'missing-topic', topic: t.label, msg: `六主题选型表缺 ${t.label}（可标注"不适用(理由)"）` });
+    if (!new RegExp(t.key, 'i').test(section)) {
+      issues.push({ type: 'missing-topic', topic: t.label, msg: `十维度选型表缺 ${t.label}（可标注"不适用(理由)"）` });
     }
   }
 
@@ -519,7 +530,7 @@ function main() {
     checks.block++;
     blockers.push({
       code: 'G05',
-      name: '架构完备性（NFR/六主题选型/ADR 缺失）',
+      name: '架构完备性（NFR/十维度选型/ADR 缺失）',
       issues: archCheck.issues,
     });
   } else {

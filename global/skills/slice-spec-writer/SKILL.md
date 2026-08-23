@@ -1,6 +1,6 @@
 ---
 name: slice-spec-writer
-description: 根据 PRD 和架构文档，将功能拆分为可独立实现的垂直切片，每个切片包含验收标准、依赖关系、测试 anchor、Protected Region。使用场景：Phase 3（立规矩）和开发中。触发词："拆切片"、"切片规格"、"写 spec"、"拆分功能"
+description: 根据 PRD 和架构文档，将功能拆分为可独立实现的垂直切片，每个切片包含验收标准、依赖关系、测试 anchor、Protected Region。使用场景：/vibe-spec 切片规格阶段（立规矩）和开发中。触发词："拆切片"、"切片规格"、"写 spec"、"拆分功能"
 ---
 
 # 切片规格书写器
