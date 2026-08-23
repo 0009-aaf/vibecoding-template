@@ -1,5 +1,5 @@
 ---
-description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 prd-generator + architecture-designer skill）
+description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 prd-generator + architecture-designer skill）→ 定视觉（加载 ui-ux-pro-max + frontend-design + web-artifacts-builder）
 ---
 
 ## /vibe-plan — 项目规划
@@ -73,12 +73,18 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - 用 vision 分析工具分析截图（优先 `doubao_analyze_image`，不可用时跳过，不阻塞）
   - 提取：布局 / 导航结构 / 配色 / 气质
 - **生成 `docs/09-DESIGN.md`（界面设计规格）**：复制 `~/.config/opencode/templates/DESIGN-template.md`，按提取结果填充：
-  - §1 设计令牌（颜色/字体/间距/圆角/阴影/断点，表格化——UI 切片实现的唯一视觉锚点）
+  - **先加载设计 skill（视觉重项目必做，纯后端项目跳过）**：
+    1. 加载 `ui-ux-pro-max` → `python ~/.config/opencode/skills/ui-ux-pro-max/scripts/search.py "<产品类型> <行业> <关键词>" --design-system -p "<项目名> --output-dir <项目根>` 生成完整设计系统（pattern/style/colors/typography/effects/anti-patterns）
+    2. 加载 `frontend-design` → 对照设计系统审校美学方向（防 AI 模板化：避开 cream+serif+terracotta / 黑底+acid accent / broadsheet 三类默认样）
+    3. **视觉重（PRD §2 有明确页面视觉要求）→ 加载 `web-artifacts-builder`** → 用 `D:\Git\bin\bash.exe` 跑 `scripts/init-artifact.sh <tmp目录>` 产出 React 骨架，手写关键页（首页/核心功能页）→ `scripts/bundle-artifact.sh` 打包成**单文件 HTML 静态预览**输出到 `references/design/preview.html`（用户可浏览器直接打开看方向）
+       - 图标一律内联 SVG（`lucide-react` / 手写 `stroke="currentColor"`），禁用位图/emoji
+       - 预览仅定方向，不追求完整：用户确认后细节在 `/vibe-implement` 阶段实现
+  - §1 设计令牌（颜色/字体/间距/圆角/阴影/断点，表格化——UI 切片实现的唯一视觉锚点；**来自 ui-ux-pro-max 输出的色板/字体系统**）
   - §2 页面清单（每页布局区块/路由/所属 feature）
   - §3 组件清单与复用（组件库来自 ARCH §9 D2 选型）
   - §4 交互五态规范（loading/empty/error/disabled/skeleton）
   - §5 响应式策略 + §6 无障碍基线（允许逐项"不适用(理由)"）
-  - §7 参考与截图索引
+  - §7 参考与截图索引（含 `references/design/preview.html` 引用）
   - 纯后端项目（PRD 无页面模块）：保留文件，整体标注"不适用(理由=无 UI 切片)"
   - PRD §2 收敛为一句话风格方向 + 指向 `docs/09-DESIGN.md`（视觉细节不再散落 PRD）
   - G05.6 门禁校验：有 UI 切片的项目必须存在 09-DESIGN.md（判定口径与 M18 一致）

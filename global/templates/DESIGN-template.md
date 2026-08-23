@@ -7,6 +7,7 @@
 ## 1. 设计令牌（Design Tokens）
 
 > 表格化令牌是 AI 实现一致性的锚点：切片只能引用令牌，禁止自由发明颜色/间距/字号。
+> 令牌来源（vibe-plan 阶段4）：由 `ui-ux-pro-max --design-system` 产出的色板/字体系统 + `frontend-design` 美学审校后落表；视觉重项目对照 `references/design/preview.html`（web-artifacts-builder 单文件 HTML 预览）。
 
 ### 1.1 颜色
 

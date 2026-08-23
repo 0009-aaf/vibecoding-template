@@ -149,6 +149,13 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
 | "测试失败是环境问题，不是我的代码" | 先验证环境假设再下结论；在失败原因里找到确凿证据前，都当代码问题处理 |
 
 ### 阶段2b: 写实现（增量验证）
+- **UI 切片设计前置（本切片的视觉锚点，先于写码）**：
+  - 读取 `docs/09-DESIGN.md` §1 设计令牌（颜色/字体/间距/圆角/阴影——本切片所有样式决策的唯一来源）
+  - 读取 §2 本页面布局区块 + §4 交互五态要求
+  - **视觉重切片（09-DESIGN §7 标注了 preview 的）**：
+    - 若 `references/design/preview.html` 已存在 → 用 playwright 打开参考（`playwright_navigate file:///...`），对照实现
+    - 不存在且本切片含核心页面 → 加载 `web-artifacts-builder` 按 09-DESIGN §1 令牌产出 `references/design/preview-<切片名>.html`（单文件 HTML，内联 SVG 图标）
+  - 图标规范：一律内联 SVG（`stroke="currentColor"` + `aria-label`），禁用位图/emoji
 - **加载编码规范**（skill: coding-standards）
   - 按文件类型追加子 skill：
     - `.ts`/`.tsx` -> coding-standards-ts + coding-standards-react
@@ -288,6 +295,7 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
   - 启动应用（自动探测启动命令 + 端口隔离 + PID 追踪）
   - 用 playwright 实际操控：点击、填表、走该切片的成功/失败/边界路径
   - **功能断言**（核心）：跳转 URL / 提示文本 / 元素出现是否匹配验收标准
+  - **UI 视觉核对**：有 `references/design/preview.html` 或 `preview-<切片名>.html` 时，先 `playwright_navigate file:///...` 打开该预览对照设计方向，再对比实现是否偏离令牌（颜色/字体/间距）
   - 截图存证：`references/design/verification/slice-<编号>/`
   - **UI 视觉核对**（可选）：用 vision 分析工具分析截图，超时则跳过，不阻塞
   - **验证完成后关闭应用进程**（读取 PID，SIGTERM -> 等待 5s -> SIGKILL）

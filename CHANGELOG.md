@@ -40,6 +40,7 @@
 - **UI/前端设计 skill 补齐（3 个入库）**：`frontend-design`（Anthropic 官方，美学方向/反 AI 模板化）、`ui-ux-pro-max` v2.0（nextlevelbuilder 源，79 样式/192 色板/74 字体/22 栈 + 设计系统生成器 `scripts/search.py --design-system`）、`web-artifacts-builder`（官方 HTML 预览构建器，React+Tailwind+shadcn → 单文件 HTML；scripts 依赖 node/pnpm/tar，Git bash 运行）；本机 `~/.claude/skills/ui-ux-pro-max` 残缺 v1（data/scripts 空目录）移入 `_archived/ui-ux-pro-max-v1`
 - **路由登记**：check-sync 仓库侧 AUTHORITATIVE_SKILLS 补 3 项；sync-routing-table 排除 opencode 侧 coding-standards 家族镜像（主登记在 map.skills 段，opencode 不重复登记），路由表 v3.0 零漂移
 - **shell 环境陷阱记录**：`bash` 命令解析到 `C:\Windows\system32\bash.exe`（WSL stub，WSL 已删后报错）→ 须用 `D:\Git\bin\bash.exe`（见 shell-strategy）
+- **设计 skill 接入 vibe 工作流**：vibe-plan 阶段4 显式调用 `ui-ux-pro-max`（`--design-system` 定令牌）+ `frontend-design`（美学审校）+ `web-artifacts-builder`（视觉重项目产出 `references/design/preview.html` 单文件 HTML 预览，内联 SVG 图标，无位图/emoji）；vibe-implement 阶段2b UI 切片先读 09-DESIGN §1 令牌 + 对照 preview 实现（阶段3.5 浏览器验证打开 preview 核对）；DESIGN-template §1 注明令牌来源
 
 ## [2026-08-23] 文档生命周期补强 + 防漂移机器校验
 
