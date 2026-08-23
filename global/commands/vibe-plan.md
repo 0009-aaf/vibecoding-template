@@ -69,12 +69,34 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - 提取：布局 / 导航结构 / 配色 / 气质
   - 写入 PRD §2（附参考截图路径）
 
+### 阶段5: 交接文档（README 填充 + Runbook 生成）
+- **填充 `README.md`**（原为占位，必须替换）：
+  - 项目名：取自 PRD §0 标题
+  - 一句话定位：取自 PRD §0"要解决的问题"
+  - 技术栈徽章/一行：从 02-ARCHITECTURE.md 选型摘要（Modular Monolith / Next.js / ...）
+  - 快速开始：3 条命令（安装/启动/测试），细节指向 `docs/06-RUNBOOK.md`
+  - 保留 vibe 命令表与项目结构说明（starter-template 已有）
+- **生成 `docs/06-RUNBOOK.md`**：复制 `~/.config/opencode/templates/RUNBOOK-template.md`
+  - 按选型填充：环境要求（版本）、环境变量清单、启动/测试命令、部署方式、回滚、备份恢复
+  - 从 02-ARCHITECTURE.md §9 选型值与 §8 测试策略取实际内容
+  - `.env.example`：从 Runbook §2 的变量表生成（只含占位值，无真实密钥）
+- **生成 `docs/06-CODING-STANDARDS.md`**：复制 `~/.config/opencode/templates/CODING-STANDARDS-template.md`
+  - 按 02-ARCHITECTURE.md 技术栈选型裁剪 §3 技术栈专项：只保留主栈对应 coding-standards-<lang> 的 ≤15 条
+  - 通用命名/文件组织/Commit 规范从模板直接带入（N1-N6、F1-F5、Conventional Commits）
+  - 保留 §6 引用（全量规范指向 skill，不复制 58 条）
+  - 反臃肿原则：文档 ≤35 条约束，超出部分指向 skill 层
+- **PRD 确认含 §0 项目背景**（Why/用户/成功标志/排除项/约束）；缺则补齐
+
 ### 产出
-- `docs/01-PRD.md`（含 §3.1 NFR）
+- `docs/01-PRD.md`（含 §0 项目背景 + §3.1 NFR）
 - `docs/02-ARCHITECTURE.md`（含库清单、命名约定、测试策略、§9 十维度选型）
 - `docs/04-CONTRACTS.md`（契约框架：库清单 + 命名约定 + 共享类型占位）
 - `docs/05-DECISIONS.md`（ADR 决策记录，随选型追加）
 - `docs/DoD.md`（项目级 Definition of Done，五段固定清单）
+- `docs/06-RUNBOOK.md`（运行/环境/部署/回滚/备份——阶段5）
+- `docs/06-CODING-STANDARDS.md`（项目级代码规范：命名/文件组织/技术栈专项/Commit——阶段5）
+- `README.md`（已填充：定位 + 快速开始 + vibe 命令表）
+- `.env.example`（环境变量占位样例）
 - `.opencode/quality-gate.js`（根据架构配置生成，含 G05 架构完备性检查）
 
 ### 收尾
