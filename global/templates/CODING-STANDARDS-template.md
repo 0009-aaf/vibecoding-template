@@ -35,8 +35,9 @@
 ## 4. 契约级约定（与 04-CONTRACTS.md 对齐）
 
 - API 路由：`/api/v1/<资源名>`（复数）
-- API 请求/响应：JSON；错误格式 RFC 9457（`type/title/detail`）
+- API 请求/响应：JSON；错误格式 RFC 9457（`type/title/detail`），错误码须在 `docs/04-CONTRACTS.md` §4 注册表登记
 - 版本控制：接口变更提供 `v1`/`v2`，不做 silent breaking change
+- feature flag：命名 `<域>_<功能>_<日期>`（如 `auth_new_login_20260901`）；每个 flag 创建时登记 `docs/TECH-DEBT.md`（建议处理时机=下个迭代/日期），到期未清理会被 audit 提醒；禁止用 flag 遮蔽未完成的契约变更（该走 ADR + v2）
 
 ## 5. Commit 规范（Conventional Commits）
 
@@ -51,3 +52,8 @@
 | 全量通用规范（58 条） | skill: `coding-standards` |
 | 语言专项 | skill: `coding-standards-{ts,react,node,python,vue,c,api,html,shell,wx}` |
 | 补充阅读 | vault `40_Knowledge/lessons-learned.md`（本机踩坑教训） |
+
+## 变更记录
+
+| 日期 | 变更 | 原因 |
+|---|---|---|
