@@ -339,6 +339,12 @@ vibe workflow 只支持两种并行模式，**AI 不会自动开多 CLI 会话**
 > （`python ~/.claude/harness/blackboard.py archive <SID>`）。
 > 以下仅 `--loop` / `--full` 执行。
 
+#### 6.0 提交消息（CM11：文件功能清单，两种模式都适用）
+- 格式：`<type>(<scope>): <subject>`（CM1-CM3）+ Body 文件功能清单（CM11）
+- Body 每个非琐碎变更文件一行：`<文件>: <功能> + <本次变更>`
+  例：`src/auth/login.ts: 登录表单提交校验，新增空值防御（C1）`
+- 快速自检：不读 diff、只读 message，能说清"每个文件是干什么的、这次改了什么"才算合格
+
 #### 6.1 合并准备（在 worktree 内）
 - `git rebase main`（拉取其他切片已合并的改动）
   - 冲突 -> 手动解决：
