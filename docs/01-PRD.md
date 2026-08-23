@@ -1,5 +1,8 @@
 # PRD: Vibecoding 开发架构模板
 
+> 需求与验收标准（含 §3.1 NFR）。/vibe-plan 阶段2 生成；需求变更走 §4 变更记录并同步切片。
+> 本文档须遵守 `docs/00-DOC-STANDARD.md`。
+
 ## 1. 需求清单
 
 ### 项目脚手架（starter-template/）
