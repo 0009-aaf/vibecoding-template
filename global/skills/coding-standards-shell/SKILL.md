@@ -18,7 +18,7 @@ description: Shell 脚本编码规范（bash + PowerShell，12 条）。Agent �
 | SH2 | 入口判空: 参数/环境变量必填校验，fail-fast | bash: `${VAR:?VAR is required}`、参数个数不足时打印 usage 退出 2；PS: `[Parameter(Mandatory)]` 加 `[ValidateNotNullOrEmpty()]`，可叠加 `[ValidateSet()]` / `[ValidatePattern()]` |
 | SH3 | 临时文件用 `mktemp -d` / `New-TemporaryFile`，禁止硬编码 /tmp 路径 | 清理放 EXIT trap（bash）/ finally（PS）；bash 先 `local x` 再赋值（`local x="$(cmd)"` 会吞退出码） |
 | SH4 | 破坏性命令防护（rm -rf / Remove-Item -Recurse） | 目标路径先校验非空（bash 用 `"${dir:?}"` 防空变量展开成 `/`）；提供 --dry-run；关键步骤前记日志；部署类脚本要有回滚路径 |
-| SH5 | 禁 `eval` / `Invoke-Expression`；catch 必处理 | 命令含用户输入时必须白名单校验；空 catch 直接违反项目宪法 C3（`constitution.md`，catch 必处理） |
+| SH5 | 禁 `eval` / `Invoke-Expression`；catch 必处理 | 命令含用户输入时必须白名单校验；空 catch 直接违反项目宪法 C3（constitution.md，catch 必处理） |
 | SH6 | 结构: bash 用 main() 加 source guard；PS 用 Approved Verbs 函数 | bash: `main "$@"` 且 `if [[ "${BASH_SOURCE[0]}" == "$0" ]]` 包裹（可被 source 测试）；PS 函数名 `Verb-Noun`；脚本超 300 行改用 Python/TS |
 | SH7 | 静态检查为门禁 | bash: `shellcheck` 零警告，disable 用行级注释并注明理由；PS: `Invoke-ScriptAnalyzer`（PSGallery preset），抑制用 `[SuppressMessageAttribute]` 加 Justification |
 
@@ -51,6 +51,7 @@ description: Shell 脚本编码规范（bash + PowerShell，12 条）。Agent �
 |---|------|-----------|
 | SH11 | 假设 CI=true 无 TTY: 预置 -y / --yes / --force / --no-input | 会挂死的命令: pause、read、conda init、交互式编辑器；git 用 `--no-edit`、`GIT_TERMINAL_PROMPT=0` |
 | SH12 | 无非交互参数时用管道喂答案或 timeout 兜底 | `yes \| cmd`、heredoc、`timeout 30 cmd`；任何可能弹确认的命令都设超时 |
+| SH13 | **`bash` 命令可能解析到 WSL stub**: `C:\Windows\system32\bash.exe`（WSL 入口）在 PATH 中优先，WSL 发行版被删后调用即报"适用于 Linux 的 Windows 子系统没有已安装的分发"（UTF-16LE 乱码） | 先 `Get-Command bash` 确认 Source；要跑 Git bash 脚本用全路径 `D:\Git\bin\bash.exe`（或 `& "C:\Program Files\Git\bin\bash.exe"`）；同理 `sh`/`curl` 等若被 system32 抢占也查来源 |
 
 ## 对照示例
 

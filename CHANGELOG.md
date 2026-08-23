@@ -32,8 +32,14 @@
 
 ### Changed
 - **提交历史统一 CM11 格式**：34 个历史提交的 Body 全量改写为文件功能清单（git filter-branch 消息改写 + force push；本地保留备份分支 backup/pre-cm11-rewrite，Protected Region 豁免段与 BREAKING CHANGE 等合规 footer 原样保留）
+- **提交历史 subject 去 type 化**：36 个历史提交的 subject 全部去掉 `feat:/fix:/docs:/chore:` 前缀、移除 CM11 字样（git commit-tree 消息重建 + force push，tree 哈希 36/36 一致仅 message 变化；备份分支 backup/pre-no-type）
 - vibe-plan 阶段4 定视觉产出升级：从"写入 PRD §2"改为生成 09-DESIGN.md（PRD §2 收敛为方向 + 指向）
 - quality-gate G05 增 G05.6 界面设计存在性（isUiFile 提升为模块级，M18/G05.6 同口径）
+
+### Added
+- **UI/前端设计 skill 补齐（3 个入库）**：`frontend-design`（Anthropic 官方，美学方向/反 AI 模板化）、`ui-ux-pro-max` v2.0（nextlevelbuilder 源，79 样式/192 色板/74 字体/22 栈 + 设计系统生成器 `scripts/search.py --design-system`）、`web-artifacts-builder`（官方 HTML 预览构建器，React+Tailwind+shadcn → 单文件 HTML；scripts 依赖 node/pnpm/tar，Git bash 运行）；本机 `~/.claude/skills/ui-ux-pro-max` 残缺 v1（data/scripts 空目录）移入 `_archived/ui-ux-pro-max-v1`
+- **路由登记**：check-sync 仓库侧 AUTHORITATIVE_SKILLS 补 3 项；sync-routing-table 排除 opencode 侧 coding-standards 家族镜像（主登记在 map.skills 段，opencode 不重复登记），路由表 v3.0 零漂移
+- **shell 环境陷阱记录**：`bash` 命令解析到 `C:\Windows\system32\bash.exe`（WSL stub，WSL 已删后报错）→ 须用 `D:\Git\bin\bash.exe`（见 shell-strategy）
 
 ## [2026-08-23] 文档生命周期补强 + 防漂移机器校验
 

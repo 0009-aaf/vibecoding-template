@@ -21,8 +21,8 @@
   - 边界条件：文档模板与 Skill 输出格式一致
 - 优先级：P0
 
-### 五个全局 Skill（~/.config/opencode/skills/）
-- 功能描述：prd-generator、architecture-designer、architecture-selection、slice-spec-writer、e2e-verifier 五个 Skill，全局可用
+### 八个全局 Skill（~/.config/opencode/skills/）
+- 功能描述：方法类 prd-generator、architecture-designer、architecture-selection、slice-spec-writer、e2e-verifier + 设计类 frontend-design、ui-ux-pro-max、web-artifacts-builder，八个 Skill，全局可用
 - 验收标准：
   - 成功路径：任何项目可加载全局 Skill
   - 失败路径：Skill 加载后无法执行指定步骤
