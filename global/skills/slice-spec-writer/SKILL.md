@@ -44,6 +44,7 @@ description: 根据 PRD 和架构文档，将功能拆分为可独立实现的�
 - 涉及的文件清单（该切片独占）
 - 共享文件（多个切片共同修改的文件，如 router/config/registry）
 - 验收标准
+- **UI 依据**（仅 UI/全栈切片）：引用 `docs/09-DESIGN.md` 条目编号（§2 页面行、§3 组件行、§4 五态），实现不得偏离
 - 测试 anchor
 - Protected Region 标记
 - session-id（初始为空，锁定时填入）
@@ -58,7 +59,13 @@ POST /api/v1/auth/register
   Request: { email: string, password: string }
   Response 200: { user: User, token: string }
   Response 422: { errors: Array<{ field: string, message: string }> }
+  错误码: AUTH-001 邮箱重复(409) / AUTH-002 密码强度不足(422)
+  性能预算: P95 < 300ms
 ```
+
+**错误码规则**：每个非 2xx 响应必须有注册错误码——格式 `<域>-<三位数>`（域 = feature 名大写），
+同步登记到 `docs/04-CONTRACTS.md` 全局错误码注册表；禁止切片私造未登记错误码、
+禁止复用其他切片的错误码语义。UI 端错误文案按码映射，展示走 `docs/09-DESIGN.md` §4 error 态。
 
 #### 4.2 导出类型（写入 docs/04-CONTRACTS.md）
 ```
@@ -164,6 +171,12 @@ POST /api/v1/auth/register
   Request: { email: string, password: string }
   Response 200: { user: User, token: string }
   Response 422: { errors: Array<{ field: string, message: string }> }
+  错误码: AUTH-001 邮箱重复(409) / AUTH-002 密码强度不足(422)
+  性能预算: P95 < 300ms
+
+### UI 依据（UI/全栈切片）
+- `docs/09-DESIGN.md` §2 页面：登录页（/login）
+- `docs/09-DESIGN.md` §4 五态：error 态（错误码→文案映射展示）
 
 ### 导出类型
 export interface User { id: string; email: string; name: string }
