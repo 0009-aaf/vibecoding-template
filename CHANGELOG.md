@@ -6,7 +6,7 @@
 ## [Unreleased]
 
 ### Added
-- **CM11 提交消息文件功能清单**：Body 每个变更文件一行 `<文件>: <该文件的功能>`——全部文件都列、纯功能描述（描述文件本身是干什么的，不描述本次改动，改动内容看 diff），读提交历史不查目录即知涉及文件职责；落点：总纲 CM11 规则 + 自检清单行（v1.9）、vibe-implement 阶段 6.0、CODING-STANDARDS 模板 §5
+- **CM11 提交消息文件功能清单**：Body 每个变更文件一行 `<文件>: <该文件的功能>`——全部文件都列、纯功能描述（描述文件本身是干什么的，不描述本次改动，改动内容看 diff），读提交历史不查目录即知涉及文件职责；subject 保留 type 前缀、同为名词性功能描述（不用"新增/修复/改为"类变更动词）；落点：总纲 CM11 规则 + 自检清单行（v1.9）、vibe-implement 阶段 6.0、CODING-STANDARDS 模板 §5
 - **README 丰富**（对照公开 README 最佳实践重构）：badges / 这是什么总览 / 特性一览 / mermaid 工作流图 / Skills 一览 / 质量防线表 / 文档导航 / FAQ / Roadmap / 贡献与项目状态
 - **文档规范体系**（ADR-004）：`docs/00-DOC-STANDARD.md`（编号白名单/必备四件/内容规范/反臃肿）+ 模板；check-sync 新增 S6 文档结构校验（野编号/四件缺失即阻断，实测拦截）
 - **check-sync S7：skill 路由完整性 + 引用存在性机器校验**——S7a 总纲路由表（含 description 花括号枚举）与 `global/skills/` 实际目录双向比对（悬空/孤儿均阻断）；S7b 全仓 markdown 的 `` `X` skill`` / `skill("X")` 引用必须真实存在（与 S3 命令引用同构）。已注入自测：孤儿目录与悬空引用均检出、参数化写法无误报。同步清理 3 处历史悬空引用（coding-standards M5 改指 constitution、§九改自引用 RV1-RV4、DoD-template 改指宪法 C2）
