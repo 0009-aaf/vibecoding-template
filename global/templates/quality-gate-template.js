@@ -17,7 +17,7 @@
  *   M18 有 UI 切片缺 E2E（阻断）
  *   M19 spec 测试用例未实现（阻断）
  *   M20 测试文件不在规定目录（警告）
- *   G05 架构完备性（vibe 项目：NFR+十维度选型+安全基线+ADR，阻断）
+ *   G05 架构完备性（vibe 项目：NFR+十维度选型+安全基线+界面设计+ADR，阻断）
  *   G06 文档完备性（vibe 项目：CODING-STANDARDS/RUNBOOK 存在性，阻断）
  *
  * 注：M04/M05/M09/M14/M15 历史声明未实现，已从检查项中移除，避免假安全感。
@@ -231,13 +231,7 @@ function checkTests(files, cwd) {
     }
   }
 
-  // M18: 有 UI 切片缺 E2E 测试
-  // 检查是否有 UI 组件变更但 e2e/ 目录无对应 spec
-  // UI 判定：目录段 ui/components/pages/views/screens，或 src/ 下前端组件扩展名；排除测试与 e2e 文件
-  const isUiFile = (f) => {
-    if (/\.(test|spec)\./.test(f) || f.startsWith(TEST_DIRS.e2e)) return false;
-    return /\/(ui|components|pages|views|screens)\//.test(f) || (/^src\//.test(f) && /\.(tsx|jsx|vue|svelte)$/.test(f));
-  };
+  // M18: 有 UI 切片缺 E2E 测试（isUiFile 为模块级共享判定，与 G05.6 同口径）
   const hasUiChange = files.some(isUiFile);
   const hasE2e = files.some(f => f.startsWith(TEST_DIRS.e2e));
   if (hasUiChange && !hasE2e) {
@@ -329,13 +323,20 @@ function runCoverageCheck() {
   return { skipped: false, failures, scripts: scriptNames };
 }
 
+// UI 文件判定（M18 与 G05.6 共用同口径：目录段 ui/components/pages/views/screens，
+// 或 src/ 下前端组件扩展名；排除测试与 e2e 文件）
+function isUiFile(f) {
+  if (/\.(test|spec)\./.test(f) || f.startsWith(TEST_DIRS.e2e)) return false;
+  return /\/(ui|components|pages|views|screens)\//.test(f) || (/^src\//.test(f) && /\.(tsx|jsx|vue|svelte)$/.test(f));
+}
+
 // G05: 架构完备性检查（vibe 工作流项目）
 // 采用 vibe 工作流（存在 docs/01-PRD.md 或 docs/02-ARCHITECTURE.md）时强制：
 //   - NFR 已量化（PRD §3.1 或 ARCHITECTURE 含 规模/SLO/并发/数据量/RTO·RPO）
 //   - 十维度选型表存在且十维均有答案（允许显式"不适用"）
 //   - ADR 决策记录存在
 // 反臃肿原则：校验"有答案"而非"有内容"；非 vibe 项目（无 PRD/ARCH）跳过。
-function checkArchitectureCompleteness() {
+function checkArchitectureCompleteness(files) {
   const arch = getFileContent('docs/02-ARCHITECTURE.md');
   const prd = getFileContent('docs/01-PRD.md');
 
@@ -389,6 +390,15 @@ function checkArchitectureCompleteness() {
   const security = getFileContent('docs/07-SECURITY.md');
   if (!security) {
     issues.push({ type: 'missing-security', msg: '缺少安全基线（docs/07-SECURITY.md，由 /vibe-plan 阶段3 生成）' });
+  }
+
+  // G05.6: 界面设计文档（有 UI 文件的项目必须存在；判定口径与 M18 共用 isUiFile；纯后端项目自然跳过）
+  const hasUi = Array.isArray(files) && files.some(isUiFile);
+  if (hasUi) {
+    const design = getFileContent('docs/09-DESIGN.md');
+    if (!design) {
+      issues.push({ type: 'missing-design', msg: '缺少界面设计文档（docs/09-DESIGN.md，由 /vibe-plan 阶段4 生成）' });
+    }
   }
 
   return { skipped: false, issues };
@@ -560,7 +570,7 @@ function main() {
   // M14/M15: 未实现，已从检查项移除（避免假安全感 —— 同 M09 先例）
 
   // G05: 架构完备性（vibe 项目强制，非 vibe 项目跳过）
-  const archCheck = checkArchitectureCompleteness();
+  const archCheck = checkArchitectureCompleteness(files);
   if (archCheck.skipped) {
     checks.pass++; // 非 vibe 项目，无架构检查依据
   } else if (archCheck.issues.length > 0) {

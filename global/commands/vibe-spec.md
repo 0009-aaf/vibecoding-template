@@ -11,6 +11,7 @@ description: 切片命令：读取 PRD + 架构文档 → 拆分切片 → 输�
 ### 前置条件
 - `docs/01-PRD.md` 必须存在
 - `docs/02-ARCHITECTURE.md` 必须存在
+- 全程约束：项目根 `constitution.md` 为最高约束，任何产出违背其条款即否决重做
 
 ### 阶段1: 分析文档
 - 读取 `docs/01-PRD.md` 获取功能清单
