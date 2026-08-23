@@ -1,13 +1,13 @@
 ---
 name: coding-standards
-description: 编码规范 v1.8（通用规则 80 条编号，B/C/CM/CX/D/EN/F/M/N/P/S/T 系列）。每次编码任务开始前必读。核心底线：入口判空、精准修改、catch 必处理、异常不吞。语言专项已拆分到 coding-standards-{ts,react,vue,html,node,python,c,api,shell,wx} 子 skill（路由表见 §六）。
+description: 编码规范 v1.9（通用规则 81 条编号，B/C/CM/CX/D/EN/F/M/N/P/S/T 系列）。每次编码任务开始前必读。核心底线：入口判空、精准修改、catch 必处理、异常不吞。语言专项已拆分到 coding-standards-{ts,react,vue,html,node,python,c,api,shell,wx} 子 skill（路由表见 §六）。
 ---
 
-# 编码规范 v1.8
+# 编码规范 v1.9
 
 > **CRITICAL**：每次编码任务开始前，先读取本文件。本文件会从每次踩坑中自动进化。
 >
-> 最后更新：2026-08-23 | 通用规则：80 条编号（各系列见 §一~五、§十二） | 版本：v1.8
+> 最后更新：2026-08-23 | 通用规则：81 条编号（各系列见 §一~五、§十二） | 版本：v1.9
 > 语言专项规则：见各 coding-standards-<lang> 子 skill（TS/Python/API/Vue/C/React/Node/WX）
 > 经验教训：见 vault `40_Knowledge/lessons-learned.md`
 >
@@ -163,6 +163,7 @@ description: 编码规范 v1.8（通用规则 80 条编号，B/C/CM/CX/D/EN/F/M/
 □ Commit 带了 type 前缀？                 → CM1
 □ Commit subject ≤50 字符？               → CM2
 □ 一个 commit 只做一件事？                → CM8
+□ Body 列了文件功能清单？                 → CM11
 □ 没提交密钥/.env/构建产物？              → CM10
 □ 源文件 UTF-8 / 编译器声明了字符集？     → EN1 EN2
 □ 模块边界：没跨 feature import？           -> M10 M14
@@ -233,6 +234,7 @@ description: 编码规范 v1.8（通用规则 80 条编号，B/C/CM/CX/D/EN/F/M/
 | CM8 | 一个 commit 只做一件事（原子提交），避免"改 A + 顺手改 B"混在一起 |
 | CM9 | Commit 前确认编译通过 + 测试通过 + lint 无新增告警 |
 | CM10 | 禁止提交：密钥/Token/`.env`（含真实值）/构建产物/IDE 个人配置 |
+| CM11 | Body 含文件功能清单：每个非琐碎变更文件一行 `<文件>: <功能> + <本次变更>`（例：`quality-gate.js`: M02 命令注入修复，staged 文件名改 execFileSync 参数数组），让提交历史可按文件功能阅读，不读 diff 也能看懂改了什么 |
 
 ---
 
@@ -327,3 +329,4 @@ description: 编码规范 v1.8（通用规则 80 条编号，B/C/CM/CX/D/EN/F/M/
 | v1.6 | 2026-06-27 | 新增 OpenAI Codex 最佳实践 4 条(CX1-CX4)、审查输出格式 4 条(RV1-RV4)；C 语言专项；Google Nit 约定 |
 | v1.7 | 2026-08-09 | 新增 §十二 模块拆分与边界 23 条(M1-M23)，来源：Parnas/Fowler/Newman/GitLab/arc42/Feature-Sliced/Nx |
 | v1.8 | 2026-08-09 | 拆分语言专项到独立 skill（ts/python/api/vue/c）；§七经验教训移至 vault `40_Knowledge/lessons-learned.md`；§六改为路由表；§八自检清单移除语言专项条目 |
+| v1.9 | 2026-08-23 | 新增 CM11（提交 Body 文件功能清单：每文件一行"功能+变更"，提交历史可按功能阅读）；路由表补 shell/html 并修正全部条数 |
