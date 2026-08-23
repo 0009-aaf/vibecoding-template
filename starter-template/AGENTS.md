@@ -15,7 +15,12 @@
 - `docs/03-STATUS.md` — 项目状态（每次更新）
 - `docs/04-CONTRACTS.md` — 接口契约（/vibe-spec 生成，切片实现依据）
 - `docs/05-DECISIONS.md` — ADR 决策记录（选型必记）
+- `docs/06-RUNBOOK.md` — 运行/环境/部署/回滚/备份（/vibe-plan 阶段5 生成，实现后修正）
+- `docs/07-SECURITY.md` — 安全基线（/vibe-plan 阶段3 生成，与架构同生命周期，评审对照基准）
+- `docs/08-CODING-STANDARDS.md` — 项目级代码规范（/vibe-plan 阶段5 生成，冲突时优先于全局 skill）
 - `docs/DoD.md` — 项目级完成底线（/vibe-plan 生成，五段固定清单，切片完成须 AC ∩ DoD 双达标）
+- `docs/TECH-DEBT.md` — 技术债登记（/vibe-implement 阶段4 维护，NOTICED BUT NOT TOUCHING 的落点）
+- `CHANGELOG.md` — 面向使用者的变更记录（/vibe-implement 阶段6 commit 时追加）
 
 ## 架构选型（新项目必读）
 - `/vibe-plan` 阶段3 会加载 `architecture-selection` skill，对 NFR 适用的维度弹选项（⭐推荐 + 优劣）

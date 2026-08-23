@@ -49,6 +49,10 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - **增量保护**：`docs/DoD.md` 已存在 -> 不覆盖（DoD 定稿后不重谈），仅提示用户
   - 按项目情况裁剪（保留五段结构：Correctness / Quality / Integration / Documentation / Ship-readiness）
   - 同步到 `docs/02-ARCHITECTURE.md`（引用 DoD.md 作为 §8 之后的完成闸门说明）
+- **生成 `docs/07-SECURITY.md`（安全基线，与架构选型同生命周期）**：
+  - 从 `~/.config/opencode/templates/SECURITY-template.md` 复制
+  - 按 02-ARCHITECTURE.md §4 服务端边界与 §9 安全相关选型展开：鉴权、密钥管理、输入校验、CORS/CSRF、依赖漏洞策略
+  - 小项目允许逐项标注"不适用(理由)"，但文件必须存在（G05.5 门禁校验存在性，不校验内容质量）
 - 输出到 `docs/02-ARCHITECTURE.md`
 
 ### 阶段4: 定视觉（浏览器访问参考站 + CLI 降级）
@@ -80,7 +84,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - 按选型填充：环境要求（版本）、环境变量清单、启动/测试命令、部署方式、回滚、备份恢复
   - 从 02-ARCHITECTURE.md §9 选型值与 §8 测试策略取实际内容
   - `.env.example`：从 Runbook §2 的变量表生成（只含占位值，无真实密钥）
-- **生成 `docs/06-CODING-STANDARDS.md`**：复制 `~/.config/opencode/templates/CODING-STANDARDS-template.md`
+- **生成 `docs/08-CODING-STANDARDS.md`**：复制 `~/.config/opencode/templates/CODING-STANDARDS-template.md`
   - 按 02-ARCHITECTURE.md 技术栈选型裁剪 §3 技术栈专项：只保留主栈对应 coding-standards-<lang> 的 ≤15 条
   - 通用命名/文件组织/Commit 规范从模板直接带入（N1-N6、F1-F5、Conventional Commits）
   - 保留 §6 引用（全量规范指向 skill，不复制 58 条）
@@ -94,10 +98,11 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 - `docs/05-DECISIONS.md`（ADR 决策记录，随选型追加）
 - `docs/DoD.md`（项目级 Definition of Done，五段固定清单）
 - `docs/06-RUNBOOK.md`（运行/环境/部署/回滚/备份——阶段5）
-- `docs/06-CODING-STANDARDS.md`（项目级代码规范：命名/文件组织/技术栈专项/Commit——阶段5）
+- `docs/07-SECURITY.md`（安全基线：鉴权/密钥/输入校验/CORS/依赖漏洞——阶段3，与架构同生命周期）
+- `docs/08-CODING-STANDARDS.md`（项目级代码规范：命名/文件组织/技术栈专项/Commit——阶段5）
 - `README.md`（已填充：定位 + 快速开始 + vibe 命令表）
 - `.env.example`（环境变量占位样例）
-- `.opencode/quality-gate.js`（根据架构配置生成，含 G05 架构完备性检查）
+- `.opencode/quality-gate.js`（根据架构配置生成，含 G05 架构完备性[含 G05.5 安全基线] + G06 文档完备性检查）
 
 ### 收尾
 - 确保 `docs/03-STATUS.md` 存在，不存在则创建
