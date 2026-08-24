@@ -1,7 +1,7 @@
 {
   "name": "opencode-vision-bridge",
   "version": "0.2.0",
-  "description": "Convert pasted image parts to text via doubao-seed-2.0-lite before they reach text-only models; prevents hang. Replaces vision-auto + image-bridge.",
+  "description": "Convert pasted image parts to text via deepseek-v4-flash-vision-exp (DeepSeek official) before they reach text-only models; prevents hang. Replaces vision-auto + image-bridge.",
   "type": "module",
   "main": "index.mjs",
   "private": true,
