@@ -41,7 +41,7 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 | 档位 | 适用 | 跳过 | 仍执行（不减验证强度） |
 |---|---|---|---|
 | `--loop`（默认） | 多阶段/多文件/长任务 | 无 | 完整 7 阶段 |
-| `--full` | 多步但有界 | 阶段3.5 浏览器验证可降级 | 其余全部 |
+| `--full` | 多步但有界 | 阶段3.5 浏览器验证可降级 | 其余全部（含 Converge） |
 | `--fast` | 单文件/无新行为的改动 | worktree/锁/合并流程 | quality-gate + DoD |
 
 **自动探测兜底**：改动 ≤2 文件且非 API 核心 → 提示可用 `--fast`。
@@ -52,6 +52,7 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 | 机制 | 来源 | 在哪个命令/阶段触发 | 你要注意什么 |
 |---|---|---|---|
 | 模式门控 fast/full/loop | J-Space | implement 入口 | 选错会被强制回退 |
+| Converge 差距扫描 | Spec Kit converge（R-01） | implement 阶段3.2（loop/full） | spec 验收标准逐条对账；✗ 回环补实现，豁免 ≤20% 且必进技术债 |
 | 稠密轨 `✓/?/✗` 落盘 | J-Space | implement 阶段2b | `.vibecoding/dense-track.md` 已 git 追踪 |
 | 诊断携带重试 | J-Space | implement 阶段3 | 失败先写 `失败诊断:`，第 2 轮起写 `证据链:` |
 | doubt 循环（五步） | addyosmani | implement 阶段3 卡壳时 | 同一失败 2 轮无定论才触发；只传工件不给结论 |
