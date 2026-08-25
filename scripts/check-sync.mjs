@@ -16,6 +16,8 @@
  *   S5 ARCH-template 与 architecture-designer 双源 sync-hash 标记相等
  *   S6 文档结构校验（docs/00-DOC-STANDARD：编号白名单/H1/引言/变更记录）
  *   S7 skill 路由完整性 + skill 名引用存在性（S7a 总纲路由双向比对；S7b `X` skill / skill("X") 必须有目录）
+ *   S8 文档声明机制存在性：AGENTS.md/README/docs/starter 中声明的关键路径（scripts/、harness 脚本）
+ *      必须真实存在；运行时生成文件（active-context.md）校验其写入脚本存在。防"文档承诺了不存在的机制"。
  *
  * 退出码：0 = 通过（可含警告），1 = 存在漂移（阻断）。
  * 逃生阀：SKIP_CHECK_SYNC=1 跳过全部检查（须在 commit message 说明原因）。
@@ -380,6 +382,47 @@ function checkSkillReferences() {
   return { issues, skills: existing.size, scanned: scanFiles.length };
 }
 
+// === S8: 文档声明机制存在性校验 ===
+
+// 防"文档承诺了不存在的机制"（2026-08 教训：AGENTS.md 声称 active-context 启动必读，
+// 但项目根无该文件、写入脚本也不存在——机制纯纸面）。规则：
+//   - 扫描 AGENTS.md/README/docs/starter 中声明的关键路径（scripts/、harness 脚本、active-context.md）
+//   - 声明的仓库路径必须存在；harness 脚本必须存在（harness 目录可配置）
+//   - 运行时生成文件（active-context.md）允许缺失，但必须有其写入脚本（active-context.py）
+const HARNESS_DIR = process.env.HARNESS_DIR || path.join(os.homedir(), '.claude', 'harness');
+
+// S8 声明的关键机制清单：[声明引用子串, 仓库相对路径 | null（null=纯 harness 校验）, harness 脚本名 | null]
+// 新增机制时在此登记 + 同步 AGENTS.md 声明，双向防漂移
+const DECLARED_MECHANISMS = [
+  ['active-context.md', null, 'active-context.py'],        // 运行时文件：校验写入脚本存在
+  ['recall.py', null, 'recall.py'],                        // 记忆召回
+  ['reflect.py', null, 'reflect.py'],                      // 反思循环
+  ['blackboard.py', null, 'blackboard.py'],                // Agent Team 黑板
+  ['sync-routing-table.mjs', null, 'sync-routing-table.mjs'], // skill 路由表同步
+  ['sync-global.ps1', 'scripts/sync-global.ps1', null],    // 全局同步
+  ['check-sync.mjs', 'scripts/check-sync.mjs', null],      // 漂移检测自身
+  ['secret-matrix.mjs', 'scripts/secret-matrix.mjs', null],// 密钥矩阵回归
+  ['quality-gate.js', '.opencode/quality-gate.js', null],  // 质量闸门
+];
+
+function checkDeclaredMechanisms() {
+  const issues = [];
+  // 清单即权威声明源（声明可能位于仓库外全局 AGENTS.md，无法扫描 → 无条件校验清单内所有项）
+  for (const [ref, repoRel, harnessName] of DECLARED_MECHANISMS) {
+    if (repoRel) {
+      if (!fs.existsSync(path.join(repoRoot, repoRel))) {
+        issues.push(`机制 \`${ref}\`：仓库内 ${repoRel} 不存在`);
+      }
+    }
+    if (harnessName) {
+      if (!fs.existsSync(path.join(HARNESS_DIR, harnessName))) {
+        issues.push(`机制 \`${ref}\`：harness/${harnessName} 不存在（HARNESS_DIR=${HARNESS_DIR}）`);
+      }
+    }
+  }
+  return { issues, scanned: DECLARED_MECHANISMS.length };
+}
+
 // === 主流程 ===
 
 function main() {
@@ -403,6 +446,8 @@ function main() {
   if (s6.issues.length > 0) blockers.push({ code: 'S6', name: '文档结构不符合 00-DOC-STANDARD', issues: s6.issues });
   const s7 = checkSkillReferences();
   if (s7.issues.length > 0) blockers.push({ code: 'S7', name: 'skill 路由/引用漂移', issues: s7.issues });
+  const s8 = checkDeclaredMechanisms();
+  if (s8.issues.length > 0) blockers.push({ code: 'S8', name: '文档声明机制缺失', issues: s8.issues });
   const s4 = checkDeployedSync();
   if (s4.warnings.length > 0) warnings.push({ code: 'S4', name: '全局部署滞后（运行 sync-global.ps1）', issues: s4.warnings });
 
@@ -417,6 +462,7 @@ function main() {
   console.log(`[S5] 双源 sync-hash: ${s5.issues.length ? '❌' : '✅'}`);
   console.log(`[S6] 文档结构规范: ${s6.issues.length ? '❌' : '✅'}（docs ${s6.docs} 份 + 模板侧）`);
   console.log(`[S7] skill 路由/引用: ${s7.issues.length ? '❌' : '✅'}（${s7.skills} 个 skill，引用扫描 ${s7.scanned} 文件）`);
+  console.log(`[S8] 文档声明机制: ${s8.issues.length ? '❌' : '✅'}（扫描 ${s8.scanned} 文件，清单 ${DECLARED_MECHANISMS.length} 项）`);
 
   if (blockers.length > 0) {
     console.log('\n❌ 阻断项：');

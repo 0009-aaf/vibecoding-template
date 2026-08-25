@@ -1,13 +1,16 @@
 // Vault Sync — opencode Plugin
-// Session-end auto-write to Obsidian vault daily note.
+// Session-end auto-write to Obsidian vault daily note + session trace.
 //   - session.created: capture title + start time
 //   - session.idle: append one summary line to {vault}/10_Daily/YYYY-MM-DD.md
+//                  + one line to harness metrics/traces.jsonl (feeds reflect.py)
+//   - chat.params: inject active-context.md (per-repo, found by walking up from cwd)
+//                  as a system message once per session — gives "启动必读" real teeth
 //   - fire-and-forget: never blocks opencode
 //   - dedup by sessionID: each session writes exactly once
 //   - failure-tolerant: any error is swallowed after debug logging
 
-import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from "fs";
-import { join } from "path";
+import { readFileSync, writeFileSync, mkdirSync, appendFileSync, existsSync } from "fs";
+import { join, isAbsolute } from "path";
 import { homedir } from "os";
 
 // Vault 路径：优先读 opencode 配置 references.vault.path（与 /vault-sync 命令文档一致），
@@ -32,6 +35,10 @@ function resolveVaultPath() {
 const VAULT_PATH = resolveVaultPath();
 const DAILY_DIR = join(VAULT_PATH, "10_Daily");
 const LOG_PATH = join(homedir(), ".opencode", "vault-sync.log");
+// traces 落点：优先环境变量（测试隔离），默认 harness metrics（供 reflect.py 消费）
+const TRACES_PATH = process.env.VAULT_SYNC_TRACES_PATH
+  || join(homedir(), ".claude", "harness", "metrics", "traces.jsonl");
+const TRACES_ALWAYS = false; // true = 即使无 title 也写 trace（默认只写有实质内容的会话）
 
 const _debugBuffer = [];
 let _debugFlushing = false;
@@ -79,17 +86,47 @@ function appendToDaily(sessionId, title, startedAt) {
   try {
     mkdirSync(DAILY_DIR, { recursive: true });
     const line = `- ${nowStr()} [opencode] ${title || "(untitled session)"} (started ${startedAt || "?"})\n`;
-    const existing = readFileSync(file, "utf8").replace(/^\uFEFF/, "");
-    if (existing.includes(`(started ${startedAt})`) || existing.includes(line.trim())) {
-      debugLog(`DEDUP skip ${sessionId}`);
-      _written.add(sessionId);
-      return;
+    // 日笔记可能不存在（新的一天首条）：不存在则跳过 dedup 检查直接 append
+    // （appendFileSync 会自动创建文件）——修复 2026-08 ENOENT 断写 7 天
+    if (existsSync(file)) {
+      const existing = readFileSync(file, "utf8").replace(/^\uFEFF/, "");
+      if (existing.includes(`(started ${startedAt})`) || existing.includes(line.trim())) {
+        debugLog(`DEDUP skip ${sessionId}`);
+        _written.add(sessionId);
+        return;
+      }
     }
     appendFileSync(file, line, "utf8");
     _written.add(sessionId);
     debugLog(`APPEND ${sessionId} → ${file}: ${line.trim()}`);
   } catch (err) {
     debugLog(`APPEND FAIL ${sessionId}: ${err && err.message}`);
+  }
+}
+
+// 会话结束写一条 trace 到 harness/metrics/traces.jsonl（reflect.py 的日常数据源）
+// 格式与 eval traces 对齐：span/status/timestamp/attrs/duration_ms
+function appendTrace(sessionId, title, startedAt) {
+  try {
+    if (TRACES_ALWAYS || title) {
+      mkdirSync(join(TRACES_PATH, ".."), { recursive: true });
+      const trace = {
+        span: "session",
+        status: "success",
+        timestamp: new Date().toISOString(),
+        attrs: {
+          "task.id": sessionId,
+          "task.category": "session",
+          "title": title || "(untitled session)",
+          "startedAt": startedAt || "",
+        },
+        duration_ms: 0,
+      };
+      appendFileSync(TRACES_PATH, `${JSON.stringify(trace)}\n`, "utf8");
+      debugLog(`TRACE ${sessionId} → ${TRACES_PATH}`);
+    }
+  } catch (err) {
+    debugLog(`TRACE FAIL ${sessionId}: ${err && err.message}`);
   }
 }
 
@@ -117,6 +154,43 @@ function handleIdle(event) {
     debugLog(`TITLE ${sid} → ${props.title}`);
   }
   appendToDaily(sid, title, startedAt);
+  appendTrace(sid, title, startedAt);
+}
+
+// —— Active Context 注入（P0-2 改动 C）——
+// 会话首条消息前，从 cwd 向上找 active-context.md，命中则作为 system 消息注入，
+// 给模型"项目工作状态"的真实感知。找不到（非项目目录/未创建）→ 静默跳过。
+const _injectedCwd = new Set(); // 防止同一 cwd 多会话重复注入
+
+function findActiveContext(startDir) {
+  let cur = startDir;
+  while (cur && cur !== cur.split(/[\\/]/).slice(0, -1).join("/")) {
+    const candidate = join(cur, "active-context.md");
+    if (existsSync(candidate)) return candidate;
+    const parent = cur.split(/[\\/]/).slice(0, -1).join("/");
+    if (!parent || parent === cur) break;
+    cur = parent;
+  }
+  return null;
+}
+
+function buildInjectedMessage(cwd) {
+  const acFile = findActiveContext(cwd);
+  if (!acFile) return null;
+  if (_injectedCwd.has(cwd)) return null; // 同一工作目录只注入一次（本进程生命周期）
+  _injectedCwd.add(cwd);
+  try {
+    const content = readFileSync(acFile, "utf8").replace(/^\uFEFF/, "").trim();
+    if (!content) return null;
+    debugLog(`ACTIVE-CTX inject: ${acFile} (${content.length} chars)`);
+    return {
+      role: "system",
+      content: `[Active Context 注入] 项目工作状态（来源 ${acFile}，仅首条消息注入一次）：\n${content}`,
+    };
+  } catch (err) {
+    debugLog(`ACTIVE-CTX read fail ${acFile}: ${err && err.message}`);
+    return null;
+  }
 }
 
 export default async (ctx) => {
@@ -138,6 +212,21 @@ export default async (ctx) => {
       } catch (err) {
         debugLog(`ERROR ${event.type}: ${err && err.message}`);
       }
+    },
+    chat: {
+      // 首条消息注入 active-context（cwd 向上查找，跨项目不污染）
+      params: async (params) => {
+        if (!params || !Array.isArray(params.messages)) return params;
+        const cwd = process.cwd();
+        const injected = buildInjectedMessage(cwd);
+        if (!injected) return params;
+        try {
+          return { ...params, messages: [injected, ...params.messages] };
+        } catch (err) {
+          debugLog(`ACTIVE-CTX inject fail: ${err && err.message}`);
+          return params;
+        }
+      },
     },
   };
 };
