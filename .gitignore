@@ -39,6 +39,9 @@ npm-debug.log*
 # AI tooling
 .opencode/plugins/data/
 
+# Runtime project state (active-context 由 active-context.py 生成，不进版本库)
+active-context.md
+
 # Python cache
 .ruff_cache/
 __pycache__/
