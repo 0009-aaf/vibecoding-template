@@ -391,24 +391,42 @@ function checkSkillReferences() {
 //   - 运行时生成文件（active-context.md）允许缺失，但必须有其写入脚本（active-context.py）
 const HARNESS_DIR = process.env.HARNESS_DIR || path.join(os.homedir(), '.claude', 'harness');
 
-// S8 声明的关键机制清单：[声明引用子串, 仓库相对路径 | null（null=纯 harness 校验）, harness 脚本名 | null]
+// S8 声明的关键机制清单：[声明引用子串, 仓库相对路径 | null, harness 脚本名 | null, vault 相对路径 | null]
 // 新增机制时在此登记 + 同步 AGENTS.md 声明，双向防漂移
 const DECLARED_MECHANISMS = [
-  ['active-context.md', null, 'active-context.py'],        // 运行时文件：校验写入脚本存在
-  ['recall.py', null, 'recall.py'],                        // 记忆召回
-  ['reflect.py', null, 'reflect.py'],                      // 反思循环
-  ['blackboard.py', null, 'blackboard.py'],                // Agent Team 黑板
-  ['sync-routing-table.mjs', null, 'sync-routing-table.mjs'], // skill 路由表同步
-  ['sync-global.ps1', 'scripts/sync-global.ps1', null],    // 全局同步
-  ['check-sync.mjs', 'scripts/check-sync.mjs', null],      // 漂移检测自身
-  ['secret-matrix.mjs', 'scripts/secret-matrix.mjs', null],// 密钥矩阵回归
-  ['quality-gate.js', '.opencode/quality-gate.js', null],  // 质量闸门
+  ['active-context.md', null, 'active-context.py', null],        // 运行时文件：校验写入脚本存在
+  ['recall.py', null, 'recall.py', null],                        // 记忆召回
+  ['reflect.py', null, 'reflect.py', null],                      // 反思循环
+  ['golden-cases', null, null, '40_Knowledge/golden-cases'],     // 失败→回归用例目录（reflect.py 产出，R-02）
+  ['blackboard.py', null, 'blackboard.py', null],                // Agent Team 黑板
+  ['sync-routing-table.mjs', null, 'sync-routing-table.mjs', null], // skill 路由表同步
+  ['sync-global.ps1', 'scripts/sync-global.ps1', null, null],    // 全局同步
+  ['check-sync.mjs', 'scripts/check-sync.mjs', null, null],      // 漂移检测自身
+  ['secret-matrix.mjs', 'scripts/secret-matrix.mjs', null, null],// 密钥矩阵回归
+  ['quality-gate.js', '.opencode/quality-gate.js', null, null],  // 质量闸门
 ];
+
+// 解析 vault 根路径（与 vault-sync 插件同源：opencode.json references.vault.path）
+function resolveVaultPath() {
+  const candidates = [
+    process.env.OPENCODE_CONFIG,
+    path.join(os.homedir(), '.config', 'opencode', 'opencode.json'),
+  ].filter(Boolean);
+  for (const cfgPath of candidates) {
+    try {
+      const cfg = JSON.parse(readText(cfgPath));
+      const vp = cfg && cfg.references && cfg.references.vault && cfg.references.vault.path;
+      if (typeof vp === 'string' && vp.trim()) return vp.trim();
+    } catch { /* 尝试下一候选 */ }
+  }
+  return null; // 无 vault 配置 → vault 类校验跳过（警告级提示）
+}
 
 function checkDeclaredMechanisms() {
   const issues = [];
+  const vaultRoot = resolveVaultPath();
   // 清单即权威声明源（声明可能位于仓库外全局 AGENTS.md，无法扫描 → 无条件校验清单内所有项）
-  for (const [ref, repoRel, harnessName] of DECLARED_MECHANISMS) {
+  for (const [ref, repoRel, harnessName, vaultRel] of DECLARED_MECHANISMS) {
     if (repoRel) {
       if (!fs.existsSync(path.join(repoRoot, repoRel))) {
         issues.push(`机制 \`${ref}\`：仓库内 ${repoRel} 不存在`);
@@ -417,6 +435,13 @@ function checkDeclaredMechanisms() {
     if (harnessName) {
       if (!fs.existsSync(path.join(HARNESS_DIR, harnessName))) {
         issues.push(`机制 \`${ref}\`：harness/${harnessName} 不存在（HARNESS_DIR=${HARNESS_DIR}）`);
+      }
+    }
+    if (vaultRel) {
+      if (!vaultRoot) {
+        issues.push(`机制 \`${ref}\`：无法解析 vault 路径（opencode.json 无 references.vault.path），跳过校验`);
+      } else if (!fs.existsSync(path.join(vaultRoot, vaultRel))) {
+        issues.push(`机制 \`${ref}\`：vault 内 ${vaultRel} 目录不存在（由 reflect.py error_pattern 分类产出）`);
       }
     }
   }
