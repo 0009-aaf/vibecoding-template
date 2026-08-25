@@ -40,6 +40,25 @@ const TRACES_PATH = process.env.VAULT_SYNC_TRACES_PATH
   || join(homedir(), ".claude", "harness", "metrics", "traces.jsonl");
 const TRACES_ALWAYS = false; // true = 即使无 title 也写 trace（默认只写有实质内容的会话）
 
+// —— 写路径信号分级（R-03, 2026-08）——
+// 低信号会话（闲聊/无实质内容）无差别写入会稀释 traces 数据质量（Agentic Memory 综述：写前过滤是第一道闸）。
+// 分级规则：
+//   high   → title 命中 HIGH_SIGNAL_KEYWORDS（决策/修复/失败等实质工作）
+//   medium → title 非空且长度 ≥ 8 字符（有描述但非关键词）
+//   low    → 其余（空标题/极短标题）→ 不写 traces，仅写日笔记
+// 注意：关键词需精选高信号词——"实现/开发/完成"等泛词会让 medium 层形同虚设（2026-08 矩阵回归实证）
+const HIGH_SIGNAL_KEYWORDS = [
+  "决策", "修复", "bug", "踩坑", "重构", "失败", "error", "验收",
+  "架构", "ADR", "切换", "整改", "方案", "审查", "分析",
+];
+function signalLevel(title) {
+  const t = String(title || "").trim();
+  if (!t) return "low";
+  if (HIGH_SIGNAL_KEYWORDS.some((k) => t.toLowerCase().includes(k.toLowerCase()))) return "high";
+  if (t.length >= 8) return "medium";
+  return "low";
+}
+
 const _debugBuffer = [];
 let _debugFlushing = false;
 function debugLog(msg) {
@@ -106,14 +125,17 @@ function appendToDaily(sessionId, title, startedAt) {
 
 // 会话结束写一条 trace 到 harness/metrics/traces.jsonl（reflect.py 的日常数据源）
 // 格式与 eval traces 对齐：span/status/timestamp/attrs/duration_ms
+// 写前信号分级：low 信号会话跳过 traces（R-03）
 function appendTrace(sessionId, title, startedAt) {
   try {
-    if (TRACES_ALWAYS || title) {
+    const level = signalLevel(title);
+    if (TRACES_ALWAYS || level !== "low") {
       mkdirSync(join(TRACES_PATH, ".."), { recursive: true });
       const trace = {
         span: "session",
         status: "success",
         timestamp: new Date().toISOString(),
+        signal: level,
         attrs: {
           "task.id": sessionId,
           "task.category": "session",
@@ -123,7 +145,9 @@ function appendTrace(sessionId, title, startedAt) {
         duration_ms: 0,
       };
       appendFileSync(TRACES_PATH, `${JSON.stringify(trace)}\n`, "utf8");
-      debugLog(`TRACE ${sessionId} → ${TRACES_PATH}`);
+      debugLog(`TRACE ${sessionId} signal=${level} → ${TRACES_PATH}`);
+    } else {
+      debugLog(`TRACE LOW-SIGNAL skip ${sessionId} (title="${title || ""}")`);
     }
   } catch (err) {
     debugLog(`TRACE FAIL ${sessionId}: ${err && err.message}`);
