@@ -1,9 +1,8 @@
 // Vision Bridge — opencode Plugin
 // 给纯文本模型（deepseek-v4-flash 等）"眼睛"：
 //   在消息真正发往 LLM 之前（experimental.chat.messages.transform 钩子，
-//   该钩子被 opencode 同步等待），把图片 FilePart 用 deepseek-v4-flash-vision-exp
-//   （DeepSeek 官方视觉模型）转成文字描述，替换为 text part。
-//   这样粘贴的截图永远不会以图片形式到达纯文本模型 → 不再卡死。
+//   该钩子被 opencode 同步等待），把图片 FilePart 用豆包视觉模型转成文字描述，
+//   替换为 text part。这样粘贴的截图永远不会以图片形式到达纯文本模型 → 不再卡死。
 //
 // 设计要点:
 //   - 结构鲁棒: 兼容 opencode 1.18.15 的 FilePart (type:"file", 顶层 mime/url)
@@ -12,15 +11,16 @@
 //   - 去重: 同一图片 URL 10 分钟内只分析一次
 //   - 超时: 视觉 API 40s 超时，最坏降级为失败说明
 //   - 附带保留浏览器截图 tool.execute.after 自动识图能力
-//   - 2026-08: 模型从 doubao-seed-2.0-lite 切换为 deepseek-v4-flash-vision-exp（DeepSeek 官方）
+//   - 2026-08: 模型切回豆包，通道走火山方舟 Agent Plan（volcengine-coding-plan，
+//     api/plan/v3），与主模型通道一致
 
-import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { homedir } from "node:os";
 
-const VISION_API_URL = "https://api.deepseek.com/v1/chat/completions";
-const VISION_MODEL = "deepseek-v4-flash-vision-exp";
+// 火山方舟 Agent Plan 通道（与 opencode.json 的 volcengine-coding-plan 一致）
+const VISION_API_URL = "https://ark.cn-beijing.volces.com/api/plan/v3/chat/completions";
+const VISION_MODEL = "doubao-seed-2.0-lite";
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -28,9 +28,9 @@ function debug(...args) {
   console.error("[vision-bridge]", ...args);
 }
 
-// 优先 DeepSeek 官方 key；保留 ARK/VOLC 作为旧环境兼容回退
+// 优先 Agent Plan key（VOLC_API_KEY=ark-c86f...）；保留 ARK 作为旧环境兼容回退
 function apiKey() {
-  return process.env.DEEPSEEK_API_KEY || process.env.ARK_API_KEY || process.env.VOLC_API_KEY || "";
+  return process.env.VOLC_API_KEY || process.env.ARK_API_KEY || process.env.DEEPSEEK_API_KEY || "";
 }
 
 // 从 part 中提取图片信息（兼容多种 schema 变体）
@@ -59,7 +59,7 @@ async function toDataUrl(mime, url) {
 
 async function analyzeImage(dataUrl) {
   const key = apiKey();
-  if (!key) throw new Error("DEEPSEEK_API_KEY（或 ARK_API_KEY / VOLC_API_KEY）未设置");
+  if (!key) throw new Error("VOLC_API_KEY（或 ARK_API_KEY / DEEPSEEK_API_KEY）未设置");
   const resp = await fetch(VISION_API_URL, {
     method: "POST",
     headers: {
@@ -134,7 +134,7 @@ async function replaceImagePart(part) {
 
 export default async () => {
   if (!apiKey()) {
-    debug("DEEPSEEK_API_KEY（或 ARK_API_KEY / VOLC_API_KEY）未设置，视觉桥接不可用");
+    debug("VOLC_API_KEY（或 ARK_API_KEY / DEEPSEEK_API_KEY）未设置，视觉桥接不可用");
   }
   return {
     // 决定性钩子：在请求发往 LLM 之前，opencode 会等待本异步钩子完成
