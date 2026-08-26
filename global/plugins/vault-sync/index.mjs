@@ -181,6 +181,39 @@ function handleIdle(event) {
   appendTrace(sid, title, startedAt);
 }
 
+// —— 会话标题补全（2026-08 修复）——
+// 实测发现 opencode 的 session.created / session.idle 事件不携带 title（title=(none)），
+// 导致 R-03 信号分级拿不到输入 → 所有会话被判 low → traces.jsonl 数据源饿死。
+// 修复：从会话首条用户消息提取标题（chat.params 钩子），供 idle 时分级使用。
+const TITLE_MAX_LEN = 30; // 标题截断长度（够信号分级判断，避免长文本污染日笔记）
+
+// 从 UserMessage 的 parts 中提取首段文本作为标题（兼容 text part；图片/工具等跳过）
+function extractTitleFromMessage(message) {
+  if (!message || !Array.isArray(message.parts)) return "";
+  for (const part of message.parts) {
+    if (!part || typeof part !== "object") continue;
+    if (part.type === "text" && typeof part.text === "string" && part.text.trim()) {
+      return part.text.trim().replace(/\s+/g, " ").slice(0, TITLE_MAX_LEN);
+    }
+  }
+  return "";
+}
+
+// 记录会话首条用户消息标题（无既有 title 时才写；同一会话只取第一条）
+function captureSessionTitle(sessionID, message) {
+  if (!sessionID) return;
+  const info = _sessions.get(sessionID);
+  if (info && info.title) return; // 已有 title 不再覆盖
+  const title = extractTitleFromMessage(message);
+  if (!title) return;
+  if (!info) {
+    _sessions.set(sessionID, { title, startedAt: "" });
+  } else {
+    info.title = title;
+  }
+  debugLog(`CAPTURE-TITLE ${sessionID} → ${title}`);
+}
+
 // —— Active Context 注入（P0-2 改动 C）——
 // 会话首条消息前，从 cwd 向上找 active-context.md，命中则作为 system 消息注入，
 // 给模型"项目工作状态"的真实感知。找不到（非项目目录/未创建）→ 静默跳过。
@@ -238,8 +271,15 @@ export default async (ctx) => {
       }
     },
     chat: {
-      // 首条消息注入 active-context（cwd 向上查找，跨项目不污染）
-      params: async (params) => {
+      // ① 捕获会话首条用户消息作为标题（供 idle 时信号分级，R-03 修复）
+      // ② 注入 active-context（cwd 向上查找，跨项目不污染）
+      // input 含 sessionID + message（UserMessage），output 是待发 LLM 的 params
+      params: async (input, params) => {
+        try {
+          captureSessionTitle(input && input.sessionID, input && input.message);
+        } catch (err) {
+          debugLog(`CAPTURE-TITLE fail: ${err && err.message}`);
+        }
         if (!params || !Array.isArray(params.messages)) return params;
         const cwd = process.cwd();
         const injected = buildInjectedMessage(cwd);
