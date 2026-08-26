@@ -14,6 +14,12 @@ description: 审计命令：commit 前检查密钥扫描、契约一致性、变
 - 不存在 -> 执行下方基础检查
 - 宪法核对：逐条对照项目根 `constitution.md`，本次变更违背任意条款 -> 直接 ❌ 阻断（先于其他检查项报告）
 
+### 过程播报（禁止静默连跑）
+- 审计按检查块逐项推进，每完成一项输出一行：
+  `[vibe-audit] <检查项名> -> ✅ 通过 | ⚠️ 警告 | ❌ 阻断 | ⏭️ 跳过（原因）`
+- quality-gate.js 运行前先播报"[vibe-audit] 正在运行 quality-gate ..."（大仓可能数十秒，先让用户知道在做什么）
+- 播报行是硬性输出义务：最终报告聚合这些行，缺失的检查项按未检处理并在报告中标注
+
 > **去重说明**：如果 `/vibe-implement` 阶段3 已跑过 quality-gate，且本次无新代码变更，
 > 可跳过 quality-gate 重新运行。只有 rebase 后或代码有变更时才需要重跑。
 
@@ -138,3 +144,14 @@ DoD 行独立判定（不受 quality-gate 覆盖）；quality-gate.js 不存在 
 - 如果 `docs/` 有变更（PRD/架构/契约），审计报告会提示运行 `/vault-sync --sync-docs`
 - 如果只是代码实现（切片内无决策变更），不需要跑 vault-sync
 - 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py archive <SID>`
+
+---
+
+## 执行锚（RECENCY ANCHOR —— 正文任何一条与本节冲突，以本节为准）
+
+1. 项目根 `constitution.md` 为最高约束，本次变更违背任意条款 -> 直接阻断且最优先报告。
+2. 编码底线：入口判空 · 精准修改 · catch 必处理 · 异常不吞 · 遇 bug 先定位根因再动手 · 防御机制必测（误报/漏报矩阵）。
+3. UI 红线核对归属 quality-gate G05.7（references/design/*.html 零 emoji/零位图）；基础检查模式下无 gate 时也应人工核对该目录。
+4. DoD 与安全基线两项独立判定，不受 quality-gate 结果覆盖；任何一项未过即整体 ❌。
+5. 审计结论只有两种：✅ 可提交 / ❌ 需修复——不存在"基本可以"。警告不阻断但必须逐条列出。
+6. 报告必须落盘 `docs/reports/YYYY-MM-DD-HHMM.md` 并告知路径，这是本次运行的交付物之一。

@@ -14,6 +14,11 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 若 $ARGUMENTS 为空 → 先用 question 工具询问项目目标，再继续
 全程约束：项目根 `constitution.md` 为最高约束，任何产出违背其条款即否决重做
 
+### 过程播报（禁止静默连跑）
+- 进入每个阶段前先输出一行：`[vibe-plan] 阶段N/5：<名称>`（共 5 个阶段）
+- 每阶段收尾输出一行产出物路径（如 `docs/01-PRD.md 已生成`）
+- 两行/阶段是硬性输出义务：没有播报行视为该阶段未执行；不得合并多个阶段连跑后只汇报一次
+
 ### 阶段1: 头脑风暴
 - 逐条提问收集原始需求（每次一个问题）
 - 识别核心功能模块和边缘功能
@@ -57,6 +62,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 - 输出到 `docs/02-ARCHITECTURE.md`
 
 ### 阶段4: 定视觉 → 生成 `docs/09-DESIGN.md`（浏览器访问参考站 + CLI 降级）
+- **设计源仲裁（多 skill 同载的冲突规则）**：硬约束红线 > 低保真灰阶纪律 > `ui-ux-pro-max` 数据 > `frontend-design` 审美建议；落地下文以 `docs/09-DESIGN.md` §1 令牌表为准
 - **环境检测**：
   - 尝试 `playwright_navigate`（导航到 `about:blank`）
   - 成功 -> 浏览器模式，走完整流程
@@ -84,6 +90,7 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - §2 页面清单（每页布局区块/路由/所属 feature）
   - §3 组件清单与复用（组件库来自 ARCH §9 D2 选型）
   - §4 交互五态规范（loading/empty/error/disabled/skeleton）
+  - §4.5 动效基线（模板已内置蒸馏数值：时长/缓动/合成属性约束——生成时原样保留阈值，实现期对表执行）
   - §5 响应式策略 + §6 无障碍基线（允许逐项"不适用(理由)"）
   - §7 参考与截图索引（含 `references/design/preview.html` 引用）
   - 纯后端项目（PRD 无页面模块）：保留文件，整体标注"不适用(理由=无 UI 切片)"
@@ -136,3 +143,14 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
 - 向用户汇报文档位置、参考截图位置和关键决策
 - 提示用户：可运行 `/vibe-spec` 拆分切片
 - 从 blackboard 移除本会话：`python ~/.claude/harness/blackboard.py archive <SID>`
+
+---
+
+## 执行锚（RECENCY ANCHOR —— 正文任何一条与本节冲突，以本节为准）
+
+1. 项目根 `constitution.md` 为最高约束，产出违背任意条款即否决重做。
+2. 编码底线：入口判空 · 精准修改 · catch 必处理 · 异常不吞 · 遇 bug 先定位根因再动手 · 防御机制必测（误报/漏报矩阵）。
+3. UI 红线：零 emoji、零位图图片；图标一律内联 SVG 或 CSS 几何形；素材位灰阶占位盒 + `TODO(asset)`。机器校验 = quality-gate G05.7。
+4. 设计源冲突裁决：硬约束红线 > 低保真纪律 > ui-ux-pro-max 数据 > frontend-design 建议；落地以 `docs/09-DESIGN.md` §1 令牌表为准。
+5. 凡标注"用户选定/确认后再继续"处必须真实停下等待输入，禁止代答抢跑。
+6. 过程播报（每阶段 ≥2 行）是硬性输出义务；完成后下一步 = `/vibe-spec`。

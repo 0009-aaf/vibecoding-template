@@ -6,6 +6,9 @@
 ## [Unreleased]
 
 ### Added
+- **opencode + DeepSeek V4 专属适配·可见性与知识层四件套**：① vibe-plan/spec/implement/audit 四命令新增「过程播报」节（每阶段 ≥2 行 `[vibe-*] 阶段X：<名称>` + 收尾证据行，禁止静默连跑）+ 文件尾「执行锚」（RECENCY ANCHOR：宪法/编码底线/UI 红线/停等义务/下一步，prompt 三明治固化，专治长命令中段规则遗忘）；② DESIGN-template 新增 §0 设计源仲裁序（硬约束红线 > 低保真灰阶 > ui-ux-pro-max 数据 > frontend-design 审美建议）与 §4.5 动效基线（时长/缓动曲线/合成属性/stagger/reduced-motion 数值表，蒸馏自 Emil Kowalski 设计工程实践与 Material Design 3 motion 规范），随 vibe-plan 阶段4 进入每个新项目的 docs/09-DESIGN.md
+- **quality-gate G05.7 UI 素材红线门禁**：三副本同步新增检查——扫描 `references/design/*.html` 预览的零 emoji/零位图违规（`<img>` 标签、SVG 内 `<image>`、background-image 位图 url、base64 位图、Extended_Pictographic 表情；©®™ 排版字符先剔除防误报）；无预览产物项目直接通过不误伤纯后端；`scanUiRedlines`/`uiRedlinePatterns` 模块级导出（require.main 守卫，沿 secretPatterns 先例）；新增 `scripts/ui-redline-matrix.mjs` 误报/漏报矩阵（10 合法 + 8 违规，真实文件 IO 全路径，实测含"CJS 动态 import 不出新实例导致假绿"的自纠案例）
+- **根 AGENTS.md 整篇重写对齐**（销 TECH-DEBT 登记项）：补 constitution 最高约束引用、核心文档清单对齐实际 docs 结构（含 04-CONTRACTS 本仓缺席说明）、切片路径口径统一 `<编号>-<名称>`、工作流补浏览器验证与播报义务、"UI 红线"独立成节并指向 G05.7
 - **CM11 提交消息文件功能清单**：Body 每个变更文件一行 `<文件>: <该文件的功能>`——全部文件都列、纯功能描述（描述文件本身是干什么的，不描述本次改动，改动内容看 diff），读提交历史不查目录即知涉及文件职责；subject 保留 type 前缀、同为名词性功能描述（不用"新增/修复/改为"类变更动词）；落点：总纲 CM11 规则 + 自检清单行（v1.9）、vibe-implement 阶段 6.0、CODING-STANDARDS 模板 §5
 - **README 丰富**（对照公开 README 最佳实践重构）：badges / 这是什么总览 / 特性一览 / mermaid 工作流图 / Skills 一览 / 质量防线表 / 文档导航 / FAQ / Roadmap / 贡献与项目状态
 - **文档规范体系**（ADR-004）：`docs/00-DOC-STANDARD.md`（编号白名单/必备四件/内容规范/反臃肿）+ 模板；check-sync 新增 S6 文档结构校验（野编号/四件缺失即阻断，实测拦截）

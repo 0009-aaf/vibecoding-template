@@ -97,10 +97,10 @@ flowchart LR
 
 | 防线 | 入口 | 拦什么 |
 |------|------|--------|
-| `quality-gate.js` | commit 前（vibe-gate 插件调起；三副本哈希一致） | 密钥入库（M01）、测试未跑（G 系列）、跨 feature import（M10）、Protected Region 擅改 |
+| `quality-gate.js` | commit 前（vibe-gate 插件调起；三副本哈希一致） | 密钥入库（M01）、测试未跑（G 系列）、跨 feature import（M10）、Protected Region 擅改、UI 预览素材违规（G05.7：emoji/位图） |
 | `check-sync.mjs` S1-S8 | commit 前（强制） | 多副本漂移、悬空命令 / skill 引用、部署滞后、双源模板失配、文档结构违规、skill 路由断裂、文档声明机制缺失（S8） |
 | `guard` 插件 | 工具调用时 | `rm -rf` 全变体、`sudo/doas` 关机、`format` 格式化等危险命令 |
-| 矩阵回归 | 手动 / CI | guard 16+22、密钥 10+8 误报 / 漏报用例全绿（防御机制必测） |
+| 矩阵回归 | 手动 / CI | guard 16+22、密钥 10+8、UI 素材红线 10+8 误报 / 漏报用例全绿（防御机制必测） |
 
 逃生阀：`SKIP_CHECK_SYNC=1` / `SKIP_VIBE_GATE=1` 跳过一次，须在 commit message 写明原因留痕（见 [docs/06-RUNBOOK.md](docs/06-RUNBOOK.md)）。
 
@@ -119,8 +119,9 @@ vibecoding-template/
 │   ├── templates/        #   10 个文档 / 脚本模板（ARCH / DoD / SECURITY / CONTRACTS / …）
 │   └── plugins/          #   5 个插件（vibe-gate / guard / clawd-bridge / vision-bridge / vault-sync）
 ├── scripts/
-│   ├── sync-global.ps1   # 部署：global/ → ~/.config/opencode（含自检）
-│   └── check-sync.mjs    # 漂移检测器 S1-S7（commit 前强制）
+│   ├── sync-global.ps1       # 部署：global/ → ~/.config/opencode（含自检）
+│   ├── check-sync.mjs        # 漂移检测器 S1-S8（commit 前强制）
+│   └── ui-redline-matrix.mjs # G05.7 UI 素材红线误报/漏报矩阵
 └── docs/                 # 本仓库自身全套文档（Dogfooding）
 ```
 

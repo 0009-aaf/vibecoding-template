@@ -18,6 +18,7 @@
  *   M19 spec 测试用例未实现（阻断）
  *   M20 测试文件不在规定目录（警告）
  *   G05 架构完备性（vibe 项目：NFR+十维度选型+安全基线+界面设计+ADR，阻断）
+ *   G05.7 UI 素材红线（references/design/*.html 预览零 emoji/零位图，图标内联 SVG；无预览产物跳过，阻断）
  *   G06 文档完备性（vibe 项目：CODING-STANDARDS/RUNBOOK 存在性，阻断）
  *
  * 注：M04/M05/M09/M14/M15 历史声明未实现，已从检查项中移除，避免假安全感。
@@ -119,6 +120,41 @@ function checkSecrets(files) {
       const match = content.match(pattern);
       if (match) {
         issues.push({ file, match: match[0].substring(0, 30) + '...' });
+      }
+    }
+  }
+  return issues;
+}
+
+// G05.7 UI 素材红线模式（模块级导出：scripts/ui-redline-matrix.mjs import 本数组做回归）
+// 口径：设计预览 HTML 零 emoji、零位图图片；图标一律内联 SVG；
+// 照片/Logo 位用灰阶占位盒 + TODO(asset) 注释替代，真实素材由用户提供后接入。
+const uiRedlinePatterns = [
+  { type: 'img-tag', pattern: /<img\b/i, hint: '禁 <img> 素材引用（位图或外链图）；图标用内联 SVG，照片位灰阶占位盒 + TODO(asset)' },
+  { type: 'svg-image', pattern: /<image\b/i, hint: 'SVG 内禁嵌 <image> 位图；改用矢量路径' },
+  { type: 'bg-bitmap', pattern: /background-image\s*:\s*url\(\s*['"]?[^)'"]*\.(?:png|jpe?g|webp|gif|bmp|ico|avif)/i, hint: 'background-image 禁指位图资源' },
+  { type: 'base64-bitmap', pattern: /data:image\/(?:png|jpe?g|gif|webp|bmp|avif)[;,]/i, hint: '禁 base64 位图内嵌' },
+  { type: 'emoji', pattern: /\p{Extended_Pictographic}|\uFE0F/u, hint: '界面禁 emoji（按钮/空状态/表头/装饰均算）；标识图形用内联 SVG' },
+];
+
+// G05.7: 扫描 references/design/ 下预览 HTML。
+// verification 截图等二进制产物不在扫描名单——上层只传 .html 相对路径；
+// 此处对非 .html 输入二次防御直接忽略，避免对二进制做 utf8 误读。
+function scanUiRedlines(files) {
+  const issues = [];
+  const list = Array.isArray(files) ? files : [];
+  for (const raw of list) {
+    const file = String(raw).replace(/\\/g, '/');
+    if (!/^references\/design\/.+\.html$/i.test(file)) continue;
+    const lines = getFileContent(file).split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      // ©®™ 属 Extended_Pictographic 但为常规排版字符（页脚版权行），先剔除再判定防误报
+      const probe = lines[i].replace(/[©®™]/g, '');
+      for (const r of uiRedlinePatterns) {
+        const m = probe.match(r.pattern);
+        if (m) {
+          issues.push({ type: r.type, file, line: i + 1, match: m[0].substring(0, 24), hint: r.hint });
+        }
       }
     }
   }
@@ -594,6 +630,24 @@ function main() {
     checks.pass++;
   }
 
+  // G05.7: UI 素材红线（仅扫 references/design/*.html 预览；无预览产物的项目直接通过，不误伤纯后端/未到设计阶段项目）
+  const designPreviewFiles = files.map(f => String(f).replace(/\\/g, '/')).filter(f => /^references\/design\/.+\.html$/i.test(f));
+  if (designPreviewFiles.length === 0) {
+    checks.pass++; // 无设计预览产物 -> 无检查对象
+  } else {
+    const redlineIssues = scanUiRedlines(designPreviewFiles);
+    if (redlineIssues.length > 0) {
+      checks.block++;
+      blockers.push({
+        code: 'G05.7',
+        name: 'UI 素材红线（预览 HTML 含 emoji/位图）',
+        issues: redlineIssues,
+      });
+    } else {
+      checks.pass++;
+    }
+  }
+
   // G06: 文档完备性（vibe 项目强制，非 vibe 项目跳过）
   const docCheck = checkDocumentationCompleteness();
   if (docCheck.skipped) {
@@ -650,8 +704,8 @@ function main() {
   }
 }
 
-// 导出供 scripts/secret-matrix.mjs 做回归（import 时不执行闸门主流程）
-module.exports = { secretPatterns };
+// 导出供 scripts/secret-matrix.mjs 与 scripts/ui-redline-matrix.mjs 做回归（import 时不执行闸门主流程）
+module.exports = { secretPatterns, scanUiRedlines };
 
 if (require.main === module) {
   main();
