@@ -30,7 +30,7 @@ node .opencode/quality-gate.js
 node starter-template/.opencode/quality-gate.js
 
 # 2. 漂移检测（多副本/引用一致性，commit 前必跑）
-node scripts/check-sync.mjs
+node scripts/check-sync.mjs   # S9：active-context 落后 HEAD >3 天会警告（提示刷新/归档）
 
 # 3. 防御机制回归矩阵（guard/secret/ui-redline/empty-catch 规则变更后必跑，矩阵不绿禁止发布）
 node global/plugins/guard/guard-matrix.mjs
@@ -95,3 +95,4 @@ DeepSeek V4 上下文缓存按**请求前缀**命中（缓存命中输入 ≈ �
 | 2026-08-29 | §3 常用命令补 #5 gen-status.mjs 文档同步草稿生成用法 | 优化第二批（O8） |
 | 2026-08-29 | §4.1 修正 active-context 注入现状（vault-sync 实际注入头部，flash 极低价下缓存优化收益≈0 不改插件） | 优化第三批（O4/O5 调研结论） |
 | 2026-08-29 | §3 矩阵清单补 empty-catch-matrix.mjs（M21 空 catch 门禁回归） | 优化第四批（O10） |
+| 2026-08-29 | §2 漂移检测补 S9 active-context 新鲜度说明（落后 HEAD >3 天警告） | 优化第五批（审查发现 active-context 过期无机器校验） |

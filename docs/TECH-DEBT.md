@@ -25,5 +25,6 @@
 | 2026-08-29 | ~~`global/commands/vibe-implement.md` 阶段2a~~ | 已处理（审查 R-1）：阶段2a"强制先写测试+预期失败"与 fast/solo"无新行为不写测试"矛盾——补 fast/solo 跳过标注（与切片锁/合并处风格统一） | fast/solo 切片被误按 loop 强制写测试 | 已闭环 |
 | 2026-08-29 | ~~`global/commands/vibe-implement.md` solo 档~~ | 已处理（审查 R-2）：solo 原声明"不做 dense-track 记录"，与阶段0.1 中断恢复依赖矛盾——改为收尾写一行 `solo <日期> 完成层:...`（同 fast 格式） | solo 中断后恢复盲 | 已闭环 |
 | 2026-08-29 | `~/.claude/harness/` 分发缺失（开发者评估 P1） | blackboard.py/reflect.py/checks.py/gate.py 被 workflow 依赖但 git 追踪于 harness、不随仓库分发；TECH-DEBT 自曝机器路径硬编码 | 新机器复制 starter-template 后一半依赖是断的，"复制即开跑"承诺不成立 | 把 harness 依赖脚本并入 global/harness/ 或 starter，sync-global 一起分发 |
-| 2026-08-29 | `scripts/check-sync.mjs` 无自测（开发者评估 P1） | S1-S8 是"测别人"没"测自己"，防漂移守卫自身漂移无人知晓 | 漂移检测器自身回归缺失 | 加 S9：S 系列自身用 fixtures 回归（与 guard/secret 矩阵同构） |
+| 2026-08-29 | `scripts/check-sync.mjs` 无自测（开发者评估 P1） | S1-S8 是"测别人"没"测自己"，防漂移守卫自身漂移无人知晓 | 漂移检测器自身回归缺失 | 加 S10：S 系列自身用 fixtures 回归（与 guard/secret 矩阵同构）——注：S9 已于 2026-08-29 分配给 active-context 新鲜度检查 |
+| 2026-08-29 | `.opencode/quality-gate.js` M21 maskNonCode | 正则字面量掩码改前置字符判定后，`return /catch {}/`（正则前缀为标识符 `n`）不被掩码 → 正则文本被当代码 catch 误报 | 极低概率误报（需正则内恰好含空 catch 块形态且前缀为标识符） | 出现首例误报时改为词法状态机或登记豁免 |
 | 2026-08-29 | 软层机制无显式关闭路径（开发者评估 P2） | 播报/Converge/doubt 默认永远做，只有 SKIP_VIBE_GATE 逃生阀 | 机制只增不减、无"何时可不做"的明确授权 | 每条软层机制补"何时可跳过 + 谁批准"，P0 已落地 --solo 作为首个显式轻量档 |

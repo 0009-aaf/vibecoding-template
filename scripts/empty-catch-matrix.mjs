@@ -2,7 +2,7 @@
 // （宪法 C11 防御机制必测：先矩阵全绿才认为 M21 有效）
 //
 // 运行: node scripts/empty-catch-matrix.mjs
-// 期望: 误报 = 0/10  漏网 = 0/7（矩阵必须全绿）
+// 期望: 误报 = 0/14  漏网 = 0/8（矩阵必须全绿）
 //
 // 真源：直接 import quality-gate.js 导出的 findEmptyCatch（单一真源）——
 // 改 M21 只改 quality-gate 一处，本矩阵自动跟随，消除手工双源"假验证"。
@@ -25,6 +25,8 @@ const legal = [
   "catch (e) { /* TODO: real handling */ return }", // 注释 + return（有代码）
   "const re = /from\\s+[\"']@\\/features\\/([^/]+)\\/[^\"']*[\"']/;\ntry { run() } catch (e) { handle(e) }", // 正则含引号 + 后续 catch 有处理（M10 场景回归）
   "const r2 = /catch {/;", // 正则字面量内含 "catch {"（应掩码跳过）
+  "const re = /catch {}/g;", // 正则字面量含空 catch 块形态，前置 "=" 应掩码（修复回归：防误报）
+  "const re = /a\\/b/g; try { run() } catch (e) { handle(e) }", // 单行正则 + catch 有处理（防"正则不掩导致误报"）
 ];
 
 // 违规代码片段：期望命中（未命中 = 漏网）
@@ -36,6 +38,7 @@ const violations = [
   "try { run() } catch (e) { // swallow\n}", // 仅行注释
   "try { run() } catch (e) { ; }", // 仅空语句
   "catch (e) {}", // 独立 catch（无 try 前缀，健壮性）
+  "const x = a / b; try { run() } catch (e) {} const y = c / d;", // 单行除法夹真实空 catch（2026-08-29 掩码漏报回归：修复前放行）
 ];
 
 let fp = 0;
@@ -66,7 +69,7 @@ for (const c of violations) {
   }
 }
 
-console.log(`\n结果: 误报 ${fp}/10  漏网 ${fn}/7`);
+console.log(`\n结果: 误报 ${fp}/14  漏网 ${fn}/8`);
 if (fail) {
   console.log("✗ 矩阵未全绿，M21 不可上线");
   process.exit(1);

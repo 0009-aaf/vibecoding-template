@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### Added
+- **check-sync S9：active-context 新鲜度校验（2026-08-29 优化第五批）**：active-context.md 存在时，其"更新于"日期落后 HEAD 最新提交 >3 天即警告提示刷新/归档（警告级不阻断；文件缺失/非 git/无提交跳过）——防跨会话注入过时上下文（四批优化完成但 active-context 停留在 8/25 的实测教训）
 - **opencode + DeepSeek V4 专属适配·可见性与知识层四件套**：① vibe-plan/spec/implement/audit 四命令新增「过程播报」节（每阶段 ≥2 行 `[vibe-*] 阶段X：<名称>` + 收尾证据行，禁止静默连跑）+ 文件尾「执行锚」（RECENCY ANCHOR：宪法/编码底线/UI 红线/停等义务/下一步，prompt 三明治固化，专治长命令中段规则遗忘）；② DESIGN-template 新增 §0 设计源仲裁序（硬约束红线 > 低保真灰阶 > ui-ux-pro-max 数据 > frontend-design 审美建议）与 §4.5 动效基线（时长/缓动曲线/合成属性/stagger/reduced-motion 数值表，蒸馏自 Emil Kowalski 设计工程实践与 Material Design 3 motion 规范），随 vibe-plan 阶段4 进入每个新项目的 docs/09-DESIGN.md
 - **quality-gate G05.7 UI 素材红线门禁**：三副本同步新增检查——扫描 `references/design/*.html` 预览的零 emoji/零位图违规（`<img>` 标签、SVG 内 `<image>`、background-image 位图 url、base64 位图、Extended_Pictographic 表情；©®™ 排版字符先剔除防误报）；无预览产物项目直接通过不误伤纯后端；`scanUiRedlines`/`uiRedlinePatterns` 模块级导出（require.main 守卫，沿 secretPatterns 先例）；新增 `scripts/ui-redline-matrix.mjs` 误报/漏报矩阵（10 合法 + 8 违规，真实文件 IO 全路径，实测含"CJS 动态 import 不出新实例导致假绿"的自纠案例）
 - **根 AGENTS.md 整篇重写对齐**（销 TECH-DEBT 登记项）：补 constitution 最高约束引用、核心文档清单对齐实际 docs 结构（含 04-CONTRACTS 本仓缺席说明）、切片路径口径统一 `<编号>-<名称>`、工作流补浏览器验证与播报义务、"UI 红线"独立成节并指向 G05.7
@@ -23,6 +24,7 @@
 - vibe-plan 阶段5 新增生成 00-DOC-STANDARD 与 constitution（均增量保护）
 
 ### Fixed
+- **M21 空 catch 门禁掩码漏报修复（2026-08-29 优化第五批·审查实测）**：`maskNonCode` 正则字面量无差别掩码，单行内除法 `a / b; try{run()}catch(e){} c / d` 被误当正则区间整段吞掉中间真实空 catch（实测放行）——掩码改**前置字符判定**（前缀属 `( = : [ , ! & | ? { ;` 或行首才掩，标识符/数字/闭括号=除法不掩），三副本同步；矩阵补 V8 违规（单行除法夹空 catch，修复前漏网）+ L13/L14 合法（正则含 `catch{}` 防误报），扩容至 0/14 + 0/8 全绿；残余风险（`return /catch {}/` 前缀为标识符）登记 TECH-DEBT
 - **G05.7 门禁漏报修复（2026-08-27 审查）**：`bg-bitmap` 正则只匹配 `background-image:`，漏检 CSS 简写 `background:url()`（实测 `background:url(img.png)` 不命中，位图可绕过红线）——正则改 `(?:background|background-image)\s*:` 三副本同步，矩阵补 V9 违规用例（10 合法 + 9 违规）；e2e-verifier SKILL.md:12 与 vibe-implement 阶段3.2 切片路径口径统一 `<编号>-<名称>`；vibe-implement 阶段3.5/3.2 顺序校正（3.2 在前）+ 播报节阶段号列表同步；09-DESIGN §8 补模板 §0/§4.5 新增说明留档
 - **G05.7 门禁漏报二修（2026-08-29 审查 C-1）**：上一版正则仍漏检简写**前置值/逗号分隔**形态（`background:#fff url(...)` / `background: linear-gradient(...), url(...)` 实测不命中）——正则改 `background(?:-image)?\s*:\s*(?:(?!;)[^;])*?url\(...` 三副本同步，矩阵补 V10 用例（10 合法 + 10 违规全绿，换行/var/大写扩展名边界实测零漏检零误报）；**vibe-implement 文档一致性二修**（R-1/R-2）：阶段2a 补 fast/solo 跳过标注（消"先写测试"矛盾）、solo 补 dense-track 收尾记录（同 fast 格式，修中断恢复盲点）
 - **审查修复（2026-08-24 工作流多维度审查）**：

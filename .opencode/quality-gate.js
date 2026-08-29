@@ -264,15 +264,34 @@ function checkLibCompliance(files) {
 const EMPTY_CATCH_EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
 
 // 掩码：把字符串字面量/注释/正则字面量替换为等长空格（防 "catch {}" 文本、正则内引号误导状态机）
-// 顺序：块注释 -> 行注释 -> 模板串 -> 双引串 -> 单引串 -> 正则字面量（启发式）
+// 顺序：块注释 -> 行注释 -> 模板串 -> 双引串 -> 单引串 -> 正则字面量
+//
+// 正则字面量掩码需前置字符判定（JS 词法 "/" 二义性）：仅当前一非空白字符属于正则合法前缀
+// （行首 / 开括号 / 运算符 / 逗号 / 冒号 / 分号）时才掩；前缀为标识符/数字/闭括号是除法特征，不掩。
+// 否则单行内 `a / b; try{run()}catch(e){} c / d` 的除法会被误当正则区间整段吞掉中间真实 catch
+// （2026-08-29 审查实测漏报，empty-catch-matrix V8 用例回归）。
+const REGEX_PREFIX = new Set(['(', '=', ':', '[', ',', '!', '&', '|', '?', '{', ';']);
 function maskNonCode(content) {
-  return content
+  let masked = content
     .replace(/\/\*[\s\S]*?\*\//g, (m) => ' '.repeat(m.length))
     .replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
     .replace(/`(?:[^`\\]|\\.)*`/gs, (m) => ' '.repeat(m.length))
     .replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => ' '.repeat(m.length))
-    .replace(/'(?:[^'\\\n]|\\.)*'/g, (m) => ' '.repeat(m.length))
-    .replace(/\/(?:[^/\\\n]|\\.)*\/[a-z]*/g, (m) => ' '.repeat(m.length));
+    .replace(/'(?:[^'\\\n]|\\.)*'/g, (m) => ' '.repeat(m.length));
+  // 正则字面量掩码（reLit.exec 在已掩码串上跑，索引与原内容等长对齐）
+  const reLit = /\/(?:[^/\\\n]|\\.)*\/[a-z]*/g;
+  let out = '';
+  let last = 0;
+  let m;
+  while ((m = reLit.exec(masked)) !== null) {
+    let i = m.index - 1;
+    while (i >= 0 && /\s/.test(masked[i])) i--; // 回退到前一非空白字符
+    const prev = i >= 0 ? masked[i] : '';
+    out += masked.slice(last, m.index);
+    out += prev === '' || REGEX_PREFIX.has(prev) ? ' '.repeat(m[0].length) : m[0];
+    last = m.index + m[0].length;
+  }
+  return out + masked.slice(last);
 }
 
 // 去掉注释/空语句/空白后，块内容是否为空

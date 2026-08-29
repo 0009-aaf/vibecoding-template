@@ -18,12 +18,15 @@
  *   S7 skill 路由完整性 + skill 名引用存在性（S7a 总纲路由双向比对；S7b `X` skill / skill("X") 必须有目录）
  *   S8 文档声明机制存在性：AGENTS.md/README/docs/starter 中声明的关键路径（scripts/、harness 脚本）
  *      必须真实存在；运行时生成文件（active-context.md）校验其写入脚本存在。防"文档承诺了不存在的机制"。
+ *   S9 active-context 新鲜度（警告级）：active-context.md 存在时，其"更新于"日期落后 HEAD 最新提交
+ *      >3 天即警告提示刷新/归档——防跨会话注入过时上下文（运行时文件，缺失跳过）。
  *
  * 退出码：0 = 通过（可含警告），1 = 存在漂移（阻断）。
  * 逃生阀：SKIP_CHECK_SYNC=1 跳过全部检查（须在 commit message 说明原因）。
  */
 
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -448,6 +451,39 @@ function checkDeclaredMechanisms() {
   return { issues, scanned: DECLARED_MECHANISMS.length };
 }
 
+// === S9: active-context 新鲜度（警告级） ===
+// 运行时文件 active-context.md 若存在，其"更新于"日期不应落后 HEAD 最新提交太久——
+// 防止跨会话注入过时上下文（2026-08-29：四批优化完成但 active-context 停留在 8/25，注入的是旧上下文）。
+// 阈值 AC_STALE_DAYS 天内算新鲜；文件缺失/非 git/无提交均跳过（入口判空）。
+const AC_STALE_DAYS = 3;
+
+function checkActiveContextFreshness() {
+  const acPath = path.join(repoRoot, 'active-context.md');
+  if (!fs.existsSync(acPath)) return { issues: [], skipped: true }; // 缺失即跳过（S8 已校验写入脚本存在）
+  const text = fs.readFileSync(acPath, 'utf8');
+  const m = text.match(/更新于\s*(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return { issues: ['active-context.md 存在但未解析到 `> 更新于 YYYY-MM-DD` 时间戳'], skipped: false };
+  const updated = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00`);
+  let headDate = null;
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI'], { cwd: repoRoot, encoding: 'utf8' }).trim();
+    headDate = new Date(out);
+  } catch {
+    return { issues: [], skipped: true }; // 非 git 仓库或无提交 → 无比较基准，跳过
+  }
+  if (Number.isNaN(updated.getTime()) || Number.isNaN(headDate.getTime())) {
+    return { issues: [], skipped: true };
+  }
+  const days = Math.floor((headDate - updated) / 86400000);
+  if (days > AC_STALE_DAYS) {
+    return {
+      issues: [`active-context.md 更新于 ${m[0].replace('更新于', '').trim()}，落后 HEAD 最新提交 ${days} 天（>${AC_STALE_DAYS} 天）——请刷新或将已完成任务归档`],
+      skipped: false,
+    };
+  }
+  return { issues: [], skipped: false };
+}
+
 // === 主流程 ===
 
 function main() {
@@ -474,6 +510,8 @@ function main() {
   if (s7.issues.length > 0) blockers.push({ code: 'S7', name: 'skill 路由/引用漂移', issues: s7.issues });
   const s8 = checkDeclaredMechanisms();
   if (s8.issues.length > 0) blockers.push({ code: 'S8', name: '文档声明机制缺失', issues: s8.issues });
+  const s9 = checkActiveContextFreshness();
+  if (s9.issues.length > 0) warnings.push({ code: 'S9', name: 'active-context 过期', issues: s9.issues });
   const s4 = checkDeployedSync();
   if (s4.warnings.length > 0) warnings.push({ code: 'S4', name: '全局部署滞后（运行 sync-global.ps1）', issues: s4.warnings });
 
@@ -489,6 +527,7 @@ function main() {
   console.log(`[S6] 文档结构规范: ${s6.issues.length ? '❌' : '✅'}（docs ${s6.docs} 份 + 模板侧）`);
   console.log(`[S7] skill 路由/引用: ${s7.issues.length ? '❌' : '✅'}（${s7.skills} 个 skill，引用扫描 ${s7.scanned} 文件）`);
   console.log(`[S8] 文档声明机制: ${s8.issues.length ? '❌' : '✅'}（扫描 ${s8.scanned} 文件，清单 ${DECLARED_MECHANISMS.length} 项）`);
+  console.log(`[S9] active-context 新鲜度: ${s9.issues.length ? '⚠️  ' + s9.issues.length + ' 项' : '✅'}${s9.skipped ? '（缺失跳过）' : ''}`);
 
   if (blockers.length > 0) {
     console.log('\n❌ 阻断项：');
