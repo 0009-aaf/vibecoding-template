@@ -18,5 +18,12 @@
 | 2026-08-23 | ~~`global/skills/coding-standards/SKILL.md:26,178`、`coding-standards-shell:21`~~ | 引用不存在的 skill（karpathy-guidelines / code-review-and-quality）与 CLAUDE.md 残留（本体系是 AGENTS.md）——**已处理**：悬空引用改指真实体系（constitution/§九 RV1-RV4/宪法 C2），CLAUDE.md 措辞改指宪法 C3，并纳入 check-sync S7 机器校验防复发 | 悬空引用误导加载 | 已闭环 |
 | 2026-08-23 | 三套 "M" 编号体系 | coding-standards 元规则 M1-M6 / §十二 M1-M23 / quality-gate M01-M20 同前缀不同义 | 编号引用歧义（X4 要求编号原样引用） | 编号体系下次改造时（元规则改前缀） |
 | 2026-08-23 | `scripts/sync-global.ps1:65-67` | 同步只增不删：部署侧孤儿文件无检测（S4 仅单向对比）；node_modules 删除遇锁会中止 | 幽灵插件继续加载、同步非原子 | 下次改同步机制时（robocopy /MIR 方案） |
-| 2026-08-23 | `global/skills/e2e-verifier/SKILL.md:12` | 切片路径旧约定 `slices/<编号>/spec.md`，主约定已是 `<编号>-<名称>`（quality-gate M19 兼容两种才未触发） | 新读者按旧约定找不到目录 | 下次修订 e2e-verifier 时对齐 |
+| 2026-08-23 | ~~`global/skills/e2e-verifier/SKILL.md:12`~~ | 已处理：切片路径旧约定 `slices/<编号>/spec.md` 改 `<编号>-<名称>`（同步 vibe-implement 阶段3.2 同口径）——2026-08-27 对齐 | 新读者按旧约定找不到目录 | 已闭环 |
 | 2026-08-26 | `global/templates/quality-gate-template.js` G05.7 | 扫描器拦 `<img>` 标签与位图扩展名，但 `background-image:url(icons.svg)` 这类外链矢量变体未计入（红线原文要求图标一律内联 SVG，正则未覆盖 svg 后缀） | 外链 .svg 图标可绕过 G05.7 | 出现第一个滥用案例时把 bg-bitmap 正则纳入 `.svg` 变体并加矩阵用例 |
+| 2026-08-27 | ~~`global/templates/quality-gate-template.js` G05.7~~ | 已处理：`bg-bitmap` 正则只匹配 `background-image:`，漏检 CSS 简写 `background:url()`（实测 `background:url(img.png)` 不命中）——2026-08-27 正则改 `(?:background|background-image)\s*:` 并补矩阵 V9 用例（三副本同步） | CSS 简写位图可绕过红线 | 已闭环 |
+| 2026-08-29 | ~~`global/templates/quality-gate-template.js` G05.7~~ | 已处理（审查 C-1）：上一版正则仍漏检简写**前置值/逗号分隔**形态（`background:#fff url(...)` / `background: linear-gradient(...), url(...)` 实测不命中）——正则改 `background(?:-image)?\s*:\s*(?:(?!;)[^;])*?url\(...` 三副本同步，矩阵补 V10 用例（10 合法 + 10 违规全绿，含换行/var/大写扩展名边界实测零漏检零误报） | 前置值/多层背景位图可绕过红线 | 已闭环 |
+| 2026-08-29 | ~~`global/commands/vibe-implement.md` 阶段2a~~ | 已处理（审查 R-1）：阶段2a"强制先写测试+预期失败"与 fast/solo"无新行为不写测试"矛盾——补 fast/solo 跳过标注（与切片锁/合并处风格统一） | fast/solo 切片被误按 loop 强制写测试 | 已闭环 |
+| 2026-08-29 | ~~`global/commands/vibe-implement.md` solo 档~~ | 已处理（审查 R-2）：solo 原声明"不做 dense-track 记录"，与阶段0.1 中断恢复依赖矛盾——改为收尾写一行 `solo <日期> 完成层:...`（同 fast 格式） | solo 中断后恢复盲 | 已闭环 |
+| 2026-08-29 | `~/.claude/harness/` 分发缺失（开发者评估 P1） | blackboard.py/reflect.py/checks.py/gate.py 被 workflow 依赖但 git 追踪于 harness、不随仓库分发；TECH-DEBT 自曝机器路径硬编码 | 新机器复制 starter-template 后一半依赖是断的，"复制即开跑"承诺不成立 | 把 harness 依赖脚本并入 global/harness/ 或 starter，sync-global 一起分发 |
+| 2026-08-29 | `scripts/check-sync.mjs` 无自测（开发者评估 P1） | S1-S8 是"测别人"没"测自己"，防漂移守卫自身漂移无人知晓 | 漂移检测器自身回归缺失 | 加 S9：S 系列自身用 fixtures 回归（与 guard/secret 矩阵同构） |
+| 2026-08-29 | 软层机制无显式关闭路径（开发者评估 P2） | 播报/Converge/doubt 默认永远做，只有 SKIP_VIBE_GATE 逃生阀 | 机制只增不减、无"何时可不做"的明确授权 | 每条软层机制补"何时可跳过 + 谁批准"，P0 已落地 --solo 作为首个显式轻量档 |

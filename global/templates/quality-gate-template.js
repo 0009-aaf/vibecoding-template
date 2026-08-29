@@ -132,7 +132,7 @@ function checkSecrets(files) {
 const uiRedlinePatterns = [
   { type: 'img-tag', pattern: /<img\b/i, hint: '禁 <img> 素材引用（位图或外链图）；图标用内联 SVG，照片位灰阶占位盒 + TODO(asset)' },
   { type: 'svg-image', pattern: /<image\b/i, hint: 'SVG 内禁嵌 <image> 位图；改用矢量路径' },
-  { type: 'bg-bitmap', pattern: /background-image\s*:\s*url\(\s*['"]?[^)'"]*\.(?:png|jpe?g|webp|gif|bmp|ico|avif)/i, hint: 'background-image 禁指位图资源' },
+  { type: 'bg-bitmap', pattern: /background(?:-image)?\s*:\s*(?:(?!;)[^;])*?url\(\s*['"]?[^)'"]*\.(?:png|jpe?g|webp|gif|bmp|ico|avif)/i, hint: 'background/background-image 禁指位图资源（含简写 background:url() 与前置值/逗号分隔形态）' },
   { type: 'base64-bitmap', pattern: /data:image\/(?:png|jpe?g|gif|webp|bmp|avif)[;,]/i, hint: '禁 base64 位图内嵌' },
   { type: 'emoji', pattern: /\p{Extended_Pictographic}|\uFE0F/u, hint: '界面禁 emoji（按钮/空状态/表头/装饰均算）；标识图形用内联 SVG' },
 ];

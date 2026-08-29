@@ -6,6 +6,9 @@
 // 正则真源：直接 import quality-gate.js 导出的 secretPatterns（单一真源）——
 // 改 M01 正则只改 quality-gate 一处，本矩阵自动跟随，消除手工双源"假验证"。
 // guard 侧同类回归见 global/plugins/guard/guard-matrix.mjs。
+//
+// 饱和线（2026-08-29 机制审计）：覆盖已见 + 高频写法即停，不追未来/极端写法；
+// 新增用例前先判断是否真实事故（被漏拦过）再补，禁止"每次审查加用例"式无限膨胀。
 
 import { secretPatterns } from '../.opencode/quality-gate.js';
 

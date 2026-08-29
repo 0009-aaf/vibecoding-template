@@ -14,7 +14,7 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 |---|---|---|---|
 | `/vibe-plan <需求>` | 项目启动：导需求 → PRD → 架构 → 安全基线 → 界面设计 → 契约 → DoD → 宪法/规范 → quality-gate | **新项目 / 大功能**，还没有 docs/ 时 | 无（问答式收集需求） |
 | `/vibe-spec` | 拆切片：PRD+架构 → 垂直切片 + 依赖图 + 每切片 spec | plan 完成后，要开始实现前 | `docs/01-PRD.md` + `docs/02-ARCHITECTURE.md` |
-| `/vibe-implement <编号> [--fast\|--full\|--loop]` | 实现一个切片：测试 → 实现 → 闸门 → CHANGELOG/技术债登记 → 验收 → 合并 | **切片就绪后**（依赖已完成） | spec.md + CONTRACTS.md + quality-gate.js |
+| `/vibe-implement <编号> [--fast\|--solo\|--full\|--loop]` | 实现一个切片：测试 → 实现 → 闸门 → CHANGELOG/技术债登记 → 验收 → 合并 | **切片就绪后**（依赖已完成） | spec.md + CONTRACTS.md + quality-gate.js |
 | `/vibe-audit` | 提交前审计：密钥/契约/范围/文档/测试/UI/诊断痕迹/安全基线/技术债对账/漂移 + **DoD 双闸门** | **合并前**，或 rebase 后 | 至少一个切片处于待验收 |
 | `/vibe-status` | 一键看全貌：切片进度、活跃锁、稠密轨（渐进披露）、残留 | **随时**，尤其中断恢复前 | 无 |
 | `/vibe-clean [--force\|--scan-only\|--fix-status]` | 崩溃恢复：清 worktree/分支/锁/blackboard 残留 | status 提示有残留时 | 无 |
@@ -42,7 +42,8 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 |---|---|---|---|
 | `--loop`（默认） | 多阶段/多文件/长任务 | 无 | 完整 7 阶段 |
 | `--full` | 多步但有界 | 阶段3.5 浏览器验证可降级 | 其余全部（含 Converge） |
-| `--fast` | 单文件/无新行为的改动 | worktree/锁/合并流程 | quality-gate + DoD |
+| `--fast` | 单文件/无新行为的改动 | worktree/锁/合并流程 | quality-gate + DoD + 文档链义务（STATUS/CHANGELOG/blackboard） |
+| `--solo` | 单人临时/实验性改动 | worktree/锁/合并 + 文档链义务（播报/STATUS/CHANGELOG/blackboard） | quality-gate + DoD；收尾询问补文档（C10 人类豁免） |
 
 **自动探测兜底**：改动 ≤2 文件且非 API 核心 → 提示可用 `--fast`。
 **强制回退**：想 fast 但引入新行为 → 回退 `--full`/`--loop`（需写测试满足 DoD 红→绿）。
@@ -51,7 +52,7 @@ description: vibe 工作流的入口地图：7 个命令的职责与调用时机
 
 | 机制 | 来源 | 在哪个命令/阶段触发 | 你要注意什么 |
 |---|---|---|---|
-| 模式门控 fast/full/loop | J-Space | implement 入口 | 选错会被强制回退 |
+| 模式门控 fast/solo/full/loop | J-Space | implement 入口 | 选错会被强制回退 |
 | Converge 差距扫描 | Spec Kit converge（R-01） | implement 阶段3.2（loop/full） | spec 验收标准逐条对账；✗ 回环补实现，豁免 ≤20% 且必进技术债 |
 | 稠密轨 `✓/?/✗` 落盘 | J-Space | implement 阶段2b | `.vibecoding/dense-track.md` 已 git 追踪 |
 | 诊断携带重试 | J-Space | implement 阶段3 | 失败先写 `失败诊断:`，第 2 轮起写 `证据链:` |
@@ -98,6 +99,7 @@ python "C:\Users\fms\.claude\harness\gate.py" --show
 /vibe-spec
 /vibe-implement 001          # API 切片，完整流程
 /vibe-implement 002 --fast   # 样式微调，轻量路径
+/vibe-implement 003 --solo   # 个人临时改动，最小路径（收尾询问补文档）
 /vibe-audit                  # 提交前双闸门
 /vibe-status                 # 随时查看
 ```

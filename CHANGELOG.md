@@ -23,6 +23,8 @@
 - vibe-plan 阶段5 新增生成 00-DOC-STANDARD 与 constitution（均增量保护）
 
 ### Fixed
+- **G05.7 门禁漏报修复（2026-08-27 审查）**：`bg-bitmap` 正则只匹配 `background-image:`，漏检 CSS 简写 `background:url()`（实测 `background:url(img.png)` 不命中，位图可绕过红线）——正则改 `(?:background|background-image)\s*:` 三副本同步，矩阵补 V9 违规用例（10 合法 + 9 违规）；e2e-verifier SKILL.md:12 与 vibe-implement 阶段3.2 切片路径口径统一 `<编号>-<名称>`；vibe-implement 阶段3.5/3.2 顺序校正（3.2 在前）+ 播报节阶段号列表同步；09-DESIGN §8 补模板 §0/§4.5 新增说明留档
+- **G05.7 门禁漏报二修（2026-08-29 审查 C-1）**：上一版正则仍漏检简写**前置值/逗号分隔**形态（`background:#fff url(...)` / `background: linear-gradient(...), url(...)` 实测不命中）——正则改 `background(?:-image)?\s*:\s*(?:(?!;)[^;])*?url\(...` 三副本同步，矩阵补 V10 用例（10 合法 + 10 违规全绿，换行/var/大写扩展名边界实测零漏检零误报）；**vibe-implement 文档一致性二修**（R-1/R-2）：阶段2a 补 fast/solo 跳过标注（消"先写测试"矛盾）、solo 补 dense-track 收尾记录（同 fast 格式，修中断恢复盲点）
 - **审查修复（2026-08-24 工作流多维度审查）**：
   - **ui-ux-pro-max 测试套件入库不完整**：2 个依赖上游私有脚本的测试（`test_catalog_refresh.py` / `test_relevance_evaluator.py`）加 SkipTest 防护（模板镜像缺失 refresh/evaluate 脚本时自动跳过，不再收集崩溃）；`catalog-summary.json` 快照哈希失配根因 = Windows autocrlf 漂移 → `validate_data.py` 哈希前 LF 归一化 + 新增 `.gitattributes` 强制 `global/skills/ui-ux-pro-max/data/**` 与 `web-artifacts-builder/scripts/*.sh` eol=lf；SKILL.md 补测试运行说明。回归：130 passed + 2 skipped + 7923 subtests 全绿
   - **ARCH Skill 计数漂移**：02-ARCHITECTURE §2 目录树 16→19，补 frontend-design / ui-ux-pro-max / web-artifacts-builder 三行（vibe-README skills 清单同步补设计类 3 个）
@@ -39,10 +41,14 @@
 - **单一真源**：secret-matrix 改为 import quality-gate 导出的 `secretPatterns`（消除正则手工双源——正是该矩阵注释自己警告的"假验证"模式）
 
 ### Changed
+- **机制成本-收益审计落地（2026-08-29）**：全仓机制盘点，硬层（宪法/底线/门禁/漂移检测）全部保留；软层降级——vibe-implement 播报加 `--fast` 档（fast 只播 1 行收尾证据）；三矩阵（guard/secret/ui-redline）头部加**饱和线**注释（覆盖已见+高频即停，禁"每次审查加用例"式膨胀）；审计报告落盘 `docs/reports/audit-mechanism-20260829.md`
+- **强制 preview.html 最小集（2026-08-29）**：vibe-plan 阶段4 从"视觉重项目"改为"**有 UI 项目（PRD §2 页面模块非空）强制产出** `references/design/preview.html`"，补降级链（浏览器不可用仍生成 / Git bash 不可用降级手写单文件并标注 / 全不可用阻断）；不新增 G05.8 门禁，靠既有 G05.7 兜底；DESIGN-template 措辞同步、vibe-implement 兜底产出逻辑对齐
+- **开发者视角架构评估 + P0 最小模式（2026-08-29）**：评估落盘 `docs/reports/dev-perspective-20260829.md`；vibe-implement 新增 `--solo` 档（单人临时/实验性改动：跳过 worktree/锁/合并 + 播报/STATUS/CHANGELOG/blackboard 文档链义务，仍必过 quality-gate + DoD 红→绿；收尾必须 question 询问补文档——C10 由人类豁免不静默跳过）；vibe-README 档位表/触发点/示例同步；P1/P2 遗留登记 TECH-DEBT
 - **提交历史统一 CM11 格式**：34 个历史提交的 Body 全量改写为文件功能清单（git filter-branch 消息改写 + force push；本地保留备份分支 backup/pre-cm11-rewrite，Protected Region 豁免段与 BREAKING CHANGE 等合规 footer 原样保留）
 - **提交历史 subject 去 type 化**：36 个历史提交的 subject 全部去掉 `feat:/fix:/docs:/chore:` 前缀、移除 CM11 字样（git commit-tree 消息重建 + force push，tree 哈希 36/36 一致仅 message 变化；备份分支 backup/pre-no-type）
 - vibe-plan 阶段4 定视觉产出升级：从"写入 PRD §2"改为生成 09-DESIGN.md（PRD §2 收敛为方向 + 指向）
 - quality-gate G05 增 G05.6 界面设计存在性（isUiFile 提升为模块级，M18/G05.6 同口径）
+- **vibe-implement 注意力优化试点（2026-08-29）**：①执行锚（RECENCY ANCHOR）从文末前置到文件头部 frontmatter 后——最高约束首屏可见（prompt sandwich），治长命令中段规则遗忘；②文末"失败处理"段上移合并到阶段3 修复策略前——全局失败兜底就近可读，消除约 180 行注意力跳跃，并删除与"停止条件"重复的"连续 3 次修复"条目；③反合理化表下沉受 `vibe-command-structure/checks.py` C4 机制检查约束（4 个标题必须保留），故收敛为"执行锚前置 + 重复段落合并"。机器校验全绿（quality-gate 9/0/0、check-sync S1-S8、checks.py C1-C5 PASS），已 sync-global.ps1 部署
 
 ### Added
 - **UI/前端设计 skill 补齐（3 个入库）**：`frontend-design`（Anthropic 官方，美学方向/反 AI 模板化）、`ui-ux-pro-max` v2.0（nextlevelbuilder 源，79 样式/192 色板/74 字体/22 栈 + 设计系统生成器 `scripts/search.py --design-system`）、`web-artifacts-builder`（官方 HTML 预览构建器，React+Tailwind+shadcn → 单文件 HTML；scripts 依赖 node/pnpm/tar，Git bash 运行）；本机 `~/.claude/skills/ui-ux-pro-max` 残缺 v1（data/scripts 空目录）移入 `_archived/ui-ux-pro-max-v1`

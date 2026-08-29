@@ -11,6 +11,9 @@
  * finally 无条件删除，全程端到端覆盖真实文件读取；任何中途崩溃都不会留下残留文件。
  *
  * 运行：node scripts/ui-redline-matrix.mjs   （exit 0 = 全绿）
+ *
+ * 饱和线（2026-08-29 机制审计）：覆盖已见 + 高频写法即停，不追未来/极端写法；
+ * 新增用例前先判断是否真实事故（被漏拦过）再补，禁止"每次审查加用例"式无限膨胀。
  */
 
 import { createRequire } from 'node:module';
@@ -48,7 +51,7 @@ const LEGAL = [
   },
 ];
 
-// ---- 违规用例（期待命中指定类型）：8 个 ----
+// ---- 违规用例（期待命中指定类型）：10 个 ----
 const VIOLATION = [
   { name: 'V1 <img> 本地位图', types: ['img-tag'], html: TPL('<img src="./assets/hero.png" alt="主视觉">') },
   { name: 'V2 <img> 外链位图', types: ['img-tag'], html: TPL('<img src="https://cdn.example.com/photo.jpg" alt="示例">') },
@@ -58,6 +61,8 @@ const VIOLATION = [
   { name: 'V6 base64 位图内嵌', types: ['img-tag', 'base64-bitmap'], html: TPL('<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" alt="">') },
   { name: 'V7 按钮文案 emoji', types: ['emoji'], html: TPL('<button type="button">🚀 一键部署</button>') },
   { name: 'V8 空状态 emoji + VS16 变体选择符', types: ['emoji'], html: TPL('<div class="empty">📦 暂无数据</div><p>⚠️ 请先保存</p>') },
+  { name: 'V9 CSS 简写 background:url() 指位图（漏报边界回归）', types: ['bg-bitmap'], html: TPL('<div style="background:url(banner.png) center/cover no-repeat"></div>') },
+  { name: 'V10 简写前置值/逗号分隔形态（background:#fff url(...)）', types: ['bg-bitmap'], html: TPL('<div style="background:#fff url(hero.jpg) center/cover no-repeat;background: linear-gradient(#000,#111), url(bg.webp)"></div>') },
 ];
 
 // 在本仓库内落地用例文件 -> 静态 gate 实例扫描 -> finally 删除（真实 IO 全路径覆盖）

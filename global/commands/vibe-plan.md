@@ -79,13 +79,18 @@ description: 规划命令：导需求 → 生成 PRD → 设计架构（加载 p
   - 用 vision 分析工具分析截图（优先 `doubao_analyze_image`，不可用时跳过，不阻塞）
   - 提取：布局 / 导航结构 / 配色 / 气质
 - **生成 `docs/09-DESIGN.md`（界面设计规格）**：复制 `~/.config/opencode/templates/DESIGN-template.md`，按提取结果填充：
-  - **先加载设计 skill（视觉重项目必做，纯后端项目跳过）**：
+  - **先加载设计 skill（有 UI 项目必做——PRD §2 页面模块非空；纯后端项目跳过）**：
     1. 加载 `ui-ux-pro-max` → `python ~/.config/opencode/skills/ui-ux-pro-max/scripts/search.py "<产品类型> <行业> <关键词>" --design-system -p "<项目名> --output-dir <项目根>` 生成完整设计系统（pattern/style/colors/typography/effects/anti-patterns）
     2. 加载 `frontend-design` → 对照设计系统审校美学方向（防 AI 模板化：避开 cream+serif+terracotta / 黑底+acid accent / broadsheet 三类默认样）
-    3. **视觉重（PRD §2 有明确页面视觉要求）→ 加载 `web-artifacts-builder`** → 用 Git bash 跑 `scripts/init-artifact.sh <tmp目录>` 产出 React 骨架，手写关键页（首页/核心功能页）→ `scripts/bundle-artifact.sh` 打包成**单文件 HTML 静态预览**输出到 `references/design/preview.html`（用户可浏览器直接打开看方向）
+    3. **有 UI 项目强制产出 `references/design/preview.html`（PRD §2 有页面模块）** → 加载 `web-artifacts-builder` → 用 Git bash 跑 `scripts/init-artifact.sh <tmp目录>` 产出 React 骨架，手写关键页（首页/核心功能页）→ `scripts/bundle-artifact.sh` 打包成**单文件 HTML 静态预览**输出到 `references/design/preview.html`（用户可浏览器直接打开看方向）
        - **bash 探测（机器相关）**：先 `Get-Command bash` 确认真实 Git bash 路径（如 `D:\Git\bin\bash.exe`），**禁用** `C:\Windows\system32\bash.exe`（WSL stub，WSL 未装时直接报错）——见 coding-standards-shell SH13
        - 图标一律内联 SVG（`lucide-react` / 手写 `stroke="currentColor"`），禁用位图/emoji
        - 预览仅定方向，不追求完整：用户确认后细节在 `/vibe-implement` 阶段实现
+       - **降级链（环境不满足时逐级降级，不阻断，但必须产出 preview.html）**：
+         - 浏览器不可用 → 仍生成（preview 是静态产物，不依赖浏览器运行）
+         - Git bash 不可用 → 降级**手写单文件 HTML**（符合 coding-standards-html 单文件内联，图标内联 SVG），写入 `references/design/preview.html` 并标注"手写预览，非骨架打包"
+         - 全不可用 → **阻断**并明确列出缺什么环境（bash/node 其一），不进入阶段5
+       - 产出后 `references/design/preview.html` 即为 quality-gate G05.7 门禁扫描对象（零 emoji/零位图/内联 SVG）
   - §1 设计令牌（颜色/字体/间距/圆角/阴影/断点，表格化——UI 切片实现的唯一视觉锚点；**来自 ui-ux-pro-max 输出的色板/字体系统**）
   - §2 页面清单（每页布局区块/路由/所属 feature）
   - §3 组件清单与复用（组件库来自 ARCH §9 D2 选型）
