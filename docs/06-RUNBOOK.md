@@ -38,6 +38,9 @@ node scripts/secret-matrix.mjs
 
 # 4. 真源 → 全局部署（global/ -> ~/.config/opencode/）
 powershell -ExecutionPolicy Bypass -File scripts/sync-global.ps1
+
+# 5. 文档同步草稿生成（从 dense-track/converge 自动生成 STATUS/CHANGELOG/TECH-DEBT 草稿，确认后贴入）
+node scripts/gen-status.mjs <切片编号> "<一句话变更>" --debt "<文件:行>|<问题>|<影响>|<时机>"
 ```
 
 ## 4. 同步约定（谁同步谁、何时同步）
@@ -87,3 +90,4 @@ DeepSeek V4 上下文缓存按**请求前缀**命中（缓存命中输入 ≈ �
 |---|---|---|
 | 2026-08-23 | 初版 | 文档生命周期补强（G06 门禁项） |
 | 2026-08-29 | 补 §4.1 缓存友好约定（V4 上下文缓存前缀命中，稳定真源批改/易变文件后置） | 注意力与成本优化第一批（O6） |
+| 2026-08-29 | §3 常用命令补 #5 gen-status.mjs 文档同步草稿生成用法 | 优化第二批（O8） |

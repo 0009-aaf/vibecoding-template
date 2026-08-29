@@ -453,6 +453,7 @@ function checkDeclaredMechanisms() {
 function main() {
   if (process.env.SKIP_CHECK_SYNC === '1') {
     console.log('⏭️  SKIP_CHECK_SYNC=1，跳过漂移检测');
+    console.log('⚠️  逃生阀已用——commit message 必须写明原因留痕（防逃逸滥用；约定见 docs/06-RUNBOOK.md）');
     process.exit(0);
   }
 
