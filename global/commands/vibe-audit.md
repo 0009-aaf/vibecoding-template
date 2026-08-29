@@ -155,3 +155,4 @@ DoD 行独立判定（不受 quality-gate 覆盖）；quality-gate.js 不存在 
 4. DoD 与安全基线两项独立判定，不受 quality-gate 结果覆盖；任何一项未过即整体 ❌。
 5. 审计结论只有两种：✅ 可提交 / ❌ 需修复——不存在"基本可以"。警告不阻断但必须逐条列出。
 6. 报告必须落盘 `docs/reports/YYYY-MM-DD-HHMM.md` 并告知路径，这是本次运行的交付物之一。
+7. 模型档位（opencode 变体，**用户手动切换**）：审查需深度推理 → `deepseek-v4-flash-high`；默认 `deepseek-v4-flash`。
