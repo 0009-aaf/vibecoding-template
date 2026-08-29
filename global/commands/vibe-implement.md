@@ -14,6 +14,7 @@ $ARGUMENTS
 4. 先写测试后写实现（红→绿）；fast/solo 模式只减隔离与文档链成本、不减验证强度（quality-gate 必须过）。
 5. 凡标注"人类验收/question 工具询问"处必须真实停下等待输入，禁止代答自验自过；solo 收尾补文档询问同样必须真实停下。
 6. 过程播报（每阶段 ≥1 行 + 半行证据）是硬性输出义务（solo 仅收尾 1 行证据）；实现期样式只引用 `docs/09-DESIGN.md` §1 令牌与 §4 五态/§4.5 动效基线。
+7. 文档读取纪律：只读任务点名文件/章节（如 `docs/09-DESIGN.md` §1），禁止整篇通读；单文件读取 ≤80 行，超出用 grep/指针定位——防长上下文注意力稀释、保 V4 上下文缓存命中。
 
 ### 会话隔离
 生成 SID = `impl-{切片编号}-{今日日期}-{4位随机}`（fast 模式为 `impl-{切片编号}-{今日日期}-fast-{4位随机}`；solo 模式无需注册 blackboard）。注册（loop/full/fast）：`python ~/.claude/harness/blackboard.py register <SID> "vibe-implement (<切片编号> <切片名>)"`

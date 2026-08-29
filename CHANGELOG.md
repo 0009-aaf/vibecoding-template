@@ -49,6 +49,7 @@
 - vibe-plan 阶段4 定视觉产出升级：从"写入 PRD §2"改为生成 09-DESIGN.md（PRD §2 收敛为方向 + 指向）
 - quality-gate G05 增 G05.6 界面设计存在性（isUiFile 提升为模块级，M18/G05.6 同口径）
 - **vibe-implement 注意力优化试点（2026-08-29）**：①执行锚（RECENCY ANCHOR）从文末前置到文件头部 frontmatter 后——最高约束首屏可见（prompt sandwich），治长命令中段规则遗忘；②文末"失败处理"段上移合并到阶段3 修复策略前——全局失败兜底就近可读，消除约 180 行注意力跳跃，并删除与"停止条件"重复的"连续 3 次修复"条目；③反合理化表下沉受 `vibe-command-structure/checks.py` C4 机制检查约束（4 个标题必须保留），故收敛为"执行锚前置 + 重复段落合并"。机器校验全绿（quality-gate 9/0/0、check-sync S1-S8、checks.py C1-C5 PASS），已 sync-global.ps1 部署
+- **优化第一批落地（2026-08-29）**：①vibe-implement 执行锚加第 7 条"文档读取纪律"（只读任务点名章节/单文件 ≤80 行/超出用 grep 定位——防注意力稀释 + 保 V4 缓存命中）；②vibe-spec 阶段3 新增"并行命令清单"（依赖图确定后输出无依赖切片组的并行启动命令，利用模型高并发，用户手动多窗口执行）；③RUNBOOK 新增 §4.1 缓存友好约定（V4 前缀缓存：稳定真源批改省钱、易变文件放注入末尾、禁无效改动致缓存失效）
 
 ### Added
 - **UI/前端设计 skill 补齐（3 个入库）**：`frontend-design`（Anthropic 官方，美学方向/反 AI 模板化）、`ui-ux-pro-max` v2.0（nextlevelbuilder 源，79 样式/192 色板/74 字体/22 栈 + 设计系统生成器 `scripts/search.py --design-system`）、`web-artifacts-builder`（官方 HTML 预览构建器，React+Tailwind+shadcn → 单文件 HTML；scripts 依赖 node/pnpm/tar，Git bash 运行）；本机 `~/.claude/skills/ui-ux-pro-max` 残缺 v1（data/scripts 空目录）移入 `_archived/ui-ux-pro-max-v1`

@@ -50,6 +50,14 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-global.ps1
 | `global/commands/*` 引用的命令/文件 | 实际文件 | 引用增删后 | check-sync 检查 3 |
 | `global/skills/coding-standards` 路由表 + 全仓引用的 skill 名 | 实际 skill 目录 | skill 增删/路由改动后 | check-sync 检查 7（路由双向比对 + 引用存在性） |
 
+### 4.1 缓存友好约定（V4 上下文缓存）
+
+DeepSeek V4 上下文缓存按**请求前缀**命中（缓存命中输入 ≈ 未命中的 1/30~1/60）。对 vibe 工作流的影响：
+
+- **稳定真源（宪法/skill/命令/模板）是缓存命中的主体**：批改它们本身是"省钱操作"，改动后立即部署（sync-global.ps1）保持全局与仓库一致，缓存才不浪费
+- **易变文件（active-context.md / docs/03-STATUS.md）放注入序列末尾读**，避免前缀变化导致整段缓存失效
+- 避免为"顺手"加无关注释/空行改动稳定文件——一次无效改动 = 整段缓存前缀失效
+
 ## 5. 部署（新机器初始化）
 
 1. 克隆本仓库
@@ -78,3 +86,4 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-global.ps1
 | 日期 | 变更 | 原因 |
 |---|---|---|
 | 2026-08-23 | 初版 | 文档生命周期补强（G06 门禁项） |
+| 2026-08-29 | 补 §4.1 缓存友好约定（V4 上下文缓存前缀命中，稳定真源批改/易变文件后置） | 注意力与成本优化第一批（O6） |
