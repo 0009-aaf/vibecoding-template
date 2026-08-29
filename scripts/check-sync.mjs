@@ -417,7 +417,7 @@ function resolveVaultPath() {
       const cfg = JSON.parse(readText(cfgPath));
       const vp = cfg && cfg.references && cfg.references.vault && cfg.references.vault.path;
       if (typeof vp === 'string' && vp.trim()) return vp.trim();
-    } catch { /* 尝试下一候选 */ }
+    } catch { continue; /* 尝试下一候选 */ }
   }
   return null; // 无 vault 配置 → vault 类校验跳过（警告级提示）
 }

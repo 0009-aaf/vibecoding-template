@@ -32,9 +32,11 @@ node starter-template/.opencode/quality-gate.js
 # 2. 漂移检测（多副本/引用一致性，commit 前必跑）
 node scripts/check-sync.mjs
 
-# 3. 防御机制回归矩阵（guard/secret 规则变更后必跑，矩阵不绿禁止发布）
+# 3. 防御机制回归矩阵（guard/secret/ui-redline/empty-catch 规则变更后必跑，矩阵不绿禁止发布）
 node global/plugins/guard/guard-matrix.mjs
 node scripts/secret-matrix.mjs
+node scripts/ui-redline-matrix.mjs
+node scripts/empty-catch-matrix.mjs
 
 # 4. 真源 → 全局部署（global/ -> ~/.config/opencode/）
 powershell -ExecutionPolicy Bypass -File scripts/sync-global.ps1
@@ -92,3 +94,4 @@ DeepSeek V4 上下文缓存按**请求前缀**命中（缓存命中输入 ≈ �
 | 2026-08-29 | 补 §4.1 缓存友好约定（V4 上下文缓存前缀命中，稳定真源批改/易变文件后置） | 注意力与成本优化第一批（O6） |
 | 2026-08-29 | §3 常用命令补 #5 gen-status.mjs 文档同步草稿生成用法 | 优化第二批（O8） |
 | 2026-08-29 | §4.1 修正 active-context 注入现状（vault-sync 实际注入头部，flash 极低价下缓存优化收益≈0 不改插件） | 优化第三批（O4/O5 调研结论） |
+| 2026-08-29 | §3 矩阵清单补 empty-catch-matrix.mjs（M21 空 catch 门禁回归） | 优化第四批（O10） |

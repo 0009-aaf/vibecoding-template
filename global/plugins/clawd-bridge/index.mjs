@@ -129,7 +129,9 @@ function scheduleDebugFlush() {
     _debugBuffer.length = 0;
     try {
       await fsp.appendFile(DEBUG_LOG_PATH, chunk, "utf8");
-    } catch {}
+    } catch (e) {
+      console.error(`[clawd-bridge] debug flush 失败: ${e && e.message}`);
+    }
     _debugFlushing = false;
     if (_debugBuffer.length > 0) scheduleDebugFlush();
   });
@@ -139,7 +141,9 @@ function resetDebugLog() {
   try {
     mkdirSync(CLAWD_DIR, { recursive: true });
     writeFileSync(DEBUG_LOG_PATH, "", "utf8");
-  } catch {}
+  } catch (e) {
+    console.error(`[clawd-bridge] debug 日志初始化失败: ${e && e.message}`);
+  }
 }
 
 function readRuntimePort() {
@@ -147,7 +151,9 @@ function readRuntimePort() {
     const raw = JSON.parse(readFileSync(RUNTIME_CONFIG_PATH, "utf8"));
     const port = Number(raw && raw.port);
     if (Number.isInteger(port) && SERVER_PORTS.includes(port)) return port;
-  } catch {}
+  } catch (e) {
+    console.error(`[clawd-bridge] 运行端口读取失败: ${e && e.message}`);
+  }
   return null;
 }
 

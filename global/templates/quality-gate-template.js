@@ -17,6 +17,7 @@
  *   M18 有 UI 切片缺 E2E（阻断）
  *   M19 spec 测试用例未实现（阻断）
  *   M20 测试文件不在规定目录（警告）
+ *   M21 空 catch 块（阻断，宪法 C3；JS/TS 家族源码）
  *   G05 架构完备性（vibe 项目：NFR+十维度选型+安全基线+界面设计+ADR，阻断）
  *   G05.7 UI 素材红线（references/design/*.html 预览零 emoji/零位图，图标内联 SVG；无预览产物跳过，阻断）
  *   G06 文档完备性（vibe 项目：CODING-STANDARDS/RUNBOOK 存在性，阻断）
@@ -258,9 +259,69 @@ function checkLibCompliance(files) {
   return issues;
 }
 
-// M17-M20: 测试检查
-function checkTests(files, cwd) {
+// M21: 空 catch 块扫描（宪法 C3：catch 必处理，禁止空 catch——flash 高频错误）
+// 模块级导出 findEmptyCatch，供 scripts/empty-catch-matrix.mjs 单一真源回归（同 M01/secretPatterns 先例）
+const EMPTY_CATCH_EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
+
+// 掩码：把字符串字面量/注释/正则字面量替换为等长空格（防 "catch {}" 文本、正则内引号误导状态机）
+// 顺序：块注释 -> 行注释 -> 模板串 -> 双引串 -> 单引串 -> 正则字面量（启发式）
+function maskNonCode(content) {
+  return content
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => ' '.repeat(m.length))
+    .replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
+    .replace(/`(?:[^`\\]|\\.)*`/gs, (m) => ' '.repeat(m.length))
+    .replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => ' '.repeat(m.length))
+    .replace(/'(?:[^'\\\n]|\\.)*'/g, (m) => ' '.repeat(m.length))
+    .replace(/\/(?:[^/\\\n]|\\.)*\/[a-z]*/g, (m) => ' '.repeat(m.length));
+}
+
+// 去掉注释/空语句/空白后，块内容是否为空
+function stripBlockNoise(block) {
+  return block
+    .replace(/\/\/[^\n]*/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/;/g, '')
+    .replace(/\s+/g, '');
+}
+
+// 定位所有 catch 块（在掩码后内容上跑，字符串/注释/正则已变空格），返回空块 issues（含行号）
+function findEmptyCatch(content, file) {
   const issues = [];
+  const masked = maskNonCode(content);
+  const catchRe = /(^|[^\w$])(catch)\s*(?:\(\s*[^)]*\)\s*)?\{/g;
+  let m;
+  while ((m = catchRe.exec(masked)) !== null) {
+    const braceStart = masked.indexOf('{', m.index);
+    let depth = 0;
+    let j = braceStart;
+    while (j < masked.length) {
+      if (masked[j] === '{') depth++;
+      else if (masked[j] === '}') { depth--; if (depth === 0) break; }
+      j++;
+    }
+    const block = masked.slice(braceStart + 1, j);
+    if (stripBlockNoise(block) === '') {
+      const lineNo = content.slice(0, m.index).split('\n').length;
+      issues.push({ file, line: lineNo, type: 'empty-catch' });
+    }
+  }
+  return issues;
+}
+
+// M21 聚合：遍历变更文件，扫描 JS/TS 家族的源码
+function checkEmptyCatch(files) {
+  const issues = [];
+  for (const file of files) {
+    if (!EMPTY_CATCH_EXTS.has(path.extname(file))) continue;
+    const content = getFileContent(file);
+    if (!content) continue;
+    issues.push(...findEmptyCatch(content, file));
+  }
+  return issues;
+}
+
+// M17-M20: 测试检查
+function checkTests(files, cwd) {  const issues = [];
 
   // M20: 测试文件不在规定目录
   for (const file of files) {
@@ -572,6 +633,19 @@ function main() {
     checks.pass++;
   }
 
+  // M21: 空 catch 块（宪法 C3）
+  const emptyCatchIssues = checkEmptyCatch(files);
+  if (emptyCatchIssues.length > 0) {
+    checks.block++;
+    blockers.push({
+      code: 'M21',
+      name: '空 catch 块（宪法 C3：catch 必处理或显式 re-throw）',
+      issues: emptyCatchIssues,
+    });
+  } else {
+    checks.pass++;
+  }
+
   // M17: 测试覆盖率（项目配置了 coverage 脚本才执行）
   const cov = runCoverageCheck();
   if (cov.skipped) {
@@ -705,7 +779,7 @@ function main() {
 }
 
 // 导出供 scripts/secret-matrix.mjs 与 scripts/ui-redline-matrix.mjs 做回归（import 时不执行闸门主流程）
-module.exports = { secretPatterns, scanUiRedlines };
+module.exports = { secretPatterns, scanUiRedlines, findEmptyCatch };
 
 if (require.main === module) {
   main();

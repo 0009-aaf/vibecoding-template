@@ -154,8 +154,9 @@ export default async () => {
                 configurable: true,
                 writable: false,
               });
-            } catch {
+            } catch (e) {
               // 部分对象可能不可扩展，跳过绑定，靠 imageInfo 判断
+              debug("part 绑定 __parts 失败", e && e.message);
             }
           }
           await replaceImagePart(part);
@@ -195,6 +196,7 @@ export default async () => {
           }
         } catch {
           // try next
+          continue;
         }
       }
       if (!filePath) return;
